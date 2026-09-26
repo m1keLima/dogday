@@ -101,6 +101,7 @@
   .lake .ground{background:#86b86b}
   .pool .ground{background:repeating-linear-gradient(90deg,#e6eff4 0 38px,#cddce5 38px 41px)}
   .museum .ground{background:repeating-linear-gradient(90deg,#bb8b59 0 70px,#a67848 70px 73px)}
+  .house .ground{background:radial-gradient(ellipse 32% 38% at 50% 52%,#d9674a 0 94%,#b8503a 95% 99%,transparent 100%),repeating-linear-gradient(90deg,#c99a66 0 90px,#b88954 90px 93px)}
   .zoo .ground{background:#d2bd8c}
 
   #gitems,#props{position:absolute;inset:0;pointer-events:none}
@@ -154,7 +155,14 @@
   @keyframes dropin{0%{transform:translateY(0);opacity:1}80%{opacity:1}100%{transform:translateY(190px) scale(.6);opacity:0}}
 
   /* ---------- quests ---------- */
-  .quests{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .quests{display:grid;grid-template-columns:1fr;gap:10px}
+  .ropts{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  .quest .ropts button{font-size:17px;padding:9px 12px;text-align:left;margin-left:0;white-space:normal}
+  .ropts button.wrong{background:#fde3e1;animation:nope .3s}
+  .quest .solved{display:block;margin-top:4px;font-size:15px;color:var(--good)}
+  .hdots{letter-spacing:3px;font-size:13px}
+  .listen{font-size:15px;font-weight:800;color:var(--ink-soft);align-self:center}
+  .listen.out{color:var(--bad)}
   .quest{border:3px dashed var(--line);border-radius:16px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
   .quest .qt{flex:1 1 170px}
   .quest button{margin-left:auto}
@@ -451,10 +459,10 @@
     <div class="shint" id="storyHint"></div>
     <details class="peek" id="storyPeek"><summary>📖 Peek at the story</summary><div id="storyPeekText"></div></details>
     <div class="sctl">
-      <button id="storyRead">🔊 Read it to me</button>
+      <span class="listen" id="storyListen"></span>
       <button class="go" id="storyNext">Next →</button>
     </div>
-    <p class="tip" id="storyTip">Tip: tap any word to hear it.</p>
+    <p class="tip" id="storyTip">Stuck on a word? Tap it to hear it — but you only get 3 listens, so save them for the hard ones!</p>
   </div>
 </div>
 
@@ -540,10 +548,14 @@ const BREEDS = {
    props: big emoji [emoji, left%, class]. Keep them out of ~40–62%, that's where he stands.
    ground: small things scattered on the ground once per day. */
 const PLACES = {
-  home:{name:"Home", icon:"🏠", to:"home", pos:[0,0], hint:"🍖 food · 🛁 bath · 💤 nap",
+  house:{name:"Inside", icon:"🛋️", to:"inside", pos:[0,0], indoor:true, hint:"🍖 food · 🛁 bath · 💤 nap",
+        props:[["🪴",15,""],["🧸",31,"small"],["🥣",67,"small"]],
+        ground:["🧦","🧸","🦴","🎾","🧦"],
+        arrive:"Inside. He does one lap of the living room to check nothing's changed."},
+  home:{name:"Yard", icon:"🏡", to:"the yard", pos:[0,0], hint:"🎾 fetch · 🚗 car ride",
         props:[["🌳",86,"sway"],["🦴",27,"small"]],
         ground:["🌷","🌼","🥎","🍂","🌱","🧸","🌷"],
-        arrive:"Home. He checks the bowl, just in case."},
+        arrive:"The yard. He does a quick patrol of the fence."},
   park:{name:"Park", icon:"🌳", to:"the park", pos:[1,0], hint:"🥏 catch · 🕳️ dig",
         props:[["🌳",5,"sway"],["🌲",19,"sway"],["🌳",91,"sway"],["🦆",72,"small"]],
         ground:["🌼","🍂","🪨","🍄","🐞","🌱","🌸","🐿️"],
@@ -574,9 +586,12 @@ const PLACES = {
         arrive:"So many smells. He doesn't know which way to face."}
 };
 
-/* home↔park is a walk that counts as exercise; everything else is a drive priced by distance */
+/* house↔yard is the front door; home↔park is a walk that counts as exercise;
+   everything else is a drive priced by distance */
+const homeish = k => k === "home" || k === "house";
 function route(to){
-  const walk = (S.loc === "home" && to === "park") || (S.loc === "park" && to === "home");
+  if(homeish(S.loc) && homeish(to)) return {to, door:true, walk:true, mins:2, energy:0, happy:0, clean:0, exercise:0, pose:"walk"};
+  const walk = (homeish(S.loc) && to === "park") || (S.loc === "park" && homeish(to));
   if(walk) return {to, walk:true, mins:15, energy:-5, happy:3, clean:-2, exercise:15, pose:"walk"};
   const [ax,ay] = PLACES[S.loc].pos, [bx,by] = PLACES[to].pos;
   const mins = Math.max(10, Math.round((8 + Math.hypot(ax-bx, ay-by)*5)/5)*5);
@@ -608,6 +623,34 @@ function caps(pts){
   return pts.map(([x,y])=>`<path d="M${x} ${y} l-22 24 l9 -3 l13 9 l12 -10 l11 4 z" fill="#fff"/>`).join("");
 }
 const BACKDROPS = {
+  house:`<rect width="880" height="234" fill="#f6e4c9"/>
+    ${Array.from({length:22},(_,i)=>`<rect x="${i*40+14}" y="0" width="12" height="234" fill="#f1dcbc"/>`).join("")}
+    <rect y="196" width="880" height="38" fill="#e9d2ae"/><rect y="194" width="880" height="4" fill="#c9a87a"/>
+    <rect x="120" y="36" width="150" height="110" rx="4" fill="#fff"/>
+    <rect class="skywin" x="128" y="44" width="134" height="94"/>
+    <path d="M195 44 v94 M128 91 h134" stroke="#fff" stroke-width="5"/>
+    <path d="M104 28 h182" stroke="#8a5a3c" stroke-width="6" stroke-linecap="round"/>
+    <path d="M108 30 q16 60 0 128 h26 q-12 -64 0 -128z M282 30 q-16 60 0 128 h-26 q12 -64 0 -128z" fill="#e8743c"/>
+    <rect x="330" y="46" width="64" height="50" rx="3" fill="#c9a24a"/><rect x="337" y="53" width="50" height="36" fill="#fff6e6"/>
+    <text x="345" y="81" font-size="22">🐶</text>
+    <rect x="416" y="58" width="42" height="42" rx="3" fill="#c9a24a"/><rect x="421" y="63" width="32" height="32" fill="#bfe0c8"/>
+    <text x="426" y="86" font-size="18">🌻</text>
+    <circle class="glow" cx="584" cy="92" r="40"/>
+    <rect x="581" y="104" width="6" height="92" fill="#6b5a45"/><rect x="566" y="192" width="36" height="6" rx="3" fill="#6b5a45"/>
+    <path d="M566 104 l8 -34 h20 l8 34z" class="win"/>
+    <g>
+      <rect x="626" y="132" width="220" height="50" rx="16" fill="#5f8fbf"/>
+      <rect x="638" y="104" width="196" height="46" rx="16" fill="#6f9fcc"/>
+      <rect x="610" y="120" width="34" height="70" rx="14" fill="#5f8fbf"/>
+      <rect x="828" y="120" width="34" height="70" rx="14" fill="#5f8fbf"/>
+      <rect x="650" y="150" width="88" height="26" rx="10" fill="#7fb0dc"/><rect x="742" y="150" width="88" height="26" rx="10" fill="#7fb0dc"/>
+      <rect x="628" y="186" width="10" height="10" fill="#6b5a45"/><rect x="836" y="186" width="10" height="10" fill="#6b5a45"/>
+    </g>
+    <rect x="12" y="60" width="72" height="136" fill="#9a6a3c"/>
+    <g fill="#b98553"><rect x="18" y="66" width="60" height="4"/><rect x="18" y="104" width="60" height="4"/><rect x="18" y="142" width="60" height="4"/></g>
+    <g><rect x="20" y="74" width="9" height="30" fill="#e8743c"/><rect x="31" y="78" width="8" height="26" fill="#57a9d6"/><rect x="41" y="72" width="10" height="32" fill="#f0b429"/><rect x="53" y="80" width="8" height="24" fill="#4fa86b"/>
+    <rect x="22" y="114" width="10" height="28" fill="#6b4a8f"/><rect x="34" y="118" width="9" height="24" fill="#d9534f"/><rect x="46" y="112" width="11" height="30" fill="#57a9d6"/></g>
+    <text x="22" y="190" font-size="36">📚</text>`,
   home:`<path d="M0 150 Q160 110 330 145 T650 135 T880 128 V234 H0Z" fill="#a8cf8c"/>
     <path d="M0 192 Q200 165 420 188 T880 180 V234 H0Z" fill="#98c47e"/>
     <g transform="translate(24 0)">
@@ -819,7 +862,7 @@ const ACTIONS = [
     say:"Head out the window the entire way. Ears like flags.",
     gate:s => s.full < 18 ? "Too hungry to care about the car. He's staring at the bowl." : null, stat:"full" },
 
-  { id:"feed", label:"Fill the bowl", icon:"🍖", mins:20, locs:["home"],
+  { id:"feed", label:"Fill the bowl", icon:"🍖", mins:20, locs:["house"],
     eff:{energy:10,happy:9,clean:-5,full:58}, exercise:0, pose:"eat", fx:"🍖",
     say:"Inhaled in nineteen seconds, then checked the bowl four more times.",
     gate:s => s.full > 72 ? "He sniffs it, then walks away. Still full from last time." : null, stat:"full" },
@@ -829,20 +872,25 @@ const ACTIONS = [
     say:"Gone. No evidence it ever existed.",
     gate:s => s.full > 92 ? "He takes it politely and buries it. That's a no." : null, stat:"full" },
 
-  { id:"wash", label:"Give him a bath", icon:"🛁", mins:35, locs:["home"],
+  { id:"wash", label:"Give him a bath", icon:"🛁", mins:35, locs:["house"],
     eff:{energy:-8,happy:-14,clean:74,full:-3}, exercise:0, pose:"shake", fx:"💧",
     say:"Betrayed, damp, and somehow fluffier. Shook it all over the hallway.",
     gate:s => s.clean > 86 ? "He's already spotless. Even he thinks this is excessive." : null, stat:"clean" },
 
-  { id:"nap", label:"Let him nap", icon:"💤", mins:90, locs:["home"],
+  { id:"nap", label:"Let him nap", icon:"💤", mins:90, locs:["house"],
     eff:{energy:56,happy:-3,clean:0,full:-9}, exercise:0, pose:"sleep", fx:"💤",
     say:"Out cold in ninety seconds. Legs twitching, chasing something.",
     gate:s => s.energy > 68 ? "Not remotely sleepy. He's doing laps of the kitchen." : null },
 
-  { id:"cuddle", label:"Cuddle on the couch", icon:"🛋️", mins:20, locs:["home"],
+  { id:"cuddle", label:"Cuddle on the couch", icon:"🛋️", mins:20, locs:["house"],
     eff:{energy:6,happy:12}, exercise:0, pose:"idle", fx:"💛",
     say:"He's decided he's a lap dog. You've lost feeling in one leg.",
     gate:s => s.happy > 90 ? "Far too wound-up to sit still. Maybe after something fun." : null, stat:"happy" },
+
+  { id:"tug", label:"Play tug-of-war", icon:"🪢", mins:15, locs:["house"],
+    eff:{energy:-10,happy:13,clean:-1,full:-2}, exercise:10, pose:"shake", fx:"🪢",
+    say:"Growled like a wolf, tail going like a propeller. Let you win once, out of pity.",
+    gate:s => s.energy < 22 ? "He holds the rope in his mouth and lies down. Call it a draw." : null },
 
   { id:"hike", label:"Hike to the summit", icon:"🥾", mins:60, locs:["mountains"], outside:true,
     eff:{energy:-28,happy:26,clean:-12,full:-10}, exercise:60, pose:"walk", fx:"🏔️",
@@ -910,15 +958,40 @@ const ACTIONS = [
 ];
 
 /* ---------- treasure hunt ---------- */
+/* Each step is a riddle with 4 answers (RIGHT answer first — shuffled on screen).
+   The answer tells you where to go; there you sniff for the next note. */
+const HUNT_STEPS = 5;
 const CLUES = {
-  park:     {go:"Go to the place with green grass, tall trees, and ducks.", spot:"under the park bench"},
-  beach:    {go:"Go where the sand is hot and the big waves splash.",       spot:"inside a big shell"},
-  mountains:{go:"Go up, up, up! Find the tall rocks with snow on top.",      spot:"under a gray rock"},
-  lake:     {go:"Go where the frogs say ribbit and a little boat floats.",   spot:"on the old dock"},
-  pool:     {go:"Go where kids go down a slide and SPLASH into the water.",  spot:"by the slide ladder"},
-  museum:   {go:"Go see the big old bones of a dinosaur.",                   spot:"by the dinosaur's foot"},
-  zoo:      {go:"Go where the lion roars and the giraffe is very tall.",     spot:"by the zebra fence"}
+  park:{spot:"under the park bench", riddles:[
+    {q:"I am brown and fluffy. I have a big bushy tail. I hide nuts in trees. What am I?", a:["a squirrel","a fish","a cow","a frog"], icon:"🐿️", where:"Squirrels live in the park."},
+    {q:"I have green grass, tall trees, and a bench. Ducks swim in my pond. What am I?", a:["a park","a kitchen","a car","a shop"], icon:"🌳", where:"Go to the park!"}]},
+  beach:{spot:"inside a big shell", riddles:[
+    {q:"I have a hard shell and two big claws. I walk sideways on the sand. What am I?", a:["a crab","a cat","a cow","a bee"], icon:"🦀", where:"Crabs live at the beach."},
+    {q:"I am big and blue and salty. Waves splash in me all day. What am I?", a:["the sea","a cup","a bath","a puddle"], icon:"🌊", where:"The sea is at the beach."}]},
+  mountains:{spot:"under a gray rock", riddles:[
+    {q:"I am very, very tall. I have snow on my top. You can climb me. What am I?", a:["a mountain","a sand hill","a tree","a house"], icon:"⛰️", where:"Go to the mountains!"},
+    {q:"I have a beard and two horns. I climb on high, rocky places. What am I?", a:["a goat","a pig","a hen","a fish"], icon:"🐐", where:"Goats live up in the mountains."}]},
+  lake:{spot:"on the old dock", riddles:[
+    {q:"I am green. I sit on a lily pad. I hop and I say ribbit. What am I?", a:["a frog","a snake","a bird","a cat"], icon:"🐸", where:"Frogs live at the lake."},
+    {q:"I float on the water. You sit in me and move me with a paddle. What am I?", a:["a canoe","a car","a bike","a bus"], icon:"🛶", where:"Canoes float on the lake."}]},
+  pool:{spot:"by the slide ladder", riddles:[
+    {q:"You climb up my steps, then whoosh down into the water. What am I?", a:["a water slide","a ladder","a bed","a swing"], icon:"🛝", where:"The water slide is at the pool."},
+    {q:"I am blue water with lines for lanes. You swim laps in me. What am I?", a:["a swimming pool","a bathtub","a sink","a cup"], icon:"🏊", where:"Go to the pool!"}]},
+  museum:{spot:"by the dinosaur's foot", riddles:[
+    {q:"I lived long, long ago. Now you can see my big old bones. What am I?", a:["a dinosaur","a puppy","a kitten","a bunny"], icon:"🦖", where:"Dinosaur bones are in the museum."},
+    {q:"I hang on a wall in a gold frame. Someone painted me. What am I?", a:["a painting","a clock","a hat","a coat"], icon:"🖼️", where:"Paintings hang in the museum."}]},
+  zoo:{spot:"by the zebra fence", riddles:[
+    {q:"I am big and gray. I have big ears and a long trunk. What am I?", a:["an elephant","a mouse","a fish","a bird"], icon:"🐘", where:"Elephants live at the zoo."},
+    {q:"I am tall with a long, long neck. I eat leaves from the tops of trees. What am I?", a:["a giraffe","a dog","a frog","a duck"], icon:"🦒", where:"Giraffes live at the zoo."}]},
+  house:{spot:"under a couch cushion", riddles:[
+    {q:"You sleep in me at night. I have a soft pillow and a warm blanket. What am I?", a:["a bed","a car","a tree","a boat"], icon:"🛏️", where:"Beds are inside the house."},
+    {q:"I am soft and long. The whole family sits on me to read and rest. What am I?", a:["a couch","a table","a lamp","a door"], icon:"🛋️", where:"The couch is inside the house."}]}
 };
+function makeHunt(r){
+  let steps = shuffle(Object.keys(CLUES), r).slice(0, HUNT_STEPS);
+  if(steps[0] === "house") steps.push(steps.shift());   // don't start where he wakes up
+  return {steps, riddles:steps.map(k => pick(CLUES[k].riddles, r)), i:0, solved:false, done:false, prize:null};
+}
 const PRIZES = [["👑","a gold crown"],["💎","a big shiny gem"],["🦴","a GOLDEN bone"],["🪙","a bag of gold coins"],["🏆","a tiny trophy"]];
 
 /* ---------- stories (1st-grade reading level) ----------
@@ -926,65 +999,366 @@ const PRIZES = [["👑","a gold crown"],["💎","a big shiny gem"],["🦴","a GO
    qs: [question, [RIGHT answer first, wrong, wrong]] — options are shuffled on screen. */
 const STORIES = [
   {title:"The Red Ball", art:"🎾🌳",
-   text:["{name} has a red ball.","{He} likes to run and get it.","One day the ball went up a hill.","{name} ran up the hill fast.","The ball was by a big tree.","{name} got the ball and ran back home."],
+   text:["{name} has a red ball.","{He} likes to run and get it.","One day the ball went up a hill.","{name} ran up the hill fast.","The ball was not at the top.","{He} looked and looked.","The ball was by a big tree.","A little bird sat on it!","The bird flew away. Tweet, tweet!","{name} got the ball and ran back home."],
    qs:[["What color is the ball?",["red","blue","green"]],
        ["Where did the ball go?",["up a hill","into the sea","under the bed"]],
        ["Where was the ball?",["by a big tree","in a box","on a car"]]]},
   {title:"A Frog at the Lake", art:"🐸💦",
-   text:["{name} went to the lake.","{He} saw a big green frog.","The frog said, \"Ribbit!\"","{name} said, \"Woof!\"","The frog hopped in the water. Splash!","Now {name} is wet, and {he} is happy."],
+   text:["{name} went to the lake.","The water was blue and still.","{He} saw a big green frog.","The frog sat on a lily pad.","The frog said, \"Ribbit!\"","{name} said, \"Woof!\"","The frog hopped in the water. Splash!","{name} jumped in too.","Now {name} is wet.","{He} is wet, but {he} is happy."],
    qs:[["What did {name} see?",["a frog","a cat","a bee"]],
        ["What did the frog say?",["Ribbit!","Moo!","Quack!"]],
        ["How does {name} feel at the end?",["happy","sad","mad"]]]},
   {title:"Snow Day", art:"❄️☃️",
-   text:["It is cold today.","Snow is on the grass.","{name} runs in the snow.","{His} paws get cold and white.","{He} digs a big hole in the snow.","Then {he} goes in to get warm."],
+   text:["It is cold today.","Snow is on the grass.","Snow is on the car too.","{name} runs out in the snow.","{His} paws get cold and white.","{He} digs a big hole.","{He} finds a stick in the snow.","{He} runs to show Mom the stick.","Now {his} nose is cold too.","So {he} goes in to get warm."],
    qs:[["Where is the snow?",["on the grass","in the bed","in the bath"]],
        ["What color do {his} paws get?",["white","red","blue"]],
        ["What does {name} do at the end?",["goes in to get warm","eats a cake","sleeps in the snow"]]]},
   {title:"The Lost Sock", art:"🧦🔍",
-   text:["Mom lost a sock.","It is a blue sock.","{name} looks under the bed. No sock.","{name} looks in the box. No sock!","Then {he} looks in {his} dog bed.","There it is! {name} had it all day."],
+   text:["Mom lost a sock.","It is a blue sock with a white dot.","\"Can you help me?\" Mom said.","{name} looks under the bed. No sock.","{name} looks in the box. No sock!","{name} looks in the tub. No sock!","Then {he} looks in {his} dog bed.","There it is!","{name} had it all day.","Mom laughs and gives {him} a big hug."],
    qs:[["What color is the sock?",["blue","pink","green"]],
        ["Where did {name} look first?",["under the bed","in the car","in the tub"]],
        ["Where was the sock?",["in the dog bed","in the box","under the bed"]]]},
   {title:"A Trip to the Zoo", art:"🦒🦁",
-   text:["{name} and Dad went to the zoo.","They saw a tall giraffe.","They saw a big gray elephant.","The lion said, \"ROAR!\"","{name} hid behind Dad.","Then {he} saw the penguins and wagged {his} tail."],
+   text:["{name} and Dad went to the zoo.","First they saw a tall giraffe.","It ate leaves from the top of a tree.","Then they saw a big gray elephant.","It had a long, long trunk.","Next they saw a lion.","The lion said, \"ROAR!\"","{name} hid behind Dad.","Last, they saw the penguins.","{name} liked them best and wagged {his} tail."],
    qs:[["Who went to the zoo with {name}?",["Dad","Mom","Grandma"]],
        ["Which animal was tall?",["the giraffe","the penguin","the lion"]],
        ["What did {name} do when the lion roared?",["hid behind Dad","ran to the lion","went to sleep"]]]},
   {title:"The Big Puddle", art:"🌧️💦",
-   text:["Drip, drip, drip. It is raining.","{name} sees a big puddle.","{He} jumps in with all four feet. Splat!","Mud is on {his} nose.","Mud is on {his} tail.","Now {name} needs a bath!"],
+   text:["Drip, drip, drip. It is raining.","{name} and Mom go for a walk.","Mom has a big red hat.","{name} sees a big puddle.","{He} jumps in with all four feet.","Splat!","Mud is on {his} nose.","Mud is on {his} tail.","Mud is on Mom's hat too!","Now {name} needs a bath."],
    qs:[["What is the weather?",["rainy","sunny","snowy"]],
        ["What did {name} jump in?",["a puddle","a pool","a box"]],
        ["What does {name} need now?",["a bath","a nap","a hat"]]]},
   {title:"The Big Slide", art:"🛝🏊",
-   text:["The pool has a big slide.","{name} goes up, up, up the steps.","{He} looks down. It is so high!","{name} sits down and goes.","Whoosh! Splash!","{He} wants to go again."],
+   text:["The pool has a big slide.","It is red and yellow.","{name} goes up, up, up the steps.","{He} looks down.","It is so high!","{name} is a little bit scared.","Then {he} sits down and goes.","Whoosh! Splash!","{He} swims to the side.","{He} wants to go again!"],
    qs:[["What does the pool have?",["a big slide","a big cake","a big boat"]],
        ["Where does {name} go first?",["up the steps","into the car","to bed"]],
        ["What does {name} want at the end?",["to go again","to go home","to eat"]]]},
   {title:"Bones at the Museum", art:"🦖🦴",
-   text:["{name} went to the museum.","{He} saw a big dinosaur.","It was made of old bones.","{name} wanted a bone to chew.","\"No, no!\" said the man.","{name} got a dog treat. Yum!"],
+   text:["{name} went to the museum.","It was big and quiet.","{He} saw a big dinosaur.","It was made of old bones.","It had big, sharp teeth.","{name} wanted a bone to chew.","{He} ran to get one.","\"No, no!\" said the man.","\"Those bones are too old!\"","The man gave {name} a dog treat. Yum!"],
    qs:[["What did {name} see?",["a dinosaur","a shark","a car"]],
        ["What was it made of?",["bones","rocks","sticks"]],
        ["What did {name} get to eat?",["a dog treat","a bone","a hat"]]]},
   {title:"Up the Mountain", art:"⛰️🐦",
-   text:["{name} and Mom went up a mountain.","The path was long and steep.","{name} saw a bird up in a tree.","At the top, the wind was cold.","They sat on a rock and ate a snack.","What a view!"],
+   text:["{name} and Mom went up a mountain.","The path was long and steep.","They went up and up and up.","{name} saw a bird in a tree.","The bird sang a song.","Then {he} saw a goat on a rock.","At the top, the wind was cold.","They sat on a big rock.","They ate a snack.","What a view!"],
    qs:[["Who went up the mountain with {name}?",["Mom","Dad","a cat"]],
        ["What did {name} see in a tree?",["a bird","a dog","a fish"]],
        ["What did they do at the top?",["ate a snack","went for a swim","went to sleep"]]]},
   {title:"The Loud Storm", art:"⛈️🛏️",
-   text:["Boom! Crash! The thunder is loud.","{name} is scared.","{He} hides under the bed.","Mom sits with {him} and pats {his} back.","Soon the rain stops.","The sun comes out, and {name} wags {his} tail."],
+   text:["Boom! Crash! The thunder is loud.","The rain goes tap, tap, tap.","{name} is scared.","{He} hides under the bed.","{He} shakes and shakes.","Mom sits with {him}.","She pats {his} back.","Soon the rain stops.","The sun comes out.","{name} comes out and wags {his} tail."],
    qs:[["What is loud?",["the thunder","a cat","a bell"]],
        ["Where does {name} hide?",["under the bed","in the tub","in the car"]],
        ["What comes out at the end?",["the sun","the moon","a frog"]]]},
   {title:"Treasure!", art:"🗺️🧰",
-   text:["{name} found a map.","The map had a big red X.","{name} ran to the X and sniffed.","{He} dug and dug and dug.","{He} found a box!","In the box was a gold bone."],
+   text:["{name} found a map.","The map had a big red X.","\"Let's go!\" said Sam.","They walked to the park.","They walked past the big tree.","{name} ran to the X and sniffed.","{He} dug and dug and dug.","{He} found a box!","Sam opened the box.","In the box was a gold bone."],
    qs:[["What did {name} find first?",["a map","a hat","a cat"]],
        ["What was on the map?",["a big red X","a big blue dot","a little fish"]],
        ["What was in the box?",["a gold bone","a sock","a ball"]]]},
   {title:"Beach Day", art:"🏖️🦀",
-   text:["{name} is at the beach.","The sun is hot. The sand is hot.","{He} sees a little red crab.","The crab walks to the side.","{name} walks to the side too!","Then they both go in the sea."],
+   text:["{name} is at the beach.","The sun is hot.","The sand is hot too.","{He} sees a little red crab.","The crab walks to the side.","{name} walks to the side too!","The crab digs a hole.","{name} digs a hole too!","Then they both look at the sea.","In they go. Splash!"],
    qs:[["Where is {name}?",["at the beach","at the zoo","at school"]],
        ["What color is the crab?",["red","green","black"]],
-       ["Where do they go at the end?",["in the sea","in the car","in the house"]]]}
+       ["Where do they go at the end?",["in the sea","in the car","in the house"]]]},
+  /* ---- generated set (home, nature, outings, friends) ---- */
+  {title:"Pancake Morning", art:"🥞🍯",
+   text:["Dad makes pancakes today.", "{name} sits by the stove and sniffs.", "Mix, mix, mix goes the big spoon.", "Dad flips a pancake up high.", "Oops! It lands on the floor.", "{name} looks at Dad. Dad looks at {name}.", "\"Okay, that one is for you,\" Dad says.", "{name} eats it in one bite. Yum!", "Then Dad makes ten more pancakes.", "Mia and Dad eat them with jam."],
+   qs:[["Who makes the pancakes?", ["Dad", "Mom", "Grandma"]], ["Where did the pancake land?", ["on the floor", "on a plate", "in the sink"]], ["How many more pancakes did Dad make?", ["ten", "two", "five"]]]},
+  {title:"Bath Time Bubbles", art:"🛁🫧",
+   text:["{name} is very muddy.", "\"Bath time!\" says Mom.", "{name} hides under the table.", "Mom finds {him} and picks {him} up.", "Into the tub {he} goes. Splash!", "Mom adds lots of pink bubbles.", "{name} pops a bubble with {his} nose.", "Pop! Pop! Pop! It is fun.", "Then {he} shakes and gets Mom all wet.", "Mom laughs. Now she needs a bath too!"],
+   qs:[["Where did {name} hide?", ["under the table", "in the car", "behind a tree"]], ["What color were the bubbles?", ["pink", "blue", "green"]], ["Who got wet at the end?", ["Mom", "Dad", "Sam"]]]},
+  {title:"Grandma Comes to Visit", art:"👵🧶",
+   text:["Grandma is coming today!", "{name} waits by the door all morning.", "Ding dong! There she is.", "{name} wags {his} tail very fast.", "Grandma has a big red bag.", "In the bag is a yarn ball for {name}.", "{He} rolls it all over the rug.", "Now the yarn is on the chair and the lamp.", "Grandma just smiles and sits down.", "{name} naps on her lap all day."],
+   qs:[["What color is the bag?", ["red", "blue", "yellow"]], ["What was in the bag for {name}?", ["a yarn ball", "a bone", "a hat"]], ["Where did {name} nap?", ["on Grandma's lap", "in the tub", "on the bed"]]]},
+  {title:"The Birthday Hat", art:"🎂🎉",
+   text:["Today is {name}'s birthday!", "Sam puts a party hat on {him}.", "The hat is blue with gold stars.", "Mom made a dog cake with no sugar.", "It has one candle on top.", "Everyone sings the birthday song.", "{name} barks along. Woof! Woof!", "Sam blows out the candle for {him}.", "Then {name} eats the cake. Yum!", "It is the best birthday ever."],
+   qs:[["Who puts the hat on {name}?", ["Sam", "Dad", "Lily"]], ["What color is the hat?", ["blue", "red", "green"]], ["How many candles are on the cake?", ["one", "three", "five"]]]},
+  {title:"Leaf Pile Jump", art:"🍂🍁",
+   text:["It is fall. The leaves are red and orange.", "Dad rakes the leaves into a big pile.", "It takes a long time.", "{name} looks at the pile.", "{He} runs and runs and jumps in!", "Crunch! Leaves fly all over.", "Dad puts his hands on his hips.", "Then Dad jumps in too!", "The two of them roll in the leaves.", "They can rake again later."],
+   qs:[["What season is it?", ["fall", "winter", "spring"]], ["Who rakes the leaves?", ["Dad", "Mom", "Grandpa"]], ["What did Dad do at the end?", ["jumped in too", "went inside", "got in the car"]]]},
+  {title:"Bedtime Book", art:"📖🌙",
+   text:["It is bedtime for Lily.", "She puts on her moon pajamas.", "{name} jumps on the bed.", "Mom reads a book about a cat.", "The cat in the book gets lost.", "{name} puts {his} ears down.", "But then the cat finds its home.", "{name} wags {his} tail.", "Lily yawns. {name} yawns too.", "Soon they are both asleep."],
+   qs:[["Who reads the book?", ["Mom", "Dad", "Grandpa"]], ["What is the book about?", ["a cat", "a bird", "a frog"]], ["What happened at the end?", ["they fell asleep", "they went outside", "they ate lunch"]]]},
+  {title:"Rainy Day Fort", art:"☔🏠",
+   text:["Rain taps on the window.", "Ben and {name} can not go out.", "\"Let's make a fort!\" says Ben.", "They use two chairs and a big sheet.", "Ben adds soft pillows inside.", "{name} brings {his} bone in too.", "It is cozy in the fort.", "Drip, drip goes the rain outside.", "Ben reads with a flashlight.", "{name} falls asleep on a pillow."],
+   qs:[["What did Ben and {name} make?", ["a fort", "a cake", "a boat"]], ["How many chairs did they use?", ["two", "four", "one"]], ["What did {name} bring in?", ["a bone", "a ball", "a sock"]]]},
+  {title:"Snowman Nose", art:"⛄🥕",
+   text:["Snow fell all night.", "Mia and {name} go out to play.", "Mia rolls a big snowball.", "She makes a snowman.", "She puts on a carrot for the nose.", "{name} sees the carrot. Sniff, sniff.", "{He} jumps up and grabs it!", "Now the snowman has no nose.", "Mia laughs and uses a red button instead.", "{name} munches the carrot happily."],
+   qs:[["What was the first nose?", ["a carrot", "a button", "a stick"]], ["What did {name} do?", ["grabbed the carrot", "dug a hole", "ran home"]], ["What color is the button?", ["red", "black", "white"]]]},
+  {title:"Spring Flowers", art:"🌷🌼",
+   text:["It is spring. The sun is warm.", "Grandpa plants flowers in the yard.", "He plants red ones and yellow ones.", "{name} wants to help.", "{He} digs a hole. Dig, dig, dig!", "Oh no! Dirt goes on Grandpa.", "Grandpa laughs and wipes his face.", "\"Put a flower in your hole,\" he says.", "So they plant one more flower.", "Now the yard looks so pretty."],
+   qs:[["Who plants the flowers?", ["Grandpa", "Mom", "Ben"]], ["What colors are the flowers?", ["red and yellow", "blue and pink", "white and purple"]], ["What went on Grandpa?", ["dirt", "water", "paint"]]]},
+  {title:"Summer Hose Fun", art:"☀️💦",
+   text:["It is so hot today.", "{name} pants in the shade.", "Dad turns on the hose.", "Water sprays up in the air.", "{name} runs through it. Splash!", "Sam runs through it too.", "{name} tries to bite the water.", "Chomp! Chomp! {He} can not catch it.", "Soon they are both wet and cool.", "They nap in the sun to dry off."],
+   qs:[["What was the day like?", ["hot", "cold", "rainy"]], ["Who turns on the hose?", ["Dad", "Mom", "Grandma"]], ["What did they do at the end?", ["napped in the sun", "ate lunch", "went to bed"]]]},
+  {title:"A New Baby", art:"👶🍼",
+   text:["Mom and Dad come home with a baby.", "The baby is very small.", "{name} sniffs the baby's toes.", "The baby giggles.", "At night, the baby cries. Waa!", "{name} goes to the crib.", "{He} sits very still and quiet.", "The baby looks at {name} and stops crying.", "Mom pats {name} on the head.", "\"You are a big helper,\" she says."],
+   qs:[["What did {name} sniff?", ["the baby's toes", "the crib", "a bottle"]], ["What did the baby do at night?", ["cried", "sang", "jumped"]], ["What did Mom call {name}?", ["a big helper", "a silly pup", "a sleepy dog"]]]},
+  {title:"Moving Day", art:"📦🚚",
+   text:["Today the family moves to a new house.", "There are boxes all over.", "Dad puts the boxes in a big truck.", "{name} jumps in a box. Hide and seek!", "\"Where is {name}?\" asks Mia.", "Mia looks and looks.", "Then a box barks. Woof!", "Mia opens it and laughs.", "The new house has a big green yard.", "{name} runs in it all day."],
+   qs:[["Where did {name} hide?", ["in a box", "in the truck", "under a bed"]], ["Who looked for {name}?", ["Mia", "Dad", "Ben"]], ["What color is the new yard?", ["green", "brown", "yellow"]]]},
+  {title:"The Sleepover", art:"🛏️⭐",
+   text:["Lily has a friend over for the night.", "Her name is Mia.", "The girls put sleeping bags on the floor.", "{name} gets in the middle.", "The girls eat popcorn and watch a movie.", "They tell funny jokes.", "{name} rolls on {his} back.", "At last the girls go to sleep.", "{name} stays up to keep watch.", "Then {he} snores the loudest of all!"],
+   qs:[["Who is Lily's friend?", ["Mia", "Sam", "Ben"]], ["What did the girls eat?", ["popcorn", "cake", "soup"]], ["Where did {name} lie down?", ["in the middle", "on the couch", "by the door"]]]},
+  {title:"Washing the Car", art:"🚗🧽",
+   text:["Dad washes the car on Saturday.", "He has a bucket of soapy water.", "{name} wants to help.", "{He} grabs the sponge and runs!", "Dad chases {him} around the car.", "Round and round they go.", "Then Dad trips on the hose. Splash!", "Now Dad is wet and so is {name}.", "They both laugh and get to work.", "Soon the car is clean and shiny."],
+   qs:[["What day does Dad wash the car?", ["Saturday", "Monday", "Friday"]], ["What did {name} grab?", ["the sponge", "the hose", "a shoe"]], ["What did Dad trip on?", ["the hose", "the bucket", "a ball"]]]},
+  {title:"Soup for Grandpa", art:"🍲🥕",
+   text:["Grandpa has a cold.", "Mom makes him hot soup.", "It has carrots, beans, and noodles.", "{name} carries a napkin in {his} mouth.", "{He} brings it to Grandpa's bed.", "Grandpa sips the soup. Slurp!", "Then {name} hops up on the bed.", "{He} lays {his} head on Grandpa's arm.", "\"I feel better already,\" says Grandpa.", "They both take a nap."],
+   qs:[["Who makes the soup?", ["Mom", "Dad", "Lily"]], ["What did {name} carry?", ["a napkin", "a spoon", "a sock"]], ["How did Grandpa feel at the end?", ["better", "cold", "sad"]]]},
+  {title:"Pumpkin Picking", art:"🎃🍂",
+   text:["It is fall. Ben and Dad go to get pumpkins.", "{name} goes too.", "There are big pumpkins and small ones.", "Ben picks a tall one.", "Dad picks a fat, round one.", "{name} sniffs and sniffs.", "{He} finds a tiny pumpkin and sits by it.", "\"That one is yours,\" Dad says.", "At home, they put all three by the door.", "{name} guards {his} tiny pumpkin."],
+   qs:[["What kind did Ben pick?", ["a tall one", "a fat one", "a tiny one"]], ["Which pumpkin was for {name}?", ["the tiny one", "the fat one", "the tall one"]], ["How many pumpkins are by the door?", ["three", "two", "five"]]]},
+  {title:"Baking Dog Treats", art:"🦴🥣",
+   text:["Mom and Sam bake dog treats.", "They use oats and peanut butter.", "{name} sits and watches.", "Sam cuts the treats into bone shapes.", "Into the oven they go.", "The kitchen smells so good!", "{name} licks {his} lips.", "Ding! The treats are done.", "Mom lets them cool down first.", "Then {name} gets two treats. Crunch!"],
+   qs:[["Who bakes the treats?", ["Mom and Sam", "Dad and Mia", "Grandma"]], ["What shape are the treats?", ["bones", "stars", "hearts"]], ["How many treats did {name} get?", ["two", "one", "six"]]]},
+  {title:"Picnic in the Yard", art:"🧺🐜",
+   text:["Mom puts a red blanket on the grass.", "It is a picnic day!", "There is bread, cheese, and apples.", "{name} lies on the blanket.", "Then some ants come to the picnic.", "They march to the cheese.", "{name} barks at the ants. Woof!", "The ants do not care.", "So Mom gives the ants a tiny bit of cheese.", "Now everyone has lunch, even the ants."],
+   qs:[["What color is the blanket?", ["red", "blue", "green"]], ["Who came to the picnic?", ["ants", "bees", "birds"]], ["What did the ants march to?", ["the cheese", "the apples", "the bread"]]]},
+  {title:"Laundry Day", art:"👕🧦",
+   text:["Dad does the laundry.", "He takes the clean shirts out.", "They are warm and soft.", "He puts them in a big pile on the bed.", "{name} jumps on the warm pile.", "{He} spins and spins and lies down.", "\"Get off, silly!\" Dad says.", "But {name} is already asleep.", "Dad lets {him} stay for a bit.", "Now all the shirts have dog hair!"],
+   qs:[["Where did Dad put the pile?", ["on the bed", "on the floor", "in the car"]], ["How did the shirts feel?", ["warm and soft", "cold and wet", "rough"]], ["What happened at the end?", ["shirts got dog hair", "Dad got mad", "it rained"]]]},
+  {title:"The Red Sled", art:"🛷❄️",
+   text:["It is cold and snowy.", "Ben pulls a red sled up the hill.", "{name} runs next to him.", "At the top, Ben sits on the sled.", "{name} jumps on too!", "Down they go. Whoosh!", "They go fast and land in soft snow.", "Ben and {name} are white all over.", "\"Again!\" Ben shouts.", "They slide down the hill five times."],
+   qs:[["What color is the sled?", ["red", "blue", "green"]], ["Where did they land?", ["in soft snow", "in a pond", "on the road"]], ["How many times did they slide down?", ["five", "two", "ten"]]]},
+  {title:"Setting the Table", art:"🍽️🥄",
+   text:["It is time for dinner.", "Lily sets the table.", "She puts out four plates.", "She puts out four cups.", "Then she needs the spoons.", "Where is a spoon? {name} has one!", "{He} runs off with it in {his} mouth.", "Lily chases {him} into the yard.", "{name} drops the spoon in the grass.", "Lily washes it, and dinner can start."],
+   qs:[["How many plates did Lily put out?", ["four", "two", "six"]], ["What did {name} take?", ["a spoon", "a cup", "a plate"]], ["Where did {name} drop it?", ["in the grass", "in the tub", "on the bed"]]]},
+  {title:"Tomato Garden", art:"🍅🌱",
+   text:["Mom has a garden in the back.", "She grows big red tomatoes.", "Every day, {name} helps her.", "{He} carries the little bucket.", "One day a bunny hops in.", "It nibbles a leaf.", "{name} barks, \"Woof!\"", "The bunny hops away fast.", "\"Good job, garden guard!\" says Mom.", "She picks a tomato for her lunch."],
+   qs:[["What does Mom grow?", ["tomatoes", "carrots", "corn"]], ["What did {name} carry?", ["the little bucket", "a big rake", "a hat"]], ["What hopped into the garden?", ["a bunny", "a frog", "a cat"]]]},
+  {title:"Holiday Lights", art:"🎄✨",
+   text:["The holiday is almost here.", "Dad and Ben put up lights.", "There are red, green, and blue lights.", "{name} watches from the steps.", "Dad drops the lights. Oops!", "{name} gets all tangled up.", "Now {he} looks like a tree!", "Ben takes the lights off {him}.", "At night, they turn the lights on.", "The house glows, and {name} wags {his} tail."],
+   qs:[["Who put up the lights?", ["Dad and Ben", "Mom and Mia", "Grandpa"]], ["What did {name} look like?", ["a tree", "a snowman", "a cat"]], ["When did they turn the lights on?", ["at night", "in the morning", "at lunch"]]]},
+  {title:"Spring Cleaning", art:"🧹✨",
+   text:["Mom says it is cleaning day.", "Sam sweeps the floor.", "Mia dusts the shelf.", "{name} wants a job too.", "{He} finds {his} toy box.", "{He} pulls out all of {his} toys.", "There is a duck, a ball, and an old shoe.", "Oh no, what a mess!", "Mom laughs and helps put them back.", "Then they all have a snack."],
+   qs:[["Who sweeps the floor?", ["Sam", "Mia", "Mom"]], ["What toy was in the box?", ["a duck", "a cat", "a hat"]], ["What did they do at the end?", ["had a snack", "went to bed", "took a bath"]]]},
+  {title:"A Gift for Mom", art:"💐🎁",
+   text:["Today is Mom's special day.", "Dad and Ben make her a card.", "{name} wants to give a gift too.", "{He} runs out to the yard.", "{He} comes back with a yellow flower.", "It is a little bent.", "{name} drops it on Mom's lap.", "Mom smiles a big smile.", "She puts the flower in a cup of water.", "\"Best gift ever!\" she says."],
+   qs:[["Who made the card?", ["Dad and Ben", "Mia and Lily", "Grandma"]], ["What color is the flower?", ["yellow", "red", "purple"]], ["Where did Mom put the flower?", ["in a cup", "in her hair", "in a book"]]]},
+  {title:"Hens on the Farm", art:"🐔🥚",
+   text:["{name} went to the farm with Grandpa.", "Grandpa has five red hens.", "The hens said, \"Cluck, cluck!\"", "{name} wanted to play with them.", "{He} ran into the hen house.", "The hens flapped and ran out!", "{name} saw something in the hay.", "It was a big brown egg.", "{He} did not touch it.", "Grandpa said, \"Good dog!\""],
+   qs:[["How many hens does Grandpa have?", ["five", "two", "ten"]], ["What did {name} find in the hay?", ["an egg", "a bone", "a ball"]], ["What did Grandpa say?", ["Good dog!", "Bad dog!", "Go home!"]]]},
+  {title:"The Muddy Pigs", art:"🐷💧",
+   text:["The farmer has three pink pigs.", "The pigs love the mud.", "{name} came to see them.", "\"Oink, oink!\" said the pigs.", "The pigs rolled in the mud.", "{name} rolled in the mud too!", "Now {name} was brown, not clean.", "Mom got the hose.", "Splash! {name} got a bath.", "{He} did not like the bath, but {he} liked the pigs."],
+   qs:[["What color were the pigs?", ["pink", "black", "white"]], ["What do the pigs love?", ["mud", "snow", "apples"]], ["What did Mom get?", ["the hose", "a towel", "a ball"]]]},
+  {title:"The Big Brown Horse", art:"🐴🍎",
+   text:["{name} saw a horse on the farm.", "The horse was big and brown.", "{name} was very small next to it.", "The horse said, \"Neigh!\"", "{name} hid behind Dad.", "Dad gave the horse an apple.", "The horse ate it. Crunch!", "Then the horse put its nose down.", "It gave {name} a soft sniff.", "Now {name} and the horse are pals."],
+   qs:[["What color was the horse?", ["brown", "white", "black"]], ["What did Dad give the horse?", ["an apple", "a carrot", "a bone"]], ["Where did {name} hide?", ["behind Dad", "under a bed", "in the barn"]]]},
+  {title:"The Cow With a Bell", art:"🐄🔔",
+   text:["Mia took {name} to see the cows.", "The cows were black and white.", "One cow had a bell on.", "Ding, ding went the bell.", "\"Moo!\" said the cow.", "{name} said, \"Woof!\"", "The farmer gave Mia a cup of milk.", "Mia drank it all up.", "{name} got a little bit too.", "{He} licked {his} lips. Yum!"],
+   qs:[["Who took {name} to see the cows?", ["Mia", "Ben", "Grandma"]], ["What did one cow have on?", ["a bell", "a hat", "a bow"]], ["What did the farmer give Mia?", ["milk", "eggs", "an apple"]]]},
+  {title:"A Walk in the Woods", art:"🌲🍄",
+   text:["{name} and Dad went to the woods.", "The trees were tall and green.", "{name} sniffed a big log.", "{He} found a red mushroom.", "Dad said, \"Do not eat that!\"", "So {name} did not eat it.", "Then {he} heard a tap, tap, tap.", "It was a bird on a tree.", "The bird had a red head.", "{name} wagged {his} tail at it."],
+   qs:[["Where did {name} and Dad go?", ["the woods", "the beach", "the store"]], ["What did {name} find?", ["a mushroom", "a rock", "a stick"]], ["What made the tap, tap sound?", ["a bird", "a frog", "Dad"]]]},
+  {title:"The Little Ladybug", art:"🐞🍃",
+   text:["{name} was in the yard.", "{He} saw a tiny bug on a leaf.", "It was a ladybug!", "The ladybug was red with black dots.", "{name} counted the dots.", "One, two, three, four!", "The ladybug walked on {his} nose.", "It tickled! Achoo! {He} sneezed.", "The ladybug flew away.", "{name} waved goodbye with {his} tail."],
+   qs:[["What color was the ladybug?", ["red", "blue", "green"]], ["How many dots did it have?", ["four", "two", "six"]], ["What did {name} do when it tickled?", ["sneezed", "cried", "slept"]]]},
+  {title:"The Busy Bee", art:"🐝🌻",
+   text:["Grandma has a big garden.", "It has tall yellow sunflowers.", "{name} saw a bee on a flower.", "\"Buzz, buzz,\" said the bee.", "{name} wanted to sniff it.", "Grandma said, \"Let the bee work.\"", "The bee went from flower to flower.", "It was very busy.", "{name} sat still and watched.", "Grandma gave {him} a treat for being so good."],
+   qs:[["Whose garden was it?", ["Grandma's", "Dad's", "Sam's"]], ["What did the bee say?", ["buzz, buzz", "moo, moo", "tweet, tweet"]], ["What did Grandma give {name}?", ["a treat", "a toy", "a bath"]]]},
+  {title:"Ants at the Picnic", art:"🐜🧺",
+   text:["Mom and {name} had a picnic.", "Mom had a jam sandwich.", "{name} saw a line of ants.", "The ants were tiny and black.", "One ant had a crumb.", "The crumb was bigger than the ant!", "The ants took it to a hole.", "{name} gave a happy bark.", "Mom gave the ants one more crumb.", "Now the ants had a picnic too."],
+   qs:[["What color were the ants?", ["black", "red", "green"]], ["What did Mom have?", ["a jam sandwich", "a hot dog", "a pizza"]], ["Where did the ants take the crumb?", ["to a hole", "to a tree", "to the car"]]]},
+  {title:"The Blue Butterfly", art:"🦋🌸",
+   text:["A butterfly came to the yard.", "It was blue and very pretty.", "{name} ran after it.", "The butterfly went up high.", "{name} jumped, but it was too high.", "Then the butterfly came down.", "It sat on {his} tail!", "{name} stood very still.", "{He} did not want it to go.", "At last it flew to a pink flower."],
+   qs:[["What color was the butterfly?", ["blue", "yellow", "red"]], ["What did {name} do when it sat down?", ["stood still", "ran away", "barked"]], ["Where did the butterfly go at the end?", ["to a flower", "to a tree", "to the pond"]]]},
+  {title:"A Nest in the Tree", art:"🐦🪺",
+   text:["Ben and {name} looked up at a tree.", "There was a nest in the tree.", "In the nest were three blue eggs.", "A mama bird sat on the eggs.", "\"Tweet!\" said the mama bird.", "{name} did not bark.", "{He} did not want to scare the bird.", "Crack, crack! The eggs hatched.", "Three baby birds came out.", "\"Peep, peep!\" said the babies."],
+   qs:[["What color were the eggs?", ["blue", "white", "green"]], ["How many baby birds came out?", ["three", "one", "five"]], ["Who looked up at the tree with {name}?", ["Ben", "Mia", "Grandpa"]]]},
+  {title:"Ducks at the Pond", art:"🦆🌿",
+   text:["{name} went to the pond with Lily.", "Lily had a bag of oats for the ducks.", "Five ducks swam to them.", "\"Quack, quack!\" said the ducks.", "Lily tossed the oats.", "The ducks ate and ate.", "One little duck got no oats.", "{name} pushed the bag with {his} nose.", "Lily gave the little duck some oats.", "Now all the ducks were happy."],
+   qs:[["How many ducks swam to them?", ["five", "two", "nine"]], ["What did Lily feed the ducks?", ["oats", "bread", "cake"]], ["What did the ducks say?", ["Quack, quack!", "Moo, moo!", "Oink, oink!"]]]},
+  {title:"Tide Pool Fun", art:"🦀🌊",
+   text:["Dad took {name} to the sea.", "The tide was out.", "There were little pools in the rocks.", "{name} looked into a pool.", "{He} saw a pink sea star.", "{He} saw a tiny crab too.", "The crab went snap, snap!", "{name} jumped back. Yip!", "Then the tide came in.", "The waves went swish over the rocks."],
+   qs:[["Who took {name} to the sea?", ["Dad", "Mom", "Sam"]], ["What color was the sea star?", ["pink", "blue", "green"]], ["What sound did the crab make?", ["snap, snap", "buzz, buzz", "moo, moo"]]]},
+  {title:"The Slow Turtle", art:"🐢🌱",
+   text:["{name} found a turtle by the pond.", "The turtle had a green shell.", "It was very, very slow.", "{name} ran to the tree and back.", "The turtle took one step.", "{name} ran to the pond and back.", "The turtle took one more step.", "Then the turtle hid in its shell.", "{name} sat down and waited.", "At last, the turtle poked its head out and smiled."],
+   qs:[["What color was the shell?", ["green", "red", "pink"]], ["Where did {name} find the turtle?", ["by the pond", "in the house", "at the beach"]], ["Where did the turtle hide?", ["in its shell", "under a rock", "in a tree"]]]},
+  {title:"The Lost Kitten", art:"🐱🏠",
+   text:["{name} heard a small sound.", "It went, \"Mew, mew.\"", "It was a little gray kitten.", "The kitten was lost and cold.", "{name} sat next to it to keep it warm.", "Then {he} barked for Sam.", "Sam came and picked up the kitten.", "They walked down the street.", "A girl ran out and said, \"My kitten!\"", "The girl gave {name} a big hug."],
+   qs:[["What color was the kitten?", ["gray", "orange", "white"]], ["Who did {name} bark for?", ["Sam", "Mom", "Grandpa"]], ["What sound did the kitten make?", ["mew, mew", "woof, woof", "moo, moo"]]]},
+  {title:"Nuts for Squirrels", art:"🐿️🌰",
+   text:["There is a squirrel in the park.", "It has a big, fluffy tail.", "The squirrel had a nut.", "It dug a hole and hid the nut.", "{name} saw it all.", "{He} dug the nut up!", "The squirrel was mad. \"Chit, chit!\"", "{name} put the nut back.", "{He} pushed the dirt on top.", "The squirrel flicked its tail to say thank you."],
+   qs:[["Where was the squirrel?", ["the park", "the farm", "the beach"]], ["What did the squirrel hide?", ["a nut", "a bone", "a sock"]], ["How did the squirrel feel when {name} dug up the nut?", ["mad", "happy", "sleepy"]]]},
+  {title:"The Bunny Hop", art:"🐰🥕",
+   text:["A white bunny lived in the yard.", "It had long ears and a pink nose.", "The bunny went hop, hop, hop.", "{name} tried to hop too.", "{He} fell on {his} back. Flop!", "The bunny sat and looked at {him}.", "{name} tried again.", "This time {he} did a big hop!", "Mom clapped for {name}.", "The bunny got a carrot for a snack."],
+   qs:[["What color was the bunny?", ["white", "brown", "black"]], ["What sound did {name} make when {he} fell?", ["Flop!", "Splash!", "Crack!"]], ["What did the bunny get?", ["a carrot", "an apple", "a cookie"]]]},
+  {title:"The Owl at Night", art:"🦉🌙",
+   text:["It was night, and the moon was out.", "{name} could not sleep.", "{He} looked out the window.", "\"Hoo, hoo!\" came a sound.", "An owl sat in the tree.", "The owl had big yellow eyes.", "It blinked at {name}.", "{name} blinked back.", "Then the owl flew off without a sound.", "{name} went back to bed and fell asleep."],
+   qs:[["What did the owl say?", ["Hoo, hoo!", "Tweet!", "Quack!"]], ["What color were the owl's eyes?", ["yellow", "blue", "red"]], ["What did {name} do at the end?", ["fell asleep", "ate dinner", "went outside"]]]},
+  {title:"Wish on a Star", art:"⭐🌙",
+   text:["Grandpa and {name} sat on the grass.", "The sky was dark.", "The moon was big and round.", "Then they saw lots of stars.", "Grandpa said, \"Look, a falling star!\"", "\"Make a wish,\" said Grandpa.", "{name} wished for a big bone.", "They went inside for bed.", "In the morning, {name} found a surprise.", "It was a big bone by {his} bed!"],
+   qs:[["Who sat on the grass with {name}?", ["Grandpa", "Mom", "Lily"]], ["What did {name} wish for?", ["a big bone", "a red ball", "a cat"]], ["What was the moon like?", ["big and round", "small and thin", "red"]]]},
+  {title:"After the Rain", art:"🌈☔",
+   text:["It rained all day.", "{name} had to stay inside.", "{He} was sad and bored.", "Then the rain stopped.", "The sun came out.", "Mia said, \"Look! A rainbow!\"", "It had red, orange, yellow, green, and blue.", "{name} ran out to find the end of it.", "{He} did not find the end.", "But {he} found a big puddle to jump in!"],
+   qs:[["What did Mia see?", ["a rainbow", "a plane", "a bird"]], ["How did {name} feel inside?", ["bored", "hungry", "sleepy"]], ["What did {name} find at the end?", ["a puddle", "a pot of gold", "a bone"]]]},
+  {title:"The Windy Kite", art:"🪁💨",
+   text:["It was a windy day.", "Ben had a red kite.", "The wind took the kite up, up, up!", "{name} ran with Ben.", "Then the wind blew hard. Whoosh!", "The string slipped out of Ben's hand.", "The kite flew away!", "{name} ran fast after the string.", "{He} grabbed it with {his} teeth.", "Ben said, \"You saved my kite!\""],
+   qs:[["What color was the kite?", ["red", "blue", "green"]], ["Who had the kite?", ["Ben", "Dad", "Lily"]], ["What sound did the wind make?", ["Whoosh!", "Buzz!", "Splash!"]]]},
+  {title:"Seeds in the Garden", art:"🌱🌻",
+   text:["Mom had a bag of seeds.", "Mom dug small holes in the dirt.", "{name} helped dig too.", "Mom put a seed in each hole.", "{name} pushed the dirt back.", "Then Mom gave the seeds water.", "Every day, {name} looked at the dirt.", "One day, {he} saw a little green sprout.", "It grew and grew.", "Now it is a big yellow sunflower!"],
+   qs:[["What did Mom put in the holes?", ["seeds", "bones", "rocks"]], ["What color was the sprout?", ["green", "red", "blue"]], ["What did it grow into?", ["a sunflower", "a tree", "a pumpkin"]]]},
+  {title:"A Pile of Leaves", art:"🍂🍁",
+   text:["It was fall.", "The leaves were red, orange, and brown.", "Dad raked them into a big pile.", "{name} looked at the pile.", "{name} took a big run.", "Jump! Crunch!", "Leaves went all over the yard.", "Dad laughed and laughed.", "Dad raked the pile again.", "Then Dad jumped in too!"],
+   qs:[["What did Dad make?", ["a pile of leaves", "a snowman", "a fort"]], ["What sound did the leaves make?", ["Crunch!", "Splash!", "Moo!"]], ["Who jumped in at the end?", ["Dad", "Mom", "Grandma"]]]},
+  {title:"The Snail Race", art:"🐌🏁",
+   text:["Lily found two snails in the garden.", "One snail was big.", "One snail was small.", "\"Let's have a race!\" said Lily.", "{name} was the judge.", "The snails went very slow.", "{name} got so sleepy.", "{He} took a nap.", "When {he} woke up, the race was done.", "The small snail won!"],
+   qs:[["How many snails did Lily find?", ["two", "three", "five"]], ["What did {name} do in the race?", ["took a nap", "ran fast", "ate a snack"]], ["Which snail won?", ["the small one", "the big one", "the red one"]]]},
+  {title:"A Boat on the Sea", art:"🐳⛵",
+   text:["Grandma took {name} on a boat.", "The sea was big and blue.", "The boat went up and down.", "{name} put {his} nose in the wind.", "Then Grandma said, \"Look!\"", "A big gray whale came up.", "Whoosh! Water shot out of its back.", "The water fell on {name}.", "{He} was all wet!", "{name} shook and shook, and Grandma giggled."],
+   qs:[["Who took {name} on a boat?", ["Grandma", "Dad", "Ben"]], ["What did they see?", ["a whale", "a shark", "a duck"]], ["What color was the whale?", ["gray", "pink", "green"]]]},
+  {title:"Bugs That Glow", art:"✨🌙",
+   text:["It was a warm summer night.", "Sam and {name} were in the yard.", "Little lights blinked in the grass.", "They were fireflies!", "The bugs went blink, blink, blink.", "{name} tried to catch one.", "Snap! {He} missed.", "A firefly sat on {his} nose.", "It made {his} nose glow!", "Sam said, \"You look like a lamp!\""],
+   qs:[["Who was in the yard with {name}?", ["Sam", "Mia", "Dad"]], ["When did this story happen?", ["at night", "in the morning", "at lunch"]], ["What did Sam say {name} looked like?", ["a lamp", "a star", "a car"]]]},
+  {title:"The Vet Visit", art:"🏥🩺",
+   text:["{name} goes to see the vet today.", "{He} rides in the car with Mom.", "The vet has a kind smile.", "She looks in {his} ears.", "She checks {his} teeth too.", "{name} sits very still.", "The vet says, \"Good dog!\"", "She gives {him} a treat.", "{name} wags {his} tail.", "The vet is a friend!"],
+   qs:[["Who takes {name} to the vet?", ["Mom", "Dad", "Grandma"]], ["What does the vet look in?", ["ears", "a box", "a bag"]], ["What does the vet give {name}?", ["a treat", "a hat", "a ball"]]]},
+  {title:"Books at the Library", art:"📚🐶",
+   text:["Lily takes {name} to the library.", "Today is dog day there!", "Kids read books to dogs.", "{name} lies down on a soft rug.", "Lily picks a book about a cat.", "She reads it out loud.", "{name} lifts {his} ears.", "{He} likes the cat part best.", "At the end, {he} gives a happy woof.", "Lily reads one more book."],
+   qs:[["Where does Lily take {name}?", ["the library", "the park", "the shop"]], ["What is the book about?", ["a cat", "a fish", "a bus"]], ["What does {name} lie on?", ["a soft rug", "a bed", "the grass"]]]},
+  {title:"Show and Tell", art:"🏫🎒",
+   text:["Today Ben has show and tell.", "He brings {name} to school!", "The kids sit in a big circle.", "Ben says, \"This is my dog.\"", "{name} can sit and shake.", "{He} can roll over too.", "The kids clap and cheer.", "The teacher pats {his} head.", "{name} gets a gold star.", "It is the best show and tell!"],
+   qs:[["Who brings {name} to school?", ["Ben", "Mia", "Dad"]], ["What can {name} do?", ["sit and shake", "sing", "read"]], ["What does {name} get?", ["a gold star", "a red hat", "a cookie"]]]},
+  {title:"The Bakery Smell", art:"🥐🍞",
+   text:["Dad and {name} walk to the bakery.", "It smells so good!", "{name} sniffs the air. Sniff, sniff!", "The baker has warm bread.", "She has pink cakes too.", "Dad gets a long loaf of bread.", "{name} can not eat cake.", "So the baker gives {him} a dog cookie.", "It is shaped like a bone.", "Crunch! {name} loves it."],
+   qs:[["Who walks to the bakery with {name}?", ["Dad", "Mom", "Sam"]], ["What color are the cakes?", ["pink", "green", "blue"]], ["What shape is the dog cookie?", ["a bone", "a star", "a moon"]]]},
+  {title:"A List for the Shop", art:"🛒🥫",
+   text:["Mom has a list for the shop.", "{name} rides along in the car.", "Mom gets milk and eggs.", "She gets apples and bread.", "{name} waits by the cart.", "{He} sees a big bag of dog food.", "{He} barks at it. Woof!", "Mom laughs and puts it in the cart.", "Then she adds a new toy duck.", "{name} is one happy dog!"],
+   qs:[["What does Mom get first?", ["milk and eggs", "cake", "fish"]], ["What does {name} bark at?", ["dog food", "a cat", "a car"]], ["What toy does Mom add?", ["a duck", "a ball", "a bear"]]]},
+  {title:"The Farmers Market", art:"🥕🍎",
+   text:["Grandma takes {name} to the market.", "There are lots of tents.", "One tent has red apples.", "One tent has orange carrots.", "Grandma buys six carrots.", "A man plays a song on a horn.", "Toot, toot! {name} howls along.", "Everyone laughs and claps.", "Grandma gives {name} a carrot.", "Munch, munch! Yum!"],
+   qs:[["How many carrots does Grandma buy?", ["six", "two", "ten"]], ["What color are the apples?", ["red", "blue", "pink"]], ["What does {name} do when the horn plays?", ["howls along", "runs away", "sleeps"]]]},
+  {title:"The Fire Station", art:"🚒💦",
+   text:["Sam and {name} go to the fire station.", "There is a big red fire truck.", "It has a long ladder.", "A man in a hat says hello.", "He lets Sam ring the bell.", "Ding, ding, ding!", "{name} barks. Woof, woof!", "The fire station has a dog too.", "It is a white dog with black spots.", "{name} makes a new friend."],
+   qs:[["What color is the fire truck?", ["red", "green", "yellow"]], ["What does Sam ring?", ["the bell", "the phone", "the door"]], ["What color are the spots on the other dog?", ["black", "red", "blue"]]]},
+  {title:"A Card for Grandpa", art:"📮✉️",
+   text:["Mia made a card for Grandpa.", "She and {name} walk to the post office.", "The line is long.", "{name} sits and waits nicely.", "Mia buys a stamp with a bird on it.", "She puts the card in the slot.", "Plop! Off it goes.", "The man at the desk smiles.", "He gives {name} a pat.", "Grandpa will be so glad!"],
+   qs:[["Who is the card for?", ["Grandpa", "Mom", "the vet"]], ["What is on the stamp?", ["a bird", "a dog", "a boat"]], ["Where does Mia put the card?", ["in the slot", "in a bag", "in a tree"]]]},
+  {title:"Toot Toot Train", art:"🚂🌄",
+   text:["{name} and Dad ride a train.", "Toot, toot! The train goes.", "{name} looks out the window.", "{He} sees cows in a field.", "{He} sees a big blue lake.", "Then the train goes in a tunnel.", "It is dark for a bit.", "Then the sun comes back!", "{name} wags {his} tail.", "Trains are fun!"],
+   qs:[["Who rides the train with {name}?", ["Dad", "Grandma", "Lily"]], ["What does {name} see in a field?", ["cows", "pigs", "ducks"]], ["What color is the lake?", ["blue", "green", "brown"]]]},
+  {title:"The Bus Ride", art:"🚌🚏",
+   text:["Mom and {name} wait at the bus stop.", "Here comes the big yellow bus.", "Beep, beep! The door opens.", "{name} hops on with Mom.", "{He} sits on Mom's lap.", "The bus stops again and again.", "A little girl waves at {name}.", "{He} gives her a lick.", "She giggles.", "Then Mom and {name} hop off at the park."],
+   qs:[["What color is the bus?", ["yellow", "red", "blue"]], ["Where does {name} sit?", ["on Mom's lap", "on the roof", "on a box"]], ["Where do they hop off?", ["at the park", "at school", "at the shop"]]]},
+  {title:"Grandpa's Little Boat", art:"⛵🌊",
+   text:["Grandpa has a little boat.", "It is white with a green stripe.", "{name} wears a red life vest.", "They float on the calm lake.", "A duck swims by. Quack!", "{name} wants to jump in.", "Grandpa says, \"Stay in the boat!\"", "So {name} just looks at the duck.", "Then a fish jumps up. Splash!", "{name} barks with joy."],
+   qs:[["What color vest does {name} wear?", ["red", "blue", "pink"]], ["What swims by the boat?", ["a duck", "a frog", "a cat"]], ["What jumps up at the end?", ["a fish", "a duck", "Grandpa"]]]},
+  {title:"Camping Night", art:"🏕️🌙",
+   text:["The family goes camping in the woods.", "Dad sets up a green tent.", "{name} helps by holding a stick.", "At night, they sit by a warm fire.", "Mom tells a funny story.", "{name} looks up at the sky.", "{He} sees lots of stars.", "An owl says, \"Hoo, hoo!\"", "{name} snuggles in the tent.", "{He} sleeps with a big smile."],
+   qs:[["What color is the tent?", ["green", "red", "yellow"]], ["What does {name} see in the sky?", ["stars", "a kite", "a bird"]], ["What says \"Hoo, hoo\"?", ["an owl", "a cow", "Dad"]]]},
+  {title:"The Ferris Wheel", art:"🎡🎠",
+   text:["Today is fair day!", "{name} and Lily see a big wheel.", "It goes round and round.", "They get in a blue seat.", "Up, up, up they go!", "At the top, {name} can see far.", "{He} sees the tents and the lights.", "{He} sees a man with pink cotton candy.", "Then they come back down.", "{name} gives Lily a happy lick."],
+   qs:[["Who rides with {name}?", ["Lily", "Ben", "Grandpa"]], ["What color is the seat?", ["blue", "red", "green"]], ["What color is the cotton candy?", ["pink", "blue", "white"]]]},
+  {title:"Picnic in the Park", art:"🧺🐜",
+   text:["Mom packs a picnic basket.", "It has bread, cheese, and grapes.", "They lay a red blanket on the grass.", "{name} sits in the middle.", "Then some ants come to eat too!", "They march to the grapes.", "{name} sniffs at them.", "Mom moves the blanket to a new spot.", "Now they can eat in peace.", "{name} gets a bit of cheese."],
+   qs:[["What color is the blanket?", ["red", "blue", "yellow"]], ["What comes to eat too?", ["ants", "birds", "cats"]], ["What does {name} get to eat?", ["cheese", "grapes", "cake"]]]},
+  {title:"Fun at the Playground", art:"🛝🌳",
+   text:["Sam takes {name} to the playground.", "Sam goes on the swing first.", "{name} runs back and forth.", "Then Sam goes down the slide.", "{name} waits at the bottom.", "Sam lands with a bump. Oof!", "{name} licks Sam on the nose.", "Sam laughs. {name} barks.", "Next they play on the seesaw.", "Up and down, up and down!"],
+   qs:[["What does Sam go on first?", ["the swing", "the slide", "the seesaw"]], ["Where does {name} wait?", ["at the bottom", "at the top", "in the car"]], ["What does {name} lick?", ["Sam's nose", "a cone", "a ball"]]]},
+  {title:"The Car Wash", art:"🚗🫧",
+   text:["Dad drives the car to the car wash.", "{name} sits in the back seat.", "Swish! Big blue brushes spin.", "Water hits the windows. Splash!", "Pink soap covers the car.", "{name} barks at the brushes.", "But {he} stays safe and dry inside.", "Then warm air blows. Whoosh!", "The car is shiny and clean.", "Dad says {name} needs a bath next!"],
+   qs:[["What color are the brushes?", ["blue", "red", "green"]], ["What color is the soap?", ["pink", "green", "black"]], ["What does Dad say {name} needs next?", ["a bath", "a nap", "a hat"]]]},
+  {title:"The Big Dog Show", art:"🏆🎀",
+   text:["Today is the big dog show.", "Mia brushes {name} until {he} shines.", "She puts a blue bow on {him}.", "There are big dogs and small dogs.", "{name} trots in a circle.", "{He} jumps over a little bar.", "{He} sits when Mia says sit.", "The judge smiles and nods.", "{name} wins a shiny cup!", "Mia gives {him} a big hug."],
+   qs:[["What color is the bow?", ["blue", "red", "yellow"]], ["What does {name} jump over?", ["a little bar", "a log", "a cat"]], ["What does {name} win?", ["a shiny cup", "a cake", "a hat"]]]},
+  {title:"The Duck Parade", art:"🥁🎉",
+   text:["There is a parade on Main Street.", "Ben and {name} stand by the road.", "Boom, boom! Here come the drums.", "Then a band plays loud horns.", "A clown throws candy.", "Ben catches three pieces.", "A big float looks like a duck.", "{name} barks at the duck.", "Quack! The float honks back.", "{name} jumps. Then {he} wags {his} tail."],
+   qs:[["What does the clown throw?", ["candy", "balls", "hats"]], ["How many pieces does Ben catch?", ["three", "one", "five"]], ["What does the big float look like?", ["a duck", "a cat", "a train"]]]},
+  {title:"The Ice Cream Truck", art:"🍦🚚",
+   text:["Ding-a-ling! What is that sound?", "It is the ice cream truck!", "{name} runs to the gate.", "Lily runs out with Mom.", "Lily gets a green ice cream.", "The man has a treat for dogs too.", "It is a cup of dog ice cream.", "{name} licks it fast. Slurp!", "{He} gets a cold white nose.", "Lily laughs and laughs."],
+   qs:[["What sound does the truck make?", ["ding-a-ling", "toot toot", "moo"]], ["What color is Lily's ice cream?", ["green", "pink", "brown"]], ["How does {name} lick the dog ice cream?", ["fast", "slow", "not at all"]]]},
+  {title:"At the Airport", art:"✈️🧳",
+   text:["Today Grandma comes on a plane.", "{name} and Dad go to the airport.", "They see big planes on the ground.", "Zoom! One plane goes up in the sky.", "{name} watches it fly away.", "Lots of people walk by with bags.", "Then {name} sees a pink hat.", "It is Grandma!", "{name} runs to her and jumps.", "Grandma gives {him} a big hug."],
+   qs:[["Who comes on the plane?", ["Grandma", "Mia", "the vet"]], ["What color is Grandma's hat?", ["pink", "blue", "black"]], ["Who goes to the airport with {name}?", ["Dad", "Mom", "Sam"]]]},
+  {title:"The Bike Ride", art:"🚲🌼",
+   text:["Mom gets on her bike.", "{name} runs next to her.", "They go down a long path.", "The bike bell goes ring, ring!", "They pass a pond with two swans.", "They pass a field of yellow flowers.", "{name} stops to sniff one.", "Achoo! {He} sneezes.", "Mom laughs and rings the bell.", "Then they go home for a nap."],
+   qs:[["How many swans are in the pond?", ["two", "four", "one"]], ["What color are the flowers?", ["yellow", "red", "purple"]], ["What does {name} do after the sniff?", ["sneezes", "sings", "sleeps"]]]},
+  {title:"A Day on the Farm", art:"🐄🐔",
+   text:["{name} visits Grandpa's farm.", "{He} sees a cow. Moo!", "{He} sees a pig in the mud. Oink!", "The hens peck at the corn.", "{name} helps Grandpa find eggs.", "They find five brown eggs.", "A little goat wants to play.", "It chases {name} round the barn.", "Then they both lie down in the hay.", "What a fun farm day!"],
+   qs:[["Whose farm does {name} visit?", ["Grandpa's", "Mom's", "Ben's"]], ["How many eggs do they find?", ["five", "two", "nine"]], ["Who wants to play with {name}?", ["a little goat", "a big cow", "a pig"]]]},
+  {title:"The Dog Park", art:"🐕🎾",
+   text:["{name} goes to the dog park.", "There are lots of dogs!", "A big brown dog has a ball.", "A tiny white dog runs fast.", "{name} runs with them.", "They chase and chase.", "Then Dad throws a stick.", "{name} gets it first!", "{He} brings it back to Dad.", "{He} is tired and happy."],
+   qs:[["What does the big brown dog have?", ["a ball", "a stick", "a hat"]], ["What does Dad throw?", ["a stick", "a bone", "a frisbee"]], ["How does {name} feel at the end?", ["tired and happy", "sad", "scared"]]]},
+  {title:"The Pumpkin Patch", art:"🎃🍂",
+   text:["It is fall. The leaves are red and gold.", "The family goes to the pumpkin patch.", "There are pumpkins big and small.", "Mia finds a tiny one.", "Dad finds a huge one.", "{name} finds one too!", "{His} pumpkin is round and bumpy.", "{He} tries to roll it with {his} nose.", "Bump, bump, bump!", "They take all three home."],
+   qs:[["Who finds a tiny pumpkin?", ["Mia", "Dad", "Grandma"]], ["What is the pumpkin {name} finds like?", ["round and bumpy", "flat and soft", "blue"]], ["How many pumpkins do they take home?", ["three", "one", "six"]]]},
+  {title:"Mom at the Dentist", art:"🦷🪥",
+   text:["Mom has to see the dentist.", "{name} and Dad go with her.", "They wait in a room with fish.", "The fish swim in a big tank.", "{name} watches an orange fish.", "Soon Mom comes out.", "She has a big white smile.", "Her teeth are so clean!", "{name} shows Mom {his} teeth too.", "Dad says, \"Time to brush them!\""],
+   qs:[["Who sees the dentist?", ["Mom", "Dad", "Sam"]], ["What color fish does {name} watch?", ["orange", "green", "pink"]], ["What does Dad say at the end?", ["time to brush them", "time for bed", "time to eat"]]]},
+  {title:"A New Friend", art:"🐶🌳",
+   text:["{name} went to the park with Mom.", "{He} saw a little puppy by a tree.", "The puppy was named Pip.", "Pip looked shy and sat all alone.", "{name} walked up and said, \"Woof!\"", "Pip wagged his tail a little bit.", "{name} dropped {his} ball by Pip.", "Pip pushed the ball back with his nose.", "They played and ran all day.", "Now {name} and Pip are best friends!"],
+   qs:[["Who did {name} meet?", ["Pip", "Tom", "Ben"]], ["Where was Pip?", ["by a tree", "in a car", "on a bed"]], ["What did {name} drop by Pip?", ["a ball", "a hat", "a bone"]]]},
+  {title:"Sharing the Rope", art:"🪢🐕",
+   text:["{name} has a blue tug rope.", "Pip came over to play.", "Pip wanted the rope too.", "{name} held on tight. Grr!", "Pip looked sad and sat down.", "{name} did not like that.", "{He} gave one end to Pip.", "Now they both had the rope!", "They pulled and pulled. Tug, tug!", "Sharing made it more fun."],
+   qs:[["What color is the rope?", ["blue", "red", "pink"]], ["Who wanted the rope?", ["Pip", "Mom", "Tom"]], ["What did {name} give Pip?", ["one end", "a bone", "a hat"]]]},
+  {title:"A Turn on the Swing", art:"🌳🐾",
+   text:["Sam and Mia went to the park.", "{name} ran with them.", "There was just one swing.", "Sam and Mia both wanted it.", "{name} barked. Woof, woof!", "{He} sat by the swing and waited.", "Sam said, \"Mia, you go first.\"", "Mia went up high. Whee!", "Then it was Sam's turn.", "Last, they gave {name} a gentle push!"],
+   qs:[["How many swings were there?", ["one", "two", "five"]], ["Who went first?", ["Mia", "Sam", "Dad"]], ["Who went second?", ["Sam", "Mia", "Dad"]]]},
+  {title:"Brave on the Bridge", art:"🌉🐕",
+   text:["{name} and Dad went for a walk.", "They came to a little bridge.", "The water went splash below.", "{name} did not want to go.", "{His} legs felt shaky.", "Dad said, \"You can do it!\"", "{name} took one small step.", "Then {he} took one more.", "Soon {he} was on the other side!", "{name} felt brave and proud. Woof!"],
+   qs:[["Who went on the walk?", ["Dad", "Mom", "Lily"]], ["What did they come to?", ["a bridge", "a shop", "a pond"]], ["How did {name} feel at the end?", ["brave", "sad", "sleepy"]]]},
+  {title:"The Block Tower", art:"🧱🐶",
+   text:["Lily made a tall tower.", "It had ten red blocks.", "{name} ran in fast. Zoom!", "{His} tail hit the tower.", "Crash! The blocks fell down.", "Lily looked at the mess.", "{name} put {his} head on her lap.", "That is how {he} said sorry.", "Lily gave {him} a hug.", "Then they made a new tower together."],
+   qs:[["How many blocks were in the tower?", ["ten", "two", "six"]], ["What hit the tower?", ["a tail", "a ball", "a cat"]], ["What did Lily do?", ["gave a hug", "went to bed", "got mad"]]]},
+  {title:"Helping Tom", art:"🐱🧶",
+   text:["Tom the cat had a ball of yarn.", "The yarn rolled under the bed.", "Tom could not get it.", "His paw was too short.", "Tom said, \"Meow, meow!\"", "{name} came to help.", "{He} put {his} long nose under the bed.", "{He} pushed the yarn out. Pop!", "Tom was so happy.", "He purred and sat next to {name}."],
+   qs:[["Who had the yarn?", ["Tom", "Pip", "Mia"]], ["Where did the yarn go?", ["under the bed", "up a tree", "in the tub"]], ["What did {name} use to get it?", ["nose", "tail", "a stick"]]]},
+  {title:"The Lost Teddy", art:"🧸🔍",
+   text:["Mia had a brown teddy bear.", "One day it was lost!", "Mia cried, \"Where is Teddy?\"", "{name} sniffed and sniffed.", "{He} looked in the kitchen.", "No teddy there.", "{He} looked in the yard.", "There was Teddy, in the grass!", "{name} got Teddy and ran to Mia.", "Mia hugged Teddy and {name} too."],
+   qs:[["What color was the teddy?", ["brown", "pink", "green"]], ["Where was Teddy?", ["in the grass", "in the kitchen", "on the bed"]], ["Whose teddy was it?", ["Mia", "Ben", "Mom"]]]},
+  {title:"Hide and Seek", art:"🙈🌿",
+   text:["Ben and {name} played hide and seek.", "Ben counted to ten.", "{name} ran to hide.", "{He} hid behind a big green bush.", "But {his} tail stuck out!", "Wag, wag, wag went the tail.", "Ben saw the tail and laughed.", "\"I found you!\" Ben said.", "Then it was {name}'s turn to seek.", "{He} found Ben fast with {his} nose. Sniff!"],
+   qs:[["What did Ben count to?", ["ten", "two", "five"]], ["Where did {name} hide?", ["behind a bush", "in a box", "under a car"]], ["What stuck out?", ["a tail", "a paw", "an ear"]]]},
+  {title:"The Big Race", art:"🏁🐕",
+   text:["Pip and {name} had a race.", "Sam said, \"Ready, set, go!\"", "Zoom! They ran and ran.", "Pip was fast.", "{name} was fast too.", "They ran past a tree and a rock.", "Pip was in front.", "Then {name} ran even faster.", "They got to the end at the same time!", "Sam said, \"You both win!\""],
+   qs:[["Who said go?", ["Sam", "Mom", "Tom"]], ["What did they run past?", ["a tree", "a car", "a shop"]], ["Who won the race?", ["both of them", "only Pip", "nobody"]]]},
+  {title:"Soccer in the Yard", art:"⚽🐾",
+   text:["Ben has a black and white ball.", "He kicks it in the yard.", "{name} wants to play soccer too.", "Ben kicks the ball to {name}.", "{name} pushes it with {his} nose.", "Bump! The ball rolls fast.", "It rolls past Ben.", "It goes into the net!", "\"Goal!\" Ben yells.", "{name} runs in a circle. Woof, woof!"],
+   qs:[["What colors is the ball?", ["black and white", "red", "blue and green"]], ["What did {name} push the ball with?", ["nose", "tail", "a hat"]], ["Where did the ball go?", ["into the net", "over the fence", "in a hole"]]]},
+  {title:"The Magic Hat", art:"🎩✨",
+   text:["Lily has a big black hat.", "She says, \"I can do magic!\"", "She puts a dog treat in the hat.", "She says, \"Hocus pocus!\"", "She looks in the hat. No treat!", "Where did it go?", "{name} sniffs and sniffs.", "The treat is in her pocket!", "Lily laughs and gives {him} the treat.", "Crunch! Magic is yummy."],
+   qs:[["What color is the hat?", ["black", "red", "yellow"]], ["What went in the hat?", ["a treat", "a ball", "a bird"]], ["Where was the treat?", ["in her pocket", "in the hat", "under a rock"]]]},
+  {title:"The Pirate Ship", art:"🏴‍☠️🚢",
+   text:["Sam made a ship out of a big box.", "He put on a pirate hat.", "\"Ahoy!\" said Sam.", "{name} got in the ship too.", "The rug was the sea.", "They sailed to a pillow island.", "{name} was the ship dog.", "{He} barked at a toy fish. Woof!", "Then Mom called, \"Snack time!\"", "The pirates sailed home for cookies."],
+   qs:[["What was the ship made of?", ["a big box", "a bed", "a tub"]], ["What was the sea?", ["the rug", "the bath", "the grass"]], ["What did Mom call?", ["snack time", "bed time", "bath time"]]]},
+  {title:"The Space Rocket", art:"🚀🌙",
+   text:["Mia made a rocket from a box.", "She drew red stars on it.", "{name} jumped in the rocket.", "Mia said, \"Three, two, one, blast off!\"", "Zoom! They went to the moon.", "Well, they went to the yard.", "The yard was the moon.", "{name} hopped like a moon dog.", "Mia found a moon rock.", "It was just a gray stone, but it was fun!"],
+   qs:[["What color were the stars?", ["red", "blue", "pink"]], ["Where did they pretend to go?", ["the moon", "the sea", "the zoo"]], ["What did Mia find?", ["a moon rock", "a star", "a bug"]]]},
+  {title:"A Pillow Castle", art:"🏰👑",
+   text:["Lily made a castle with pillows.", "It had a flag on top.", "Lily put on a gold crown.", "She was the queen.", "{name} was the knight.", "{He} sat by the door to keep watch.", "Tom the cat came by.", "{name} let Tom in the castle.", "Tom was a king for the day.", "Then they all had a tea party."],
+   qs:[["What was the castle made of?", ["pillows", "snow", "rocks"]], ["Who was the queen?", ["Lily", "Mia", "Mom"]], ["Who came by?", ["Tom", "Pip", "Ben"]]]},
+  {title:"Jungle Day", art:"🌴🐒",
+   text:["Ben said, \"The yard is a jungle!\"", "The tall grass was jungle grass.", "{name} was a lion. Roar!", "Ben was a monkey.", "He swung on a low tree branch.", "They found a green frog by a rock.", "The frog went hop, hop, hop.", "{name} and Ben hopped too.", "They got hot and tired.", "Then they had a nap in the shade."],
+   qs:[["What was {name} pretending to be?", ["a lion", "a bird", "a fish"]], ["What was Ben?", ["a monkey", "a tiger", "a snake"]], ["What color was the frog?", ["green", "red", "blue"]]]},
+  {title:"The Treasure Map", art:"🗺️💎",
+   text:["Sam drew a map.", "It had a big red X on it.", "\"Let's find the treasure!\" said Sam.", "{name} and Sam walked to the old tree.", "Then they went to the pond.", "The X was by a big rock.", "{name} dug and dug.", "Dirt went flying!", "{He} found a little tin box.", "Inside were three shiny coins and a bone!"],
+   qs:[["What color was the X?", ["red", "black", "blue"]], ["Where was the X?", ["by a big rock", "in the pond", "on the roof"]], ["How many coins were in the box?", ["three", "one", "ten"]]]},
+  {title:"The Kite Contest", art:"🪁🌬️",
+   text:["Today is the kite contest.", "Mia has a yellow kite.", "The wind is strong. Whoosh!", "Mia runs, and the kite goes up.", "But then the kite comes down.", "It lands in the tall grass.", "{name} runs and gets the string.", "{He} runs fast into the wind.", "Up, up, up goes the kite!", "Mia and {name} win a blue ribbon."],
+   qs:[["What color is the kite?", ["yellow", "green", "red"]], ["Where did the kite land?", ["in the grass", "on a roof", "in the lake"]], ["What did they win?", ["a blue ribbon", "a big cake", "a toy car"]]]},
+  {title:"Sandcastle Fun", art:"🏖️🏰",
+   text:["{name} and Ben went to the sand.", "Ben made a big sandcastle.", "It had four tall towers.", "{name} dug a hole next to it.", "Dig, dig, dig!", "The hole filled up with water.", "Now the castle had a little pond!", "Ben put a shell on top.", "A crab came to see.", "It walked sideways right past {name}!"],
+   qs:[["How many towers did it have?", ["four", "two", "one"]], ["What did Ben put on top?", ["a shell", "a flag", "a leaf"]], ["What came to see?", ["a crab", "a bird", "a cat"]]]},
+  {title:"The Silly Snowman", art:"⛄🥕",
+   text:["Mom and {name} made a snowman.", "First they made a big ball.", "Then they made a small ball.", "Mom put on two black rocks for eyes.", "She put on an orange carrot nose.", "{name} liked the carrot.", "{He} took it and ran away!", "Mom laughed and laughed.", "She put on a stick for a nose.", "{name} ate the carrot. Crunch!"],
+   qs:[["What were the eyes?", ["black rocks", "buttons", "leaves"]], ["What did {name} take?", ["the carrot", "the hat", "a stick"]], ["What was the new nose?", ["a stick", "a rock", "a sock"]]]},
+  {title:"The Costume Party", art:"🎭🦸",
+   text:["Mia had a costume party.", "Sam came as a bee.", "Ben came as a cat.", "Mia was a pretty fairy.", "What will {name} be?", "Mia put a red cape on {him}.", "Now {name} was a super dog!", "{He} ran around, and the cape went flap, flap.", "Everyone clapped.", "{name} got a prize for the best costume!"],
+   qs:[["What was Sam?", ["a bee", "a cat", "a fairy"]], ["What color was the cape?", ["red", "blue", "green"]], ["What did {name} get?", ["a prize", "a bath", "a hat"]]]},
+  {title:"A New Trick", art:"🦴🐕",
+   text:["Dad wanted to teach {name} a trick.", "The trick was to roll over.", "Dad said, \"Roll over!\"", "{name} just sat.", "Dad said it again.", "{name} lay down. Not yet!", "Dad rolled on the grass to show {him}.", "{name} looked at Dad. Then {he} rolled too!", "Dad clapped and gave {him} a treat.", "Now {name} rolls over every day."],
+   qs:[["Who taught the trick?", ["Dad", "Mom", "Lily"]], ["What was the trick?", ["roll over", "shake", "jump"]], ["What did {name} get?", ["a treat", "a ball", "a bath"]]]},
+  {title:"Jump Rope", art:"🪢🐶",
+   text:["Lily got a pink jump rope.", "She said, \"Jump, jump, jump!\"", "She jumped five times.", "{name} wanted to jump too.", "Lily and Sam held the rope.", "They swung it slow.", "{name} jumped up. Hop!", "{He} jumped again. Hop!", "The rope did not hit {him} one time.", "Lily cheered, \"{name} can jump rope!\""],
+   qs:[["What color is the rope?", ["pink", "black", "orange"]], ["How many times did Lily jump?", ["five", "two", "ten"]], ["Who held the rope?", ["Lily and Sam", "Mom and Dad", "Ben and Mia"]]]},
+  {title:"Bubble Day", art:"🫧🐕",
+   text:["Mom had a big bubble wand.", "She blew. Whoosh!", "Lots of bubbles flew in the air.", "{name} jumped at a bubble. Pop!", "{He} jumped at one more. Pop, pop!", "A big bubble landed on {his} nose.", "{name} looked at it with big eyes.", "Then it went pop!", "It got {his} nose all wet.", "{name} sneezed. Achoo! Mom laughed."],
+   qs:[["Who had the bubble wand?", ["Mom", "Dad", "Sam"]], ["What sound did the bubbles make?", ["pop", "moo", "beep"]], ["What did {name} do at the end?", ["sneezed", "slept", "ate"]]]},
+  {title:"The Funny Hat", art:"👒🐕",
+   text:["Grandma had a big yellow hat.", "It had a flower on top.", "The wind blew. Whoosh!", "The hat flew off Grandma's head.", "{name} ran after it.", "The hat landed on {name}'s head!", "{He} looked so funny.", "Grandma laughed and laughed.", "She said, \"You can keep it for today.\"", "{name} wore the hat all day long."],
+   qs:[["Whose hat was it?", ["Grandma", "Mom", "Lily"]], ["What color was the hat?", ["yellow", "black", "purple"]], ["What made the hat fly off?", ["the wind", "a bird", "the cat"]]]},
+  {title:"The Surprise Party", art:"🎉🎂",
+   text:["It was Dad's birthday.", "Mom and Sam made a cake.", "It was a big pink cake.", "They hid in the kitchen.", "{name} hid under the table.", "The door opened.", "\"Surprise!\" they all yelled.", "{name} barked, \"Woof, woof!\"", "Dad jumped and then smiled.", "Dad gave {name} a big hug."],
+   qs:[["Whose birthday was it?", ["Dad", "Mom", "Sam"]], ["What color was the cake?", ["pink", "green", "blue"]], ["Where did {name} hide?", ["under the table", "in the car", "up a tree"]]]}
 ];
 
 /* ---------- state ---------- */
@@ -1021,15 +1395,15 @@ function startGame(breedKey, seed){
   const r = mulberry32(seed != null ? seed : (Date.now() ^ (Math.random()*1e9)) >>> 0);
   S = {
     breedKey, breed:b, name:b.name,
-    t:DAY_START, loc:"home", busy:false, over:false,
+    t:DAY_START, loc:"house", busy:false, over:false,
     energy:78, happy:62, full:46, clean:72,
     sinceExercise:0, actions:0, exerciseMins:0, treats:0, washes:0, peakHappy:62,
     log:[],
     weather:makeWeather(r),
     ground:scatterGround(r),
-    story:{s:pick(STORIES, r), done:false, stars:0},
-    hunt:{steps:shuffle(Object.keys(CLUES), r).slice(0,3), i:0, done:false, prize:null},
-    finds:[], visited:new Set(["home"]), wxSeen:new Set(), cuddledAt:-999,
+    story:{s:pick(STORIES, r), done:false, stars:0, listens:3},
+    hunt:makeHunt(r),
+    finds:[], visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
   };
   document.documentElement.style.setProperty("--coat", b.coat);
@@ -1037,7 +1411,7 @@ function startGame(breedKey, seed){
   document.documentElement.style.setProperty("--belly", b.belly);
   setPose("idle", breedKey);
   $("pickOverlay").classList.add("hide");
-  say(`<b>${b.name}</b> is awake, stretched, and looking at you like the day is already late. A 🗺️ treasure map is taped to the front door, and today's 📖 story is on the table.`);
+  say(`<b>${b.name}</b> is awake, stretched, and looking at you like the day is already late. A 🗺️ treasure map with five riddles is taped to the fridge, and today's 📖 story is on the table.`);
   render();
 }
 
@@ -1050,7 +1424,8 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":
 function setPose(pose, breedKey){
   dog.setAttribute("class", `breed-${breedKey || S.breedKey} pose-${pose}`);
 }
-function exposedHere(){ return S.loc !== "home" && !PLACES[S.loc].indoor; }
+function exposedHere(){ return !PLACES[S.loc].indoor; }
+function stormCalm(){ return S.t - S.cuddledAt < 120; }
 
 function fmtTime(m){
   let h = Math.floor(m/60), mm = String(m%60).padStart(2,"0");
@@ -1195,7 +1570,7 @@ function buildWeather(wx){
 
 /* what he looks like when you're not telling him to do anything */
 function idlePose(){
-  if(weatherAt(S.t) === "storm" && !PLACES[S.loc].indoor) return "sad";
+  if(weatherAt(S.t) === "storm" && (exposedHere() || (S.loc === "house" && !stormCalm()))) return "sad";
   if(S.energy < 22) return "sad";
   if(S.happy  < 28) return "sad";
   return "idle";
@@ -1204,10 +1579,11 @@ function idlePose(){
 /* the behavioural half of the feedback: he tells you before the bars do */
 function currentCue(){
   const cues = [], wx = weatherAt(S.t);
-  if(wx === "storm" && !PLACES[S.loc].indoor)
-                   cues.push(["⛈️", S.loc === "home" ? "He's under the table, flinching at every rumble. A cuddle would help."
-                                                      : "He's pressed against your legs, trembling. He wants to be indoors."]);
-  if(S.full  < 30) cues.push(S.loc === "home"
+  if(wx === "storm" && exposedHere())
+                   cues.push(["⛈️", "He's pressed against your legs, trembling. He wants to be indoors."]);
+  if(wx === "storm" && S.loc === "house" && !stormCalm())
+                   cues.push(["⛈️", "He's under the table, flinching at every rumble. A cuddle would help."]);
+  if(S.full  < 30) cues.push(S.loc === "house"
       ? ["🍖", "He is sitting by the bowl, staring into it with intent."]
       : ["🍖", "He keeps checking your pockets. There is nothing in your pockets."]);
   if(S.energy< 25) cues.push(["😮‍💨", "Flat out on his side, panting. That's the tank empty."]);
@@ -1278,7 +1654,7 @@ function timeLeft(){ return DAY_END - S.t; }
 
 function drawButtons(){
   const wx = weatherAt(S.t), place = PLACES[S.loc];
-  $("actTitle").textContent = S.loc === "home" ? "What now? · at home" : `What now? · at the ${place.name.toLowerCase()}`;
+  $("actTitle").textContent = S.loc === "house" ? "What now? · inside" : S.loc === "home" ? "What now? · in the yard" : `What now? · at the ${place.name.toLowerCase()}`;
   const wrap = $("actions");
   wrap.innerHTML = "";
   ACTIONS.filter(a => a.locs.includes(S.loc) && (!a.weather || a.weather.includes(wx))).forEach(a=>{
@@ -1301,7 +1677,8 @@ function drawButtons(){
     const P = PLACES[r.to];
     const btn = document.createElement("button");
     btn.className = "go";
-    btn.innerHTML = `${P.icon} ${P.name}<span class="t">${r.mins} min ${r.walk ? "walk" : "drive"} · ${P.hint}</span>`;
+    const label = r.door ? `🚪 Go ${r.to === "house" ? "inside" : "outside"}` : `${P.icon} ${P.name}`;
+    btn.innerHTML = `${label}<span class="t">${r.mins} min ${r.door ? "" : r.walk ? "walk" : "drive"} · ${P.hint}</span>`;
     btn.disabled = S.busy || S.over || r.mins > timeLeft();
     btn.onclick = ()=>doTravel(r);
     tw.appendChild(btn);
@@ -1336,20 +1713,51 @@ function drawQuests(){
   if(h.done){
     qh.innerHTML = `<div class="qi">${h.prize[0]}</div><div class="qt"><b>Treasure hunt · found it!</b>He dug up ${esc(h.prize[1])}.</div>`;
   } else {
-    const last = h.i === h.steps.length - 1;
-    qh.innerHTML = `<div class="qi">🗺️</div><div class="qt"><b>Treasure hunt · clue ${h.i+1} of ${h.steps.length}</b><span class="clue">${last ? "X marks the spot! " : ""}${esc(CLUES[h.steps[h.i]].go)}</span></div>`;
-    const b = document.createElement("button");
-    b.innerHTML = `🐽 Sniff here<span class="t">15 min</span>`;
-    b.disabled = S.busy || S.over || 15 > timeLeft();
-    b.onclick = doSniff;
-    qh.appendChild(b);
+    const rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
+    const dots = h.steps.map((_,k)=> k < h.i ? "●" : k === h.i ? "◉" : "○").join("");
+    const head = `<b>Treasure hunt · riddle ${h.i+1} of ${h.steps.length} <span class="hdots">${dots}</span></b>`;
+    if(!h.solved){
+      if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
+      qh.innerHTML = `<div class="qi">🗺️</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span></div>`;
+      const box = document.createElement("div");
+      box.className = "ropts";
+      h.opts.forEach(([txt, right])=>{
+        const b = document.createElement("button");
+        b.textContent = txt;
+        if(h.wrong.includes(txt)){ b.className = "wrong"; b.disabled = true; }
+        b.onclick = ()=> solveRiddle(txt, right);
+        box.appendChild(b);
+      });
+      qh.appendChild(box);
+    } else {
+      qh.innerHTML = `<div class="qi">${rd.icon}</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span>` +
+        `<span class="solved">✔ It's ${esc(rd.a[0])}! ${esc(rd.where)} ${last ? "The treasure is buried there!" : "The next note is hidden there."}</span></div>`;
+      const b = document.createElement("button");
+      b.innerHTML = `🐽 Sniff here<span class="t">15 min</span>`;
+      b.disabled = S.busy || S.over || 15 > timeLeft();
+      b.onclick = doSniff;
+      qh.appendChild(b);
+    }
   }
+}
+function solveRiddle(txt, right){
+  if(S.busy || S.over) return;
+  const h = S.hunt;
+  if(right){
+    h.solved = true;
+    floatFx(h.riddles[h.i].icon, 2);
+    say(`<b>Riddle solved!</b> It's ${h.riddles[h.i].a[0]}. ${h.riddles[h.i].where}`);
+  } else {
+    h.wrong.push(txt);
+    speak(`🤔  Hmm, not ${txt}. Read the riddle again!`, true);
+  }
+  drawQuests();
 }
 
 /* ---------- the clock: passive drift ---------- */
 function passTime(mins, wx){
   wx = wx || weatherAt(S.t);
-  const calm = S.t - S.cuddledAt < 120;
+  const calm = stormCalm();
   S.t += mins;
   S.full  = clamp(S.full  - mins*0.055);
   S.clean = clamp(S.clean - mins*0.012*S.breed.dirtRate);
@@ -1364,10 +1772,11 @@ function passTime(mins, wx){
   if(S.full  < 25) S.happy = clamp(S.happy - mins*0.03);
   if(S.clean < 25) S.happy = clamp(S.happy - mins*0.015);
 
-  // weather: rain muddies an exposed dog; a storm frays his nerves unless he's indoors or cuddled
+  // weather: rain muddies an exposed dog; a storm frays his nerves — badly outside,
+  // a little in the house unless cuddled, not at all in the museum
   if(exposedHere() && (wx === "rain" || wx === "storm")) S.clean = clamp(S.clean - mins*0.03*S.breed.dirtRate);
-  if(wx === "storm" && !PLACES[S.loc].indoor)
-    S.happy = clamp(S.happy - mins*(exposedHere() ? 0.05 : (calm ? 0 : 0.02)));
+  if(wx === "storm")
+    S.happy = clamp(S.happy - mins*(exposedHere() ? 0.05 : (S.loc === "house" && !calm ? 0.015 : 0)));
 }
 
 function applyEffects(eff, id, outside, wx){
@@ -1438,7 +1847,8 @@ function doTravel(r){
   S.busy = true;
   setPose(r.pose);
   floatFx(r.walk ? "🐾" : "💨", 3);
-  speak((r.walk ? "🐾  Walking to " : "🚗  Driving to ") + PLACES[r.to].to + "…");
+  speak(r.door ? (r.to === "house" ? "🚪  In through the front door…" : "🚪  Out into the yard…")
+              : (r.walk ? "🐾  Walking to " : "🚗  Driving to ") + PLACES[r.to].to + "…");
   $("stage").style.left = r.walk ? "26%" : "78%";
 
   setTimeout(()=>{
@@ -1450,7 +1860,9 @@ function doTravel(r){
     S.visited.add(r.to);
     S.busy = false;
     $("stage").style.left = "50%";
-    say(`<b>${r.walk ? "Walked" : "Drove"} to ${PLACES[r.to].to}.</b> ${PLACES[r.to].arrive}`);
+    const how = r.door ? (r.to === "house" ? "Went inside" : "Went out to the yard")
+                       : `${r.walk ? "Walked" : "Drove"} to ${PLACES[r.to].to}`;
+    say(`<b>${how}.</b> ${PLACES[r.to].arrive}`);
     render();
     if(S.t >= DAY_END) endDay(false);
   }, 1600);
@@ -1458,7 +1870,7 @@ function doTravel(r){
 
 /* the treasure hunt: he sniffs, you read the clue and pick the place */
 function doSniff(){
-  if(S.busy || S.over || S.hunt.done) return;
+  if(S.busy || S.over || S.hunt.done || !S.hunt.solved) return;
   const wx = weatherAt(S.t), h = S.hunt;
   if(wx === "storm" && exposedHere())
     return refuse("He won't put his nose to the ground in this. He wants to be indoors.", "happy");
@@ -1482,14 +1894,15 @@ function doSniff(){
         speak(`🧰  He digs like a maniac and hits wood. A treasure chest! Inside: ${h.prize[1]}!`);
         say(`<b>TREASURE!</b> ${S.name} dug up a chest ${CLUES[target].spot}. Inside: ${h.prize[0]} ${h.prize[1]}.`);
       } else {
+        h.solved = false; h.opts = null;
         applyEffects({happy:6}, "clue");
         floatFx("📜", 3);
-        speak(`📜  He found a note ${CLUES[target].spot}! Read the next clue.`);
-        say(`<b>Clue found!</b> ${CLUES[target].spot[0].toUpperCase() + CLUES[target].spot.slice(1)}. Next: “${CLUES[h.steps[h.i]].go}”`);
+        speak(`📜  He found a note ${CLUES[target].spot}! It has a new riddle on it.`);
+        say(`<b>Note found!</b> ${CLUES[target].spot[0].toUpperCase() + CLUES[target].spot.slice(1)}. Riddle ${h.i+1} of ${h.steps.length}: “${h.riddles[h.i].q}”`);
       }
     } else {
       speak("🐽  Nothing here but a very interesting smell.");
-      say(`<b>No clue here.</b> Read the clue again: “${CLUES[target].go}”`);
+      say(`<b>No note here.</b> The answer was ${h.riddles[h.i].a[0]} — ${h.riddles[h.i].where}`);
     }
     S.busy = false;
     render();
@@ -1515,20 +1928,31 @@ function wordSpans(text){
   });
   return html;
 }
-function speakText(text, el){
-  if(!canSpeak) return;
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = .8; u.lang = "en-US";
-  if(el){
-    const spans = [...el.querySelectorAll(".w")];
-    u.onboundary = e => {
-      let cur = null;
-      for(const s of spans) if(+s.dataset.c <= e.charIndex) cur = s;
-      spans.forEach(s => s.classList.toggle("hl", s === cur));
-    };
-    u.onend = () => spans.forEach(s => s.classList.remove("hl"));
+/* the child reads; a tap hears one word. 3 different words per story — hearing
+   the same word again is free, so the counter never punishes a re-check. */
+const LISTENS = 3;
+function drawListens(){
+  const st = S.story, left = st.listens, el = $("storyListen");
+  el.className = "listen" + (left ? "" : " out");
+  el.textContent = left ? `🔊 ${"●".repeat(left)}${"○".repeat(LISTENS-left)}  ${left} listen${left === 1 ? "" : "s"} left`
+                        : "🔇 No listens left — sound it out!";
+}
+function tapWord(span){
+  const word = span.textContent.replace(/[^A-Za-z']/g, "");
+  if(!word || !canSpeak) return;
+  const st = S.story, key = word.toLowerCase();
+  st.heard = st.heard || [];
+  if(!st.heard.includes(key)){
+    if(st.listens <= 0){ $("storyHint").textContent = "No more listens. Say each sound slowly — you can do it!"; return; }
+    st.listens--; st.heard.push(key);
+    drawListens();
   }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(word);
+  u.rate = .75; u.lang = "en-US";
+  span.classList.add("hl");
+  u.onend = () => span.classList.remove("hl");
+  setTimeout(() => span.classList.remove("hl"), 1500);
   speechSynthesis.speak(u);
 }
 function stopSpeech(){ if(canSpeak) speechSynthesis.cancel(); }
@@ -1542,8 +1966,9 @@ function openStory(bedtime, done){
   $("storyBadge").textContent = bedtime ? "🌙 Bedtime story" : "📖 Today's story";
   $("storyTitle").textContent = fill(s.title);
   $("storyPeekText").textContent = lines.join(" ");
-  $("storyRead").style.display = canSpeak ? "" : "none";
+  $("storyListen").style.display = canSpeak ? "" : "none";
   $("storyTip").style.display = canSpeak ? "" : "none";
+  drawListens();
   $("storyOverlay").classList.remove("hide");
   showStoryPage();
 }
@@ -1620,10 +2045,9 @@ $("storyNext").onclick = ()=>{
     else { ST.q = 0; showQuestion(); }
   } else if(ST.q >= ST.s.qs.length) finishStory();
 };
-$("storyRead").onclick = ()=> speakText($("storyText").textContent, $("storyText"));
 $("storyText").addEventListener("click", e=>{
   const w = e.target.closest(".w");
-  if(w) speakText(w.textContent.replace(/[^A-Za-z']/g, ""));
+  if(w) tapWord(w);
 });
 
 function doStory(){
@@ -1698,7 +2122,7 @@ function goToSleep(early){
       ["Fullness", Math.round(S.full)],   ["Cleanliness", Math.round(S.clean)],
       ["Exercise", S.exerciseMins+" min"],["Treats", S.treats],
       ["Story", "⭐".repeat(S.story.stars) + "☆".repeat(n - S.story.stars)],
-      ["Treasure", S.hunt.done ? S.hunt.prize[0] + " found" : `${S.hunt.i} of ${S.hunt.steps.length} clues`],
+      ["Treasure", S.hunt.done ? S.hunt.prize[0] + " found" : `${S.hunt.i} of ${S.hunt.steps.length} riddles`],
       ["Places visited", `${S.visited.size} of ${Object.keys(PLACES).length}`],
       ["Weather", [...S.wxSeen].map(w=>WX[w].icon).join(" ")],
       ["Dug up", S.finds.length ? S.finds.join(" ") : "—"]
