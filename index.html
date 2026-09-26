@@ -19,7 +19,7 @@
     --coat:#d9a441; --coat-dark:#b9862e; --belly:#f6e2bd;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%}
+  html,body{margin:0;min-height:100%}
   body{
     background:var(--paper);
     color:var(--ink);
@@ -42,6 +42,8 @@
   .daybar{flex:1;min-width:140px;height:12px;border:2px solid var(--ink);border-radius:99px;overflow:hidden;background:#fff}
   .daybar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd166,#e8743c,#6b4a8f)}
   .where{font-size:14px;background:var(--ink);color:#fff;padding:5px 12px;border-radius:99px}
+  .wxb{font-size:14px;border:2px solid var(--ink);border-radius:14px;padding:3px 11px;background:#fff;line-height:1.3}
+  .wxb .wxnext{font-size:11px;color:var(--ink-soft);font-weight:800}
 
   /* ---------- stats ---------- */
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -59,27 +61,80 @@
   /* ---------- scene ---------- */
   .scene{
     position:relative;height:330px;border:3px solid var(--ink);border-radius:22px;
-    overflow:hidden;box-shadow:var(--shadow);
+    overflow:hidden;box-shadow:var(--shadow);isolation:isolate;
     background:linear-gradient(#bfe6f5,#e7f4f7);
     transition:background 1.2s linear;
   }
+  #stars{position:absolute;left:0;right:0;top:0;height:60%;opacity:0;transition:opacity 1.2s;pointer-events:none;
+    background-image:
+      radial-gradient(circle at 6% 14%,#fff 1.4px,transparent 2.2px),radial-gradient(circle at 15% 40%,#fff 1px,transparent 1.8px),
+      radial-gradient(circle at 24% 10%,#fff 1.6px,transparent 2.4px),radial-gradient(circle at 33% 30%,#fff 1px,transparent 1.8px),
+      radial-gradient(circle at 44% 8%,#fff 1.3px,transparent 2px),radial-gradient(circle at 52% 36%,#fff 1px,transparent 1.8px),
+      radial-gradient(circle at 61% 16%,#fff 1.6px,transparent 2.4px),radial-gradient(circle at 70% 42%,#fff 1px,transparent 1.8px),
+      radial-gradient(circle at 78% 22%,#fff 1.3px,transparent 2px),radial-gradient(circle at 92% 12%,#fff 1.5px,transparent 2.3px),
+      radial-gradient(circle at 96% 38%,#fff 1px,transparent 1.8px),radial-gradient(circle at 38% 52%,#fff 1px,transparent 1.8px)}
   .sun{position:absolute;left:14%;width:64px;height:64px;border-radius:50%;
     background:#fff3c4;box-shadow:0 0 44px 18px rgba(255,236,160,.75);transition:top 1s linear,background 1s linear,opacity 1s}
+  #moon{position:absolute;right:10%;top:22px;font-size:40px;opacity:0;transition:opacity 1.2s;pointer-events:none}
+  #clouds{position:absolute;inset:0;pointer-events:none}
+  .cloud{position:absolute;left:0;width:120px;height:38px;background:#fff;border-radius:40px;opacity:.92;
+    animation:drift linear infinite;transform-origin:0 50%}
+  .cloud:before,.cloud:after{content:"";position:absolute;background:inherit;border-radius:50%}
+  .cloud:before{width:60px;height:60px;left:18px;top:-28px}
+  .cloud:after{width:46px;height:46px;left:60px;top:-18px}
+  .cloud.grey{background:#c9ced8}
+  .cloud.dark{background:#7c8394;opacity:.95}
+  @keyframes drift{from{transform:translateX(-220px) scale(var(--s,1))}to{transform:translateX(1100px) scale(var(--s,1))}}
+
+  #backdrop{position:absolute;left:0;right:0;bottom:96px;width:100%;height:calc(100% - 96px);display:block}
+  #backdrop .win{fill:var(--win,#cfe3ee);transition:fill 1s}
+  #backdrop .skywin{fill:var(--skyTop,#bfe6f5)}
+  #backdrop .glow{fill:#ffe9a0;opacity:var(--glow,0);transition:opacity 1s}
+
   .ground{position:absolute;left:0;right:0;bottom:0;height:96px;background:#7fb36a;border-top:3px solid rgba(43,43,51,.25)}
-  .beach .ground{background:#f0dcae}
+  .ground:after{content:"";position:absolute;left:0;right:0;top:0;height:0;background:#f4f8fc;transition:height 2.5s;border-radius:0 0 40% 40%/0 0 30% 30%}
+  .wx-snow:not(.indoor) .ground:after{height:58%}
   .home .ground{background:#8dbd74}
-  .sea{position:absolute;left:0;right:0;bottom:96px;height:74px;background:linear-gradient(#5fb6d9,#3d90b8);display:none}
-  .beach .sea{display:block}
+  .park .ground{background:#7fb36a}
+  .beach .ground{background:#f0dcae}
+  .mountains .ground{background:#8da86e}
+  .lake .ground{background:#86b86b}
+  .pool .ground{background:repeating-linear-gradient(90deg,#e6eff4 0 38px,#cddce5 38px 41px)}
+  .museum .ground{background:repeating-linear-gradient(90deg,#bb8b59 0 70px,#a67848 70px 73px)}
+  .zoo .ground{background:#d2bd8c}
+
+  #gitems,#props{position:absolute;inset:0;pointer-events:none}
+  .gi{position:absolute;line-height:1;user-select:none}
+  .puddle{position:absolute;display:none;height:11px;border-radius:50%;background:rgba(84,132,184,.55);box-shadow:inset 0 2px 0 rgba(255,255,255,.35)}
+  .wx-rain:not(.indoor) .puddle,.wx-storm:not(.indoor) .puddle{display:block}
   .prop{position:absolute;bottom:80px;font-size:54px;line-height:1;user-select:none}
   .prop.small{font-size:34px}
+  .wx-wind .prop.sway,.wx-storm .prop.sway{animation:sway 1.3s ease-in-out infinite;transform-origin:50% 100%}
+  @keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(6deg)}}
 
   #stage{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);transition:left .8s cubic-bezier(.3,.7,.3,1)}
   #dog{width:250px;height:auto;display:block;overflow:visible}
 
+  #wx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .drop{position:absolute;top:-30px;width:2px;height:22px;background:linear-gradient(rgba(220,235,255,0),rgba(220,235,255,.95));animation:fall linear infinite}
+  @keyframes fall{to{transform:translate(-50px,390px)}}
+  .flake{position:absolute;top:-20px;color:#fff;animation:snowfall linear infinite;text-shadow:0 0 2px rgba(0,0,0,.15)}
+  @keyframes snowfall{0%{transform:translate(0,0)}50%{transform:translate(22px,180px)}100%{transform:translate(-12px,380px)}}
+  .leaf{position:absolute;left:-40px;font-size:20px;animation:blow linear infinite}
+  @keyframes blow{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(520px,-40px) rotate(360deg)}100%{transform:translate(1050px,30px) rotate(720deg)}}
+  .gust{position:absolute;left:-120px;height:2px;width:90px;border-radius:2px;background:rgba(255,255,255,.75);animation:gust linear infinite}
+  @keyframes gust{to{transform:translateX(1100px)}}
+
+  #tint{position:absolute;inset:0;mix-blend-mode:multiply;pointer-events:none;transition:background 1.2s linear}
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+  .wx-storm:not(.indoor) #flash{animation:flash 7s infinite}
+  @keyframes flash{0%,86%,100%{opacity:0}87%{opacity:.8}88%{opacity:.1}89.5%{opacity:.7}92%{opacity:0}}
+  .indoor #sun,.indoor #moon,.indoor #stars,.indoor #clouds,.indoor #wx{display:none}
+
   .bubble{
     position:absolute;left:50%;bottom:250px;transform:translateX(-50%);
     background:#fff;border:3px solid var(--ink);border-radius:16px;
-    padding:8px 14px;font-size:15px;max-width:330px;text-align:center;
+    padding:8px 14px;font-size:15px;max-width:360px;text-align:center;
     box-shadow:var(--shadow);opacity:0;transition:opacity .3s, transform .3s;pointer-events:none
   }
   .bubble.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
@@ -89,6 +144,26 @@
 
   .float{position:absolute;font-size:26px;pointer-events:none;animation:floatup 1.5s ease-out forwards}
   @keyframes floatup{from{opacity:1;transform:translateY(0) scale(.7)}to{opacity:0;transform:translateY(-110px) scale(1.25)}}
+  .thrown{position:absolute;left:54%;bottom:150px;font-size:30px;pointer-events:none;animation:arc 1.3s ease-out forwards}
+  @keyframes arc{
+    0%{transform:translate(0,0) rotate(0);opacity:1}
+    40%{transform:translate(min(30vw,280px),-120px) rotate(300deg)}
+    60%{transform:translate(min(32vw,300px),50px) rotate(420deg)}
+    100%{transform:translate(0,20px) rotate(640deg);opacity:0}}
+  .falling{position:absolute;top:-30px;font-size:26px;pointer-events:none;animation:dropin 1.4s ease-in forwards}
+  @keyframes dropin{0%{transform:translateY(0);opacity:1}80%{opacity:1}100%{transform:translateY(190px) scale(.6);opacity:0}}
+
+  /* ---------- quests ---------- */
+  .quests{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .quest{border:3px dashed var(--line);border-radius:16px;padding:10px 12px;display:flex;flex-wrap:wrap;gap:10px 12px;align-items:center}
+  .quest .qt{flex:1 1 170px}
+  .quest button{margin-left:auto}
+  .quest.done{border-style:solid;border-color:var(--good);background:#f3fbf5}
+  .quest .qi{font-size:34px;line-height:1}
+  .quest .qt{flex:1;font-size:15px;font-weight:700;line-height:1.45}
+  .quest .qt b{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft)}
+  .quest .clue{font-size:17px;font-weight:800;color:var(--ink)}
+  .quest button{white-space:nowrap}
 
   /* ---------- controls ---------- */
   .panel{background:var(--card);border:3px solid var(--ink);border-radius:20px;padding:12px;box-shadow:var(--shadow)}
@@ -103,9 +178,10 @@
   button .t{display:block;font-size:11px;font-weight:800;color:var(--ink-soft);letter-spacing:.4px}
   button:disabled{opacity:.42;cursor:not-allowed;box-shadow:0 4px 0 rgba(43,43,51,.3)}
   button.go{background:var(--accent);color:#fff}
-  button.go .t{color:rgba(255,255,255,.85)}
+  button.go .t{color:rgba(255,255,255,.88)}
   button.bed{background:var(--ink);color:#fff}
   button.bed .t{color:rgba(255,255,255,.8)}
+  button.wxact{background:#eef6ff}
 
   .log{font-size:14px;font-weight:600;color:var(--ink-soft);line-height:1.6;min-height:52px}
   .log b{color:var(--ink)}
@@ -113,22 +189,45 @@
   /* ---------- overlay ---------- */
   .overlay{position:fixed;inset:0;background:rgba(43,43,51,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
   .overlay.hide{display:none}
-  .modal{background:var(--card);border:4px solid var(--ink);border-radius:24px;padding:22px;max-width:660px;width:100%;box-shadow:0 10px 0 rgba(0,0,0,.25)}
+  .modal{background:var(--card);border:4px solid var(--ink);border-radius:24px;padding:22px;max-width:720px;width:100%;max-height:94vh;overflow:auto;box-shadow:0 10px 0 rgba(0,0,0,.25)}
   .modal h1{margin:0 0 4px;font-size:30px}
   .modal p.sub{margin:0 0 16px;color:var(--ink-soft);font-weight:600;font-size:15px}
-  .picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
-  .pick{border:3px solid var(--ink);border-radius:18px;padding:12px;cursor:pointer;background:#fff;text-align:center;transition:transform .1s}
+  .picks{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .pick{border:3px solid var(--ink);border-radius:18px;padding:10px;cursor:pointer;background:#fff;text-align:center;transition:transform .1s}
   .pick:hover{transform:translateY(-3px)}
-  .pick svg{width:100%;height:92px;overflow:visible}
+  .pick svg{width:100%;height:80px;overflow:visible}
   .pick .nm{font-size:18px;margin-top:6px}
   .pick .br{font-size:12px;color:var(--ink-soft);letter-spacing:1px;text-transform:uppercase}
-  .pick .ds{font-size:13px;font-weight:600;color:var(--ink-soft);margin-top:6px;line-height:1.45}
+  .pick .ds{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-top:6px;line-height:1.45}
   .score{font-size:60px;line-height:1;margin:6px 0 2px}
   .verdict{font-size:16px;font-weight:600;line-height:1.6;margin:10px 0 16px}
-  .tally{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:14px;font-weight:600;margin-bottom:16px}
-  .tally div{display:flex;justify-content:space-between;border-bottom:2px dotted var(--line);padding:4px 0}
+  .tally{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px;font-size:14px;font-weight:600;margin-bottom:16px}
+  .tally div{display:flex;justify-content:space-between;gap:8px;border-bottom:2px dotted var(--line);padding:4px 0}
+
+  /* ---------- story book ---------- */
+  .story{max-width:640px}
+  .story .shead{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-soft);letter-spacing:1px;text-transform:uppercase}
+  .story .sbadge{background:var(--accent-2);color:var(--ink);padding:4px 10px;border-radius:99px}
+  .story h2{margin:10px 0 0;font-size:24px}
+  .story .art{font-size:56px;text-align:center;margin:8px 0 2px;letter-spacing:6px}
+  .storytext{font-size:30px;line-height:1.65;font-weight:800;min-height:120px;margin:6px 0 14px}
+  .storytext.q{font-size:26px;min-height:0}
+  .storytext .w{cursor:pointer;border-radius:7px;padding:0 2px;transition:background .15s}
+  .storytext .w:hover{background:#ffe7c2}
+  .storytext .w.hl{background:var(--accent-2)}
+  .opts{display:grid;gap:10px;margin-bottom:10px}
+  .opts button{font-size:22px;text-align:left;padding:12px 16px}
+  .opts button.right{background:#dff3e4;border-color:var(--good);opacity:1}
+  .opts button.wrong{background:#fde3e1;animation:nope .3s}
+  @keyframes nope{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  .shint{min-height:24px;font-size:17px;color:var(--ink-soft);margin-bottom:8px}
+  .peek{margin-bottom:12px;font-size:17px;font-weight:600;line-height:1.6;color:var(--ink-soft)}
+  .peek summary{cursor:pointer;font-weight:800;color:var(--ink)}
+  .sctl{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+  .tip{margin:12px 0 0;font-size:13px;color:var(--ink-soft);font-weight:600}
 
   /* ---------- dog animation ---------- */
+  #dogShape{transform-origin:125px 150px}
   #dogRoot{transform-origin:120px 150px;animation:breathe 2.6s ease-in-out infinite}
   @keyframes breathe{0%,100%{transform:translateY(0) scaleY(1)}50%{transform:translateY(-2px) scaleY(1.02)}}
   .leg{animation:none}
@@ -157,8 +256,19 @@
   @keyframes nod{0%,100%{transform:rotate(0)}50%{transform:rotate(26deg) translateY(10px)}}
   .pose-eat #tail{animation-duration:.24s}
 
+  .pose-dig #head{animation:nod .28s ease-in-out infinite;transform-origin:158px 86px}
+  .pose-dig .leg:not(.b){animation:swing .18s linear infinite}
+  .pose-dig #tail{animation-duration:.25s}
+
   .pose-shake #dogRoot{animation:shake .18s linear infinite}
   @keyframes shake{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+
+  .pose-swim #dogRoot{animation:swimbob 1s ease-in-out infinite}
+  @keyframes swimbob{0%,100%{transform:translateY(22px) rotate(-3deg)}50%{transform:translateY(27px) rotate(2deg)}}
+  .pose-swim .leg{animation:swing .3s linear infinite}
+  .pose-swim .leg.b{animation-delay:.15s}
+  .swimwater{display:none}
+  .pose-swim .swimwater{display:block}
 
   .pose-sleep #dogRoot{transform:translateY(26px) rotate(-6deg) scaleY(.82);animation:snore 3s ease-in-out infinite}
   @keyframes snore{0%,100%{transform:translateY(26px) rotate(-6deg) scaleY(.82)}50%{transform:translateY(28px) rotate(-6deg) scaleY(.86)}}
@@ -177,17 +287,26 @@
 
   .eye-shut{display:none}
 
-  /* breed silhouettes */
-  .breed-bulldog #dogRoot{transform:scaleX(1.06) scaleY(.9)}
-  .breed-bulldog .leg{height:auto}
-  .ear-alt{display:none}
-  .breed-husky .ear-husky,.breed-bulldog .ear-bulldog,.breed-retriever .ear-retriever{display:block}
-  .ear-husky,.ear-bulldog,.ear-retriever{display:none}
+  /* breed silhouettes — on #dogShape, because #dogRoot's transform belongs to the pose animations */
+  .breed-bulldog   #dogShape{transform:scale(1.06,.9)}
+  .breed-dachshund #dogShape{transform:scale(1.18,.8)}
+  .breed-corgi     #dogShape{transform:scale(1.06,.84)}
+  .breed-poodle    #dogShape{transform:scale(.97,1.04)}
+  .ear-husky,.ear-bulldog,.ear-retriever,.ear-dachshund,.ear-poodle,.ear-dalmatian,.ear-corgi{display:none}
+  .breed-husky .ear-husky,.breed-bulldog .ear-bulldog,.breed-retriever .ear-retriever,
+  .breed-dachshund .ear-dachshund,.breed-poodle .ear-poodle,.breed-dalmatian .ear-dalmatian,
+  .breed-corgi .ear-corgi{display:block}
+  .ear-dalmatian{fill:#34343d}
+  .deco-poodle,.deco-dalmatian{display:none}
+  .breed-poodle .deco-poodle,.breed-dalmatian .deco-dalmatian{display:block}
 
   @media(max-width:640px){
     .stats{grid-template-columns:repeat(2,1fr)}
+    .quests{grid-template-columns:1fr}
     .scene{height:270px}
     #dog{width:190px}
+    .bubble{bottom:200px;font-size:14px;max-width:88%}
+    .storytext{font-size:25px}
   }
 </style>
 </head>
@@ -201,6 +320,7 @@
       <div class="phase" id="phase">Early morning</div>
     </div>
     <div class="daybar"><i id="daybar"></i></div>
+    <div class="wxb"><div id="wxNow">☀️ Sunny</div><div class="wxnext" id="wxNext"></div></div>
     <div class="where" id="where">🏠 Home</div>
   </div>
 
@@ -212,16 +332,22 @@
   </div>
 
   <div class="scene home" id="scene">
+    <div id="stars"></div>
     <div class="sun" id="sun"></div>
-    <div class="sea"></div>
+    <div id="moon">🌙</div>
+    <div id="clouds"></div>
+    <svg id="backdrop" viewBox="0 0 880 234" preserveAspectRatio="xMidYMax slice"></svg>
     <div class="ground"></div>
+    <div id="gitems"></div>
     <div id="props"></div>
     <div id="stage">
       <svg id="dog" class="breed-retriever pose-idle" viewBox="0 0 250 170">
+        <g id="dogShape">
         <g id="dogRoot">
           <!-- tail -->
           <g id="tail" style="transform-origin:62px 78px">
             <path d="M64 80 q-30 -4 -36 -34 q18 18 36 20 z" fill="var(--coat-dark)"/>
+            <circle class="deco-poodle" cx="30" cy="45" r="11" fill="var(--belly)"/>
           </g>
           <!-- back legs -->
           <g class="leg b" style="transform-origin:82px 106px">
@@ -235,6 +361,10 @@
           <!-- body -->
           <ellipse cx="112" cy="92" rx="58" ry="33" fill="var(--coat)"/>
           <ellipse cx="118" cy="104" rx="45" ry="19" fill="var(--belly)"/>
+          <g class="deco-dalmatian" fill="#34343d">
+            <circle cx="90" cy="78" r="6"/><circle cx="118" cy="70" r="5"/><circle cx="142" cy="86" r="4.5"/>
+            <circle cx="100" cy="98" r="4"/><circle cx="72" cy="92" r="3.6"/><circle cx="128" cy="100" r="3.2"/>
+          </g>
           <!-- front legs -->
           <g class="leg" style="transform-origin:150px 104px">
             <rect x="143" y="98" width="17" height="48" rx="8" fill="var(--coat-dark)"/>
@@ -247,8 +377,10 @@
           <!-- head -->
           <g id="head">
             <path d="M150 96 q4 -30 26 -36 l14 26 z" fill="var(--coat)"/>
+            <circle class="deco-poodle" cx="186" cy="31" r="16" fill="var(--belly)"/>
             <ellipse cx="190" cy="56" rx="31" ry="27" fill="var(--coat)"/>
             <ellipse cx="216" cy="66" rx="21" ry="14" fill="var(--belly)"/>
+            <g class="deco-dalmatian" fill="#34343d"><circle cx="192" cy="40" r="4"/><circle cx="178" cy="62" r="3.2"/></g>
             <path d="M200 72 q10 8 22 2" stroke="var(--coat-dark)" stroke-width="3" fill="none" stroke-linecap="round"/>
             <ellipse cx="234" cy="60" rx="8" ry="6.5" fill="#2b2b33"/>
             <!-- ears -->
@@ -256,6 +388,10 @@
               <path class="ear-husky"     d="M170 40 l6 -38 l24 26 z" fill="var(--coat-dark)"/>
               <path class="ear-retriever" d="M168 34 q-16 8 -12 40 q16 6 24 -14 z" fill="var(--coat-dark)"/>
               <path class="ear-bulldog"   d="M168 36 q-14 2 -12 24 q14 2 20 -12 z" fill="var(--coat-dark)"/>
+              <path class="ear-dachshund" d="M168 34 q-20 6 -16 50 q18 4 26 -24 z" fill="var(--coat-dark)"/>
+              <path class="ear-poodle"    d="M166 34 q-22 10 -16 46 q6 8 16 2 q10 -6 12 -34 z" fill="var(--coat-dark)"/>
+              <path class="ear-dalmatian" d="M168 34 q-16 8 -12 36 q16 6 24 -12 z"/>
+              <path class="ear-corgi"     d="M166 42 l2 -44 l32 30 z" fill="var(--coat-dark)"/>
             </g>
             <circle class="eye-open" cx="203" cy="52" r="5.5" fill="#2b2b33"/>
             <circle class="eye-open" cx="205" cy="50" r="1.8" fill="#fff"/>
@@ -265,9 +401,23 @@
             <circle cx="176" cy="94" r="5" fill="var(--accent-2)" stroke="#2b2b33" stroke-width="2"/>
           </g>
         </g>
+        </g>
+        <!-- water line in front of him when he swims -->
+        <g class="swimwater">
+          <path d="M14 126 q14 -8 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 V176 H14 Z" fill="#4fa9d2" opacity=".88"/>
+          <path d="M14 126 q14 -8 28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0 t28 0" stroke="#e9f7fd" stroke-width="4" fill="none"/>
+        </g>
       </svg>
     </div>
+    <div id="wx"></div>
+    <div id="tint"></div>
+    <div id="flash"></div>
     <div class="bubble" id="bubble"></div>
+  </div>
+
+  <div class="panel quests" id="quests">
+    <div class="quest" id="qStory"></div>
+    <div class="quest" id="qHunt"></div>
   </div>
 
   <div class="panel">
@@ -285,8 +435,26 @@
 <div class="overlay" id="pickOverlay">
   <div class="modal">
     <h1>Dog Day</h1>
-    <p class="sub">One day, sunrise to dusk. Give him a life, then get him to bed happy.</p>
+    <p class="sub">One day, sunrise to dusk. Read the day's story, follow the treasure map, and get your dog to bed happy.</p>
     <div class="picks" id="picks"></div>
+  </div>
+</div>
+
+<!-- ---------- story book ---------- -->
+<div class="overlay hide" id="storyOverlay">
+  <div class="modal story">
+    <div class="shead"><span class="sbadge" id="storyBadge">📖 Today's story</span><span id="storyProg"></span></div>
+    <h2 id="storyTitle"></h2>
+    <div class="art" id="storyArt"></div>
+    <div class="storytext" id="storyText"></div>
+    <div class="opts" id="storyOpts"></div>
+    <div class="shint" id="storyHint"></div>
+    <details class="peek" id="storyPeek"><summary>📖 Peek at the story</summary><div id="storyPeekText"></div></details>
+    <div class="sctl">
+      <button id="storyRead">🔊 Read it to me</button>
+      <button class="go" id="storyNext">Next →</button>
+    </div>
+    <p class="tip" id="storyTip">Tip: tap any word to hear it.</p>
   </div>
 </div>
 
@@ -304,70 +472,344 @@
 
 <script>
 /* ============================================================
-   DOG DAY  —  v1
-   Core 8 actions + travel. One day, 7:00am → dusk. No failure
+   DOG DAY  —  v2
+   7 breeds, 8 places, weather, a daily story (reading practice)
+   and a treasure hunt. One day, 7:00am → dusk. No failure
    states: the score is the whole feedback loop.
    ============================================================ */
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
 
-/* ---------- breeds ---------- */
+/* ---------- breeds ----------
+   pro: pronouns used by the story book and treasure hunt. */
 const BREEDS = {
   retriever:{
-    name:"Biscuit", label:"Retriever",
+    name:"Biscuit", label:"Retriever", pro:["he","him","his"],
     coat:"#d9a441", dark:"#b9862e", belly:"#f6e2bd",
     desc:"Balanced and endlessly willing. Loves water and fetch, gets filthy doing both.",
-    energyDrain:1.0, dirtRate:1.5, exerciseNeed:1.0, tireFloor:0,
-    joy:{fetch:1.35, walk:1.1, wash:1.2}
+    energyDrain:1.0, dirtRate:1.5, exerciseNeed:1.0, snow:1,
+    joy:{fetch:1.35, walk:1.1, swim:1.5, puddles:1.3}
   },
   husky:{
-    name:"Yuki", label:"Husky",
+    name:"Yuki", label:"Husky", pro:["she","her","her"],
     coat:"#9aa6b4", dark:"#6f7c8c", belly:"#f2f4f7",
-    desc:"A tank of energy that turns sour fast if you under-walk her. Naps only when genuinely spent.",
-    energyDrain:0.75, dirtRate:0.9, exerciseNeed:1.9, tireFloor:-15,
-    joy:{walk:1.3, carride:1.2, nap:.6}
+    desc:"A tank of energy that turns sour fast if you under-walk her. Lives for snow and mountains.",
+    energyDrain:0.75, dirtRate:0.9, exerciseNeed:1.9, snow:1.3,
+    joy:{walk:1.3, carride:1.2, nap:.6, hike:1.5, snowplay:1.6}
   },
   bulldog:{
-    name:"Tank", label:"Bulldog",
+    name:"Tank", label:"Bulldog", pro:["he","him","his"],
     coat:"#e0c9a6", dark:"#bda37c", belly:"#f8ecda",
     desc:"Tires in a heartbeat and knows it. Cheap to keep happy if you stay home and hand out snacks.",
-    energyDrain:1.5, dirtRate:0.7, exerciseNeed:0.55, tireFloor:12,
-    joy:{treat:1.5, nap:1.3, cuddleHome:1.3, fetch:.8}
+    energyDrain:1.5, dirtRate:0.7, exerciseNeed:0.55, snow:.85,
+    joy:{treat:1.5, nap:1.3, cuddle:1.4, fetch:.8, hike:.7}
+  },
+  dachshund:{
+    name:"Pretzel", label:"Dachshund", pro:["he","him","his"],
+    coat:"#9a5530", dark:"#733d22", belly:"#d69a6a",
+    desc:"Built for tunnels. Digs anywhere, finds everything, and his belly is always first to get muddy.",
+    energyDrain:1.2, dirtRate:1.3, exerciseNeed:0.8, snow:.9,
+    joy:{dig:1.6, treat:1.2, hike:.7}
+  },
+  poodle:{
+    name:"Coco", label:"Poodle", pro:["she","her","her"],
+    coat:"#f3eee6", dark:"#dcd3c5", belly:"#ffffff",
+    desc:"Clever, cultured and white — so every speck of mud shows. Adores tricks and the museum.",
+    energyDrain:0.9, dirtRate:1.25, exerciseNeed:0.9, snow:1,
+    joy:{trick:1.5, tour:1.4, portrait:1.6, puddles:.5}
+  },
+  dalmatian:{
+    name:"Domino", label:"Dalmatian", pro:["he","him","his"],
+    coat:"#fafafa", dark:"#e2e2e2", belly:"#ffffff",
+    desc:"Runs forever and wants to meet every animal on Earth. The zoo is his favourite place.",
+    energyDrain:0.85, dirtRate:1.0, exerciseNeed:1.4, snow:1,
+    joy:{walk:1.2, animals:1.5, fetch:1.2, sealions:1.3}
+  },
+  corgi:{
+    name:"Waffles", label:"Corgi", pro:["he","him","his"],
+    coat:"#e08a3c", dark:"#b96a28", belly:"#fff5e6",
+    desc:"Short legs, huge opinions. Goes wild for the water slide and anything he can catch.",
+    energyDrain:1.1, dirtRate:1.0, exerciseNeed:1.1, snow:1,
+    joy:{slide:1.5, catch:1.4, treat:1.3}
   }
 };
 
-/* ---------- world ---------- */
+/* ---------- world ----------
+   pos: map coordinates — drive time is worked out from the distance.
+   props: big emoji [emoji, left%, class]. Keep them out of ~40–62%, that's where he stands.
+   ground: small things scattered on the ground once per day. */
 const PLACES = {
-  home:{label:"🏠 Home",  cls:"home",  props:[["🏡",12,""],["🌳",84,""],["🦴",26,"small"]]},
-  park:{label:"🌳 Park",  cls:"park",  props:[["🌳",8,""],["🌲",22,""],["🌳",88,""],["🦆",78,"small"]]},
-  beach:{label:"🏖 Beach", cls:"beach", props:[["🌴",10,""],["⛱️",86,""],["🐚",22,"small"]]}
+  home:{name:"Home", icon:"🏠", to:"home", pos:[0,0], hint:"🍖 food · 🛁 bath · 💤 nap",
+        props:[["🌳",86,"sway"],["🦴",27,"small"]],
+        ground:["🌷","🌼","🥎","🍂","🌱","🧸","🌷"],
+        arrive:"Home. He checks the bowl, just in case."},
+  park:{name:"Park", icon:"🌳", to:"the park", pos:[1,0], hint:"🥏 catch · 🕳️ dig",
+        props:[["🌳",5,"sway"],["🌲",19,"sway"],["🌳",91,"sway"],["🦆",72,"small"]],
+        ground:["🌼","🍂","🪨","🍄","🐞","🌱","🌸","🐿️"],
+        arrive:"Park it is. Every smell has changed since yesterday."},
+  beach:{name:"Beach", icon:"🏖️", to:"the beach", pos:[4,2], hint:"🏊 swim · 🕳️ dig",
+        props:[["🌴",7,"sway"],["⛱️",86,""],["🦀",25,"small"]],
+        ground:["🐚","⭐","🪸","🐚","🪨","🦀","🐚"],
+        arrive:"Sand between every toe within four seconds."},
+  mountains:{name:"Mountains", icon:"⛰️", to:"the mountains", pos:[6,-3], hint:"🥾 hike · 🕳️ dig",
+        props:[["🌲",3,"sway"],["🌲",14,"sway"],["🌲",90,"sway"],["🐐",74,"small"]],
+        ground:["🪨","🌸","🍄","🪨","🌿","🦋","🪨"],
+        arrive:"Thin air, big views, and a goat staring at him."},
+  lake:{name:"Lake", icon:"🛶", to:"the lake", pos:[3,-2], hint:"🏊 swim · 🕳️ dig",
+        props:[["🌳",4,"sway"],["🌾",21,"small sway"],["🐸",78,"small"]],
+        ground:["🪨","🌾","🍄","🐌","🌼","🪨","🐞"],
+        arrive:"Ducks on the water. He is pretending not to see them."},
+  pool:{name:"Pool", icon:"🏊", to:"the pool", pos:[1.5,1.5], hint:"🛝 slide · 🏊 swim",
+        props:[["⛱️",9,""],["🛟",27,"small"],["🪴",68,"small"]],
+        ground:["🩴","🥤","🕶️","🍦","🩴"],
+        arrive:"Chlorine and sunscreen. He is vibrating."},
+  museum:{name:"Museum", icon:"🏛️", to:"the museum", pos:[2,.5], indoor:true, hint:"🦖 dino hall · 🎨 art",
+        props:[["🪴",3,""],["🗿",25,"small"]],
+        ground:["🎟️","🗺️","🎟️"],
+        arrive:"Dog-friendly day at the museum. He walks in like he owns it."},
+  zoo:{name:"Zoo", icon:"🦁", to:"the zoo", pos:[3,1], hint:"🦒 animals · 🦭 show",
+        props:[["🎈",30,"small"],["🐧",88,"small"]],
+        ground:["🥜","🎈","🍿","🪶","🥜","🍿"],
+        arrive:"So many smells. He doesn't know which way to face."}
 };
 
-const TRAVEL = [
-  {from:"home", to:"park",  label:"Walk to the park", mins:15, energy:-5, happy:3,  clean:-2, exercise:15, pose:"walk"},
-  {from:"park", to:"home",  label:"Walk home",        mins:15, energy:-5, happy:2,  clean:-2, exercise:15, pose:"walk"},
-  {from:"home", to:"beach", label:"Drive to the beach",mins:25, energy:-2, happy:8, clean:0,  exercise:0,  pose:"car"},
-  {from:"beach",to:"home",  label:"Drive home",       mins:25, energy:-2, happy:5,  clean:0,  exercise:0,  pose:"car"},
-  {from:"park", to:"beach", label:"Drive to the beach",mins:30, energy:-2, happy:8, clean:0,  exercise:0,  pose:"car"},
-  {from:"beach",to:"park",  label:"Drive to the park",mins:30, energy:-2, happy:6,  clean:0,  exercise:0,  pose:"car"}
-];
+/* home↔park is a walk that counts as exercise; everything else is a drive priced by distance */
+function route(to){
+  const walk = (S.loc === "home" && to === "park") || (S.loc === "park" && to === "home");
+  if(walk) return {to, walk:true, mins:15, energy:-5, happy:3, clean:-2, exercise:15, pose:"walk"};
+  const [ax,ay] = PLACES[S.loc].pos, [bx,by] = PLACES[to].pos;
+  const mins = Math.max(10, Math.round((8 + Math.hypot(ax-bx, ay-by)*5)/5)*5);
+  return {to, walk:false, mins, energy:-2, happy:6, clean:0, exercise:0, pose:"car"};
+}
+
+/* ---------- backdrops (inline SVG, 880×234, sits on the ground line) ---------- */
+function fence(x0,x1,step,col,y){
+  let s = "";
+  for(let x=x0; x<=x1; x+=step) s += `<rect x="${x}" y="${y}" width="11" height="${234-y}" rx="3" fill="${col}"/>`;
+  return s + `<rect x="${x0}" y="${y+12}" width="${x1-x0+11}" height="6" fill="${col}"/><rect x="${x0}" y="${y+32}" width="${x1-x0+11}" height="6" fill="${col}"/>`;
+}
+function bars(x0,x1,y,col){
+  let s = "";
+  for(let x=x0; x<=x1; x+=16) s += `<rect x="${x}" y="${y}" width="4" height="${234-y}" fill="${col}"/>`;
+  return s + `<rect x="${x0}" y="${y}" width="${x1-x0+4}" height="5" fill="${col}"/><rect x="${x0}" y="222" width="${x1-x0+4}" height="5" fill="${col}"/>`;
+}
+function waves(y,col,w){
+  let d = "";
+  for(let x=0; x<880; x+=60) d += `M${x} ${y} q15 -6 30 0 t30 0 `;
+  return `<path d="${d}" stroke="${col}" stroke-width="${w||3}" fill="none" stroke-linecap="round"/>`;
+}
+function pines(x0,x1,step,base,h,col){
+  let s = "";
+  for(let x=x0; x<=x1; x+=step){ const hh = h*(.75+((x*37)%10)/25); s += `<path d="M${x} ${base-hh} l${hh*.32} ${hh} h${-hh*.64} z" fill="${col}"/>`; }
+  return s;
+}
+function caps(pts){
+  return pts.map(([x,y])=>`<path d="M${x} ${y} l-22 24 l9 -3 l13 9 l12 -10 l11 4 z" fill="#fff"/>`).join("");
+}
+const BACKDROPS = {
+  home:`<path d="M0 150 Q160 110 330 145 T650 135 T880 128 V234 H0Z" fill="#a8cf8c"/>
+    <path d="M0 192 Q200 165 420 188 T880 180 V234 H0Z" fill="#98c47e"/>
+    <g transform="translate(24 0)">
+      <rect x="10" y="118" width="170" height="116" fill="#f4dcb4"/>
+      <polygon points="0,124 95,52 190,124" fill="#c8553d"/>
+      <rect x="132" y="62" width="20" height="40" fill="#a8452f"/>
+      <rect x="80" y="166" width="34" height="68" rx="3" fill="#8a5a3c"/>
+      <circle cx="107" cy="202" r="3" fill="#f0b429"/>
+      <rect class="win" x="26" y="140" width="38" height="30" rx="3"/>
+      <rect class="win" x="130" y="140" width="38" height="30" rx="3"/>
+      <path d="M45 140 v30 M26 155 h38 M149 140 v30 M130 155 h38" stroke="#f4dcb4" stroke-width="3"/>
+    </g>
+    ${fence(590,880,26,"#fff6e6",188)}`,
+  park:`<path d="M0 140 Q220 90 440 135 T880 120 V234 H0Z" fill="#9fcb86"/>
+    <path d="M0 186 Q260 150 520 180 T880 170 V234 H0Z" fill="#8cbf73"/>
+    <circle class="glow" cx="262" cy="112" r="34"/>
+    <rect x="259" y="118" width="6" height="116" fill="#4a4a55"/>
+    <rect x="250" y="100" width="24" height="20" rx="5" class="win"/>
+    <rect x="248" y="96" width="28" height="6" rx="3" fill="#4a4a55"/>
+    <g fill="#9a6a3c"><rect x="690" y="196" width="96" height="8" rx="3"/><rect x="690" y="178" width="96" height="8" rx="3"/></g>
+    <g fill="#5a4a3a"><rect x="697" y="204" width="6" height="30"/><rect x="773" y="204" width="6" height="30"/></g>`,
+  beach:`<rect x="0" y="136" width="880" height="98" fill="#4fa7cf"/>
+    <rect x="0" y="136" width="880" height="14" fill="#3c8db6"/>
+    <path d="M610 137 q34 -24 80 0z" fill="#6b9d5a"/>
+    <g transform="translate(420 104)"><path d="M0 32 h48 l-9 11 h-30z" fill="#fff"/><path d="M24 0 v32 h-20z" fill="#fff6e6"/><path d="M26 5 v25 h15z" fill="#e8743c"/></g>
+    ${waves(172,"rgba(255,255,255,.55)")}${waves(198,"rgba(255,255,255,.7)")}
+    <rect x="0" y="222" width="880" height="12" fill="#eaf6fb"/>`,
+  mountains:`<polygon points="0,170 120,60 230,150 340,40 470,160 600,70 740,150 880,80 880,234 0,234" fill="#a9b6ca"/>
+    ${caps([[120,60],[340,40],[600,70],[880,80]])}
+    <polygon points="0,204 160,122 300,192 450,132 620,204 760,142 880,190 880,234 0,234" fill="#7f9a78"/>
+    ${pines(10,870,34,236,34,"#58795a")}`,
+  lake:`<path d="M0 128 Q180 88 360 122 T720 112 T880 118 V160 H0Z" fill="#92c089"/>
+    <rect x="0" y="150" width="880" height="84" fill="#5aa9c9"/>
+    ${waves(176,"rgba(255,255,255,.45)",2)}${waves(206,"rgba(255,255,255,.5)",2)}
+    <g fill="#6aa55a"><ellipse cx="120" cy="206" rx="16" ry="5"/><ellipse cx="160" cy="218" rx="13" ry="4"/><ellipse cx="300" cy="194" rx="12" ry="4"/></g>
+    <text x="540" y="186" font-size="40">🛶</text>
+    <text x="250" y="178" font-size="22">🦆</text>
+    <g fill="#9a6a3c"><rect x="700" y="198" width="180" height="10" rx="2"/><rect x="712" y="208" width="7" height="26"/><rect x="790" y="208" width="7" height="26"/><rect x="868" y="208" width="7" height="26"/></g>`,
+  pool:`<rect x="0" y="118" width="880" height="80" rx="24" fill="#8cbf73"/>
+    ${fence(0,880,22,"#e9eef2",150)}
+    <rect x="0" y="196" width="880" height="38" fill="#4fc0e8"/>
+    <path d="M0 208 H880 M0 222 H880" stroke="#fff" stroke-width="3" stroke-dasharray="10 8"/>
+    <g fill="#9aa5b1"><rect x="790" y="58" width="8" height="140"/><rect x="838" y="58" width="8" height="140"/></g>
+    <g stroke="#9aa5b1" stroke-width="4">${[74,96,118,140,162,184].map(y=>`<path d="M790 ${y} h56"/>`).join("")}</g>
+    <rect x="782" y="52" width="72" height="9" rx="3" fill="#6b7885"/>
+    <path d="M800 60 C 700 66, 820 128, 730 140 S 660 182, 650 198" stroke="#e8743c" stroke-width="24" fill="none" stroke-linecap="round"/>
+    <path d="M800 60 C 700 66, 820 128, 730 140 S 660 182, 650 198" stroke="#f0b429" stroke-width="6" fill="none" stroke-dasharray="14 12"/>`,
+  museum:`<rect width="880" height="234" fill="#efe2cc"/>
+    <rect width="880" height="22" fill="#e0cfb2"/>
+    <rect y="176" width="880" height="58" fill="#e3d0b0"/><rect y="174" width="880" height="4" fill="#c9b28c"/>
+    <g fill="#f8f0e2"><rect x="24" y="22" width="44" height="212"/><rect x="812" y="22" width="44" height="212"/></g>
+    <g fill="#e6d8bf"><rect x="18" y="22" width="56" height="12"/><rect x="806" y="22" width="56" height="12"/><rect x="18" y="222" width="56" height="12"/><rect x="806" y="222" width="56" height="12"/></g>
+    <path d="M36 36 v184 M46 36 v184 M56 36 v184 M824 36 v184 M834 36 v184 M844 36 v184" stroke="#e9dcc6" stroke-width="3"/>
+    <rect x="382" y="28" width="120" height="62" rx="4" fill="#fff"/>
+    <rect class="skywin" x="388" y="34" width="108" height="50"/>
+    <path d="M442 34 v50 M388 59 h108" stroke="#fff" stroke-width="4"/>
+    <rect x="130" y="52" width="120" height="86" rx="3" fill="#c9a24a"/>
+    <rect x="140" y="62" width="100" height="66" fill="#8fc3e3"/>
+    <path d="M140 128 Q180 96 240 116 V128Z" fill="#7fb36a"/><circle cx="214" cy="80" r="10" fill="#ffd166"/>
+    <text x="160" y="124" font-size="26">🐕</text>
+    <circle class="glow" cx="300" cy="10" r="14"/><circle class="glow" cx="590" cy="10" r="14"/>
+    <rect x="596" y="208" width="210" height="26" fill="#d6c3a2"/>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <g stroke="#8c7a5e" stroke-width="11">
+        <path d="M570 176 Q600 150 640 140 Q700 116 740 120 Q772 122 784 96"/>
+        <path d="M680 128 L672 168 L682 208 M742 122 L750 168 L742 208 M772 108 l10 22"/>
+        ${[692,704,716,728].map(x=>`<path d="M${x} 124 q4 18 0 30"/>`).join("")}
+      </g>
+      <g stroke="#fbf6ea" stroke-width="6">
+        <path d="M570 176 Q600 150 640 140 Q700 116 740 120 Q772 122 784 96"/>
+        <path d="M680 128 L672 168 L682 208 M742 122 L750 168 L742 208 M772 108 l10 22"/>
+        ${[692,704,716,728].map(x=>`<path d="M${x} 124 q4 18 0 30"/>`).join("")}
+      </g>
+    </g>
+    <ellipse cx="800" cy="88" rx="22" ry="13" fill="#fbf6ea" stroke="#8c7a5e" stroke-width="3"/>
+    <path d="M784 96 q18 10 38 0" stroke="#8c7a5e" stroke-width="3" fill="none"/>
+    <circle cx="806" cy="84" r="3" fill="#8c7a5e"/>`,
+  zoo:`<path d="M0 140 Q220 100 440 135 T880 124 V234 H0Z" fill="#a3cf8a"/>
+    <path d="M0 176 Q120 150 300 174 V234 H0Z" fill="#b8d98f"/>
+    <text x="40" y="206" font-size="96">🦒</text>
+    <text x="180" y="214" font-size="66">🐘</text>
+    <text x="630" y="212" font-size="56">🦓</text>
+    <text x="740" y="214" font-size="54">🦁</text>
+    ${bars(0,330,152,"#6b5a45")}${bars(600,880,152,"#6b5a45")}
+    <g fill="#8a6a45"><rect x="364" y="30" width="10" height="204"/><rect x="506" y="30" width="10" height="204"/></g>
+    <rect x="352" y="16" width="176" height="46" rx="12" fill="#e8743c"/>
+    <text x="440" y="50" text-anchor="middle" font-size="30" font-weight="900" fill="#fff" font-family="Nunito,-apple-system,sans-serif">ZOO</text>`
+};
+
+/* ---------- weather ----------
+   Visible, and it changes what he'll do. Storms are the only weather with teeth:
+   he refuses outdoor activities in one (a visible cause, never RNG). */
+const WX = {
+  sunny: {icon:"☀️", name:"Sunny",        mix:0,   to:[0,0,0],       sun:1,   clouds:2, kind:"",     light:[255,255,255]},
+  cloudy:{icon:"☁️", name:"Cloudy",       mix:.28, to:[176,186,198], sun:.5,  clouds:6, kind:"grey", light:[228,230,238]},
+  rain:  {icon:"🌧️", name:"Rain",         mix:.5,  to:[132,144,160], sun:.1,  clouds:7, kind:"dark", light:[198,204,216]},
+  storm: {icon:"⛈️", name:"Thunderstorm", mix:.7,  to:[70,76,96],    sun:0,   clouds:8, kind:"dark", light:[152,156,180]},
+  snow:  {icon:"❄️", name:"Snow",         mix:.4,  to:[208,214,226], sun:.3,  clouds:6, kind:"grey", light:[234,238,248]},
+  wind:  {icon:"🌬️", name:"Windy",        mix:.08, to:[200,210,220], sun:.9,  clouds:4, kind:"",     light:[250,250,250], fast:true}
+};
+const WX_NEXT = {
+  sunny: [["sunny",.3],["cloudy",.3],["wind",.15],["rain",.12],["snow",.13]],
+  cloudy:[["rain",.3],["snow",.2],["sunny",.2],["wind",.15],["storm",.15]],
+  rain:  [["storm",.35],["cloudy",.3],["rain",.1],["sunny",.25]],
+  storm: [["rain",.5],["cloudy",.3],["sunny",.2]],
+  snow:  [["snow",.25],["cloudy",.4],["sunny",.35]],
+  wind:  [["cloudy",.4],["sunny",.3],["rain",.3]]
+};
+const WX_SAY = {
+  sunny: "The sun comes out. He finds the warmest patch and flops into it.",
+  cloudy:"Clouds roll in. The light goes soft and grey.",
+  rain:  "The sky opens. He looks at you like you arranged this.",
+  storm: "Thunder! He is suddenly a much smaller dog, pressed against your shins.",
+  snow:  "It's snowing! He's trying to eat every single flake personally.",
+  wind:  "The wind picks up. His ears have become sails."
+};
+function wpick(list, r){
+  let x = r(), acc = 0;
+  for(const [k,w] of list){ acc += w; if(x < acc) return k; }
+  return list[list.length-1][0];
+}
+function makeWeather(r){
+  const segs = [];
+  let t = DAY_START, cur = wpick([["sunny",.5],["cloudy",.3],["wind",.1],["snow",.1]], r);
+  while(t < DAY_END){
+    const len = 120 + Math.floor(r()*4)*30;
+    segs.push({from:t, to:Math.min(DAY_END, t+len), wx:cur});
+    t += len;
+    cur = wpick(WX_NEXT[cur], r);
+  }
+  // make sure every day has at least one "real" weather event to see
+  if(!segs.some(s=>["rain","storm","snow","wind"].includes(s.wx))){
+    const i = 1 + Math.floor(r()*(segs.length-1));
+    segs[Math.min(i, segs.length-1)].wx = wpick([["rain",.35],["snow",.25],["wind",.2],["storm",.2]], r);
+  }
+  return segs;
+}
+function weatherSeg(t){ return S.weather.find(s=>t < s.to) || S.weather[S.weather.length-1]; }
+function weatherAt(t){ return weatherSeg(t).wx; }
+
+/* ---------- fetch / catch / dig items ---------- */
+const FETCH = {
+  home:[["🎾","tennis ball"],["🧸","squeaky bear"],["🧦","rolled-up sock"]],
+  park:[["🎾","tennis ball"],["🥏","frisbee"],["🪵","stick"]],
+  beach:[["🥥","coconut"],["🏐","beach ball"],["🐚","big shell"]],
+  lake:[["🪵","stick"],["🦆","rubber duck"],["🎾","tennis ball"]],
+  mountains:[["🌰","pine cone"],["🪵","stick"],["🥏","frisbee"]]
+};
+function fetchItem(){
+  if(weatherAt(S.t) === "snow" && Math.random() < .5) return ["⚪","snowball"];
+  return pick(FETCH[S.loc] || FETCH.park);
+}
+function catchItem(){
+  const wx = weatherAt(S.t);
+  if(wx === "snow") return ["❄️","snowflakes"];
+  if(wx === "wind") return ["🍂","blowing leaves"];
+  if(wx === "rain") return ["💧","raindrops"];
+  if(S.loc === "zoo")  return ["🍿","popcorn"];
+  if(S.loc === "pool") return ["🫧","bubbles"];
+  if(S.loc === "beach")return ["🏐","beach ball"];
+  return pick([["🫧","bubbles"],["🥏","frisbee"],["🦴","tossed treats"]]);
+}
+const DIG = {
+  park:[["🦴","an old bone"],["🧦","a single sock"],["🪙","a shiny coin"],["🪱","a worried worm"]],
+  beach:[["🐚","a spiral shell"],["🦀","an offended crab"],["🪙","a coin"],["🩴","one flip-flop"]],
+  lake:[["🪨","a skipping stone"],["🐸","a frog (released)"],["🥾","an old boot"]],
+  mountains:[["💎","a sparkly rock"],["🦴","a mystery bone"],["🌰","a pine cone"]]
+};
 
 /* ---------- actions ----------
-   eff: raw deltas, before breed multipliers.
+   eff: raw deltas, before breed multipliers. effAt: per-place overrides.
+   outside: exposed to the weather (and refused in a thunderstorm).
+   weather: only offered in that weather.
    gate(): returns a refusal line, or null if he's up for it.  */
+const OUT_LOCS = ["home","park","beach","mountains","lake","zoo"];
 const ACTIONS = [
-  { id:"walk", label:"Go for a walk", icon:"🐾", mins:45, locs:["home","park","beach"],
+  { id:"walk", label:"Go for a walk", icon:"🐾", mins:45, locs:["home","park","beach","mountains","lake","zoo"], outside:true,
     eff:{energy:-18,happy:14,clean:-6,full:-6}, exercise:45, pose:"walk", fx:"🐾",
     say:"Nose down, tail up, every lamppost read cover to cover.",
     gate:s => s.energy < 20 ? "He plants himself on the floor. The legs have clocked off." : null },
 
-  { id:"fetch", label:"Play fetch", icon:"🎾", mins:30, locs:["park","beach","home"],
-    eff:{energy:-24,happy:21,clean:-11,full:-5}, exercise:30, pose:"run", fx:"🎾",
-    say:"Nine returns, eight releases. Statistically excellent.",
+  { id:"fetch", label:"Play fetch", icon:"🎾", mins:30, locs:["home","park","beach","lake","mountains"], outside:true,
+    eff:{energy:-24,happy:21,clean:-11,full:-5}, exercise:30, pose:"run",
+    pick:()=>({item:fetchItem(), n:6+Math.floor(Math.random()*6)}),
+    anim:c=>throwItem(c.item[0]),
+    say:(s,c)=>pick([
+      `Chased the ${c.item[1]} ${c.n} times, brought it back ${c.n-1}. Statistically excellent.`,
+      `The ${c.item[1]} went far. He went further. He came back with it and a leaf.`,
+      `Returned the ${c.item[1]} slimier every time. Wants you to know that's love.`]),
     gate:s => s.energy < 32 ? "He looks at the ball. He looks at you. The ball stays where it is." : null },
 
-  { id:"trick", label:"Practise a trick", icon:"⭐️", mins:15, locs:["home","park","beach"],
+  { id:"catch", label:"Play catch", icon:"🫧", mins:20, locs:["home","park","beach","pool","lake","zoo"], outside:true,
+    eff:{energy:-14,happy:15,clean:-3,full:-3}, exercise:15, pose:"jump",
+    pick:()=>({item:catchItem()}),
+    anim:c=>dropItems(c.item[0], 6),
+    say:(s,c)=>pick([
+      `Snapped at the ${c.item[1]} like they owed him money. Caught about half.`,
+      `Leapt for the ${c.item[1]} with total commitment and zero technique.`,
+      `Caught the ${c.item[1]} mid-air, then looked around to check you saw.`]),
+    gate:s => s.energy < 26 ? "He watches it sail past his nose. Didn't even blink." : null },
+
+  { id:"trick", label:"Practise a trick", icon:"⭐️", mins:15, locs:Object.keys(PLACES),
     eff:{energy:-12,happy:11,clean:-1,full:-3}, exercise:10, pose:"jump", fx:"⭐️",
     say:"Sit, jump, spin — nailed it, then did it twice more unprompted.",
     gate:s => s.energy < 38 ? "He offers you a slow blink instead. That's the trick now." : null },
@@ -375,47 +817,227 @@ const ACTIONS = [
   { id:"carride", label:"Go for a car ride", icon:"🚗", mins:40, locs:["home"],
     eff:{energy:-4,happy:19,clean:-2,full:-3}, exercise:0, pose:"car", fx:"💨",
     say:"Head out the window the entire way. Ears like flags.",
-    gate:s => s.full < 18 ? "Too hungry to care about the car. He's staring at the bowl." : null },
+    gate:s => s.full < 18 ? "Too hungry to care about the car. He's staring at the bowl." : null, stat:"full" },
 
   { id:"feed", label:"Fill the bowl", icon:"🍖", mins:20, locs:["home"],
     eff:{energy:10,happy:9,clean:-5,full:58}, exercise:0, pose:"eat", fx:"🍖",
     say:"Inhaled in nineteen seconds, then checked the bowl four more times.",
-    gate:s => s.full > 72 ? "He sniffs it, then walks away. Still full from last time." : null },
+    gate:s => s.full > 72 ? "He sniffs it, then walks away. Still full from last time." : null, stat:"full" },
 
-  { id:"treat", label:"Give a treat", icon:"🦴", mins:5, locs:["home","park","beach"],
+  { id:"treat", label:"Give a treat", icon:"🦴", mins:5, locs:Object.keys(PLACES),
     eff:{energy:3,happy:9,clean:-1,full:11}, exercise:0, pose:"eat", fx:"🦴",
     say:"Gone. No evidence it ever existed.",
-    gate:s => s.full > 92 ? "He takes it politely and buries it. That's a no." : null },
+    gate:s => s.full > 92 ? "He takes it politely and buries it. That's a no." : null, stat:"full" },
 
   { id:"wash", label:"Give him a bath", icon:"🛁", mins:35, locs:["home"],
     eff:{energy:-8,happy:-14,clean:74,full:-3}, exercise:0, pose:"shake", fx:"💧",
     say:"Betrayed, damp, and somehow fluffier. Shook it all over the hallway.",
-    gate:s => s.clean > 86 ? "He's already spotless. Even he thinks this is excessive." : null },
+    gate:s => s.clean > 86 ? "He's already spotless. Even he thinks this is excessive." : null, stat:"clean" },
 
   { id:"nap", label:"Let him nap", icon:"💤", mins:90, locs:["home"],
     eff:{energy:56,happy:-3,clean:0,full:-9}, exercise:0, pose:"sleep", fx:"💤",
     say:"Out cold in ninety seconds. Legs twitching, chasing something.",
-    gate:s => s.energy > 68 ? "Not remotely sleepy. He's doing laps of the kitchen." : null }
+    gate:s => s.energy > 68 ? "Not remotely sleepy. He's doing laps of the kitchen." : null },
+
+  { id:"cuddle", label:"Cuddle on the couch", icon:"🛋️", mins:20, locs:["home"],
+    eff:{energy:6,happy:12}, exercise:0, pose:"idle", fx:"💛",
+    say:"He's decided he's a lap dog. You've lost feeling in one leg.",
+    gate:s => s.happy > 90 ? "Far too wound-up to sit still. Maybe after something fun." : null, stat:"happy" },
+
+  { id:"hike", label:"Hike to the summit", icon:"🥾", mins:60, locs:["mountains"], outside:true,
+    eff:{energy:-28,happy:26,clean:-12,full:-10}, exercise:60, pose:"walk", fx:"🏔️",
+    say:"Summit reached. He stood on the top rock like he'd planted a flag.",
+    gate:s => s.energy < 36 ? "He looks up the trail, then sits on your foot. Not today, mountain." : null },
+
+  { id:"swim", label:"Go for a swim", icon:"🏊", mins:35, locs:["lake","beach","pool"], outside:true,
+    eff:{energy:-22,happy:22,clean:-6,full:-6}, effAt:{pool:{clean:16}, beach:{clean:-2}},
+    exercise:35, pose:"swim", fx:"💦",
+    say:s => ({lake:"Paddled out after a duck. The duck was unimpressed.",
+               beach:"Charged every wave like it had insulted his family.",
+               pool:"Laps of the pool, head high, extremely serious."})[s.loc],
+    gate:s => s.energy < 28 ? "He wades in to the knees and reconsiders." : null },
+
+  { id:"slide", label:"Ride the water slide", icon:"🛝", mins:25, locs:["pool"], outside:true,
+    eff:{energy:-16,happy:26,clean:28,full:-4}, exercise:20, pose:"jump", fx:"💦",
+    anim:()=>setTimeout(()=>floatFx("💦",5), 500),
+    say:"Up the ladder, down the tube, SPLASH. Straight back in the queue. Cleaner, too.",
+    gate:s => s.energy < 24 ? "He looks up at the ladder and does the maths. The maths says no." : null },
+
+  { id:"dig", label:"Dig a hole", icon:"🕳️", mins:20, locs:["park","beach","lake","mountains"], outside:true,
+    eff:{energy:-10,happy:16,clean:-18,full:-3}, exercise:10, pose:"dig", fx:"💨",
+    pick:()=>({item:pick(DIG[S.loc])}),
+    anim:c=>setTimeout(()=>floatFx(c.item[0],2), 700),
+    done:c=>S.finds.push(c.item[0]),
+    say:(s,c)=>`Dug a hole the size of a bucket and came up with ${c.item[1]}. Very proud of himself.`,
+    gate:s => s.energy < 18 ? "He paws the ground twice, then lies down in the hole he didn't dig." : null },
+
+  { id:"tour", label:"Tour the dinosaur hall", icon:"🦖", mins:40, locs:["museum"],
+    eff:{energy:-8,happy:17,full:-4}, exercise:10, pose:"walk", fx:"🦴",
+    say:"Stared at a T. rex thigh bone for eleven minutes. Thinks it is the greatest bone in history. It is.",
+    gate:s => s.energy < 15 ? "He lies down on the cool marble floor and becomes an exhibit." : null },
+
+  { id:"portrait", label:"Pose for the art class", icon:"🎨", mins:25, locs:["museum"],
+    eff:{energy:-3,happy:11,full:-2}, exercise:0, pose:"idle", fx:"🖼️",
+    say:"Twelve students drew him. He held the pose like a professional, then sneezed.",
+    gate:s => s.happy < 25 ? "He won't hold still for strangers today. Chin on the floor." : null, stat:"happy" },
+
+  { id:"animals", label:"Visit the animals", icon:"🦒", mins:40, locs:["zoo"], outside:true,
+    eff:{energy:-12,happy:22,clean:-4,full:-5}, exercise:25, pose:"walk", fx:"🐾",
+    say:()=>pick(["Barked hello at a giraffe. The giraffe did not look down.",
+                  "Pressed his nose to the penguin glass for the entire feeding.",
+                  "The lion yawned at him. He has decided they're friends now."]),
+    gate:s => s.energy < 18 ? "He sits by the map sign and refuses to go further. Zoos are big." : null },
+
+  { id:"sealions", label:"Watch the sea-lion show", icon:"🦭", mins:25, locs:["zoo"], outside:true,
+    eff:{energy:-4,happy:14,clean:-2,full:-2}, exercise:0, pose:"jump", fx:"🦭",
+    say:"A sea lion balanced a ball on its nose. He's been trying ever since.",
+    gate:s => s.full < 15 ? "He can smell the fish bucket and can't focus on anything else." : null, stat:"full" },
+
+  { id:"snowplay", label:"Romp in the snow", icon:"☃️", mins:30, locs:OUT_LOCS, outside:true, weather:["snow"],
+    eff:{energy:-16,happy:22,clean:-4,full:-4}, exercise:30, pose:"run", fx:"❄️",
+    say:"Face-first into a drift, came up with a snow beard. Did it eleven more times.",
+    gate:s => s.energy < 22 ? "He lies down in the snow and lets it cover him. Tank empty." : null },
+
+  { id:"puddles", label:"Jump in puddles", icon:"💦", mins:20, locs:OUT_LOCS, outside:true, weather:["rain"],
+    eff:{energy:-10,happy:18,clean:-22,full:-2}, exercise:15, pose:"jump", fx:"💦",
+    say:"Found the deepest puddle in the county and sat down in it.",
+    gate:s => s.energy < 16 ? "He stands in the puddle, not jumping. Just… existing, wetly." : null },
+
+  { id:"leaves", label:"Chase the leaves", icon:"🍂", mins:20, locs:OUT_LOCS, outside:true, weather:["wind"],
+    eff:{energy:-14,happy:16,clean:-4,full:-3}, exercise:20, pose:"run", fx:"🍂",
+    say:"Every leaf is a squirrel now. He has caught none of them and is thrilled.",
+    gate:s => s.energy < 22 ? "A leaf lands on his head. He leaves it there." : null }
+];
+
+/* ---------- treasure hunt ---------- */
+const CLUES = {
+  park:     {go:"Go to the place with green grass, tall trees, and ducks.", spot:"under the park bench"},
+  beach:    {go:"Go where the sand is hot and the big waves splash.",       spot:"inside a big shell"},
+  mountains:{go:"Go up, up, up! Find the tall rocks with snow on top.",      spot:"under a gray rock"},
+  lake:     {go:"Go where the frogs say ribbit and a little boat floats.",   spot:"on the old dock"},
+  pool:     {go:"Go where kids go down a slide and SPLASH into the water.",  spot:"by the slide ladder"},
+  museum:   {go:"Go see the big old bones of a dinosaur.",                   spot:"by the dinosaur's foot"},
+  zoo:      {go:"Go where the lion roars and the giraffe is very tall.",     spot:"by the zebra fence"}
+};
+const PRIZES = [["👑","a gold crown"],["💎","a big shiny gem"],["🦴","a GOLDEN bone"],["🪙","a bag of gold coins"],["🏆","a tiny trophy"]];
+
+/* ---------- stories (1st-grade reading level) ----------
+   {name} {he} {He} {him} {his} {His} are filled in from the chosen dog.
+   qs: [question, [RIGHT answer first, wrong, wrong]] — options are shuffled on screen. */
+const STORIES = [
+  {title:"The Red Ball", art:"🎾🌳",
+   text:["{name} has a red ball.","{He} likes to run and get it.","One day the ball went up a hill.","{name} ran up the hill fast.","The ball was by a big tree.","{name} got the ball and ran back home."],
+   qs:[["What color is the ball?",["red","blue","green"]],
+       ["Where did the ball go?",["up a hill","into the sea","under the bed"]],
+       ["Where was the ball?",["by a big tree","in a box","on a car"]]]},
+  {title:"A Frog at the Lake", art:"🐸💦",
+   text:["{name} went to the lake.","{He} saw a big green frog.","The frog said, \"Ribbit!\"","{name} said, \"Woof!\"","The frog hopped in the water. Splash!","Now {name} is wet, and {he} is happy."],
+   qs:[["What did {name} see?",["a frog","a cat","a bee"]],
+       ["What did the frog say?",["Ribbit!","Moo!","Quack!"]],
+       ["How does {name} feel at the end?",["happy","sad","mad"]]]},
+  {title:"Snow Day", art:"❄️☃️",
+   text:["It is cold today.","Snow is on the grass.","{name} runs in the snow.","{His} paws get cold and white.","{He} digs a big hole in the snow.","Then {he} goes in to get warm."],
+   qs:[["Where is the snow?",["on the grass","in the bed","in the bath"]],
+       ["What color do {his} paws get?",["white","red","blue"]],
+       ["What does {name} do at the end?",["goes in to get warm","eats a cake","sleeps in the snow"]]]},
+  {title:"The Lost Sock", art:"🧦🔍",
+   text:["Mom lost a sock.","It is a blue sock.","{name} looks under the bed. No sock.","{name} looks in the box. No sock!","Then {he} looks in {his} dog bed.","There it is! {name} had it all day."],
+   qs:[["What color is the sock?",["blue","pink","green"]],
+       ["Where did {name} look first?",["under the bed","in the car","in the tub"]],
+       ["Where was the sock?",["in the dog bed","in the box","under the bed"]]]},
+  {title:"A Trip to the Zoo", art:"🦒🦁",
+   text:["{name} and Dad went to the zoo.","They saw a tall giraffe.","They saw a big gray elephant.","The lion said, \"ROAR!\"","{name} hid behind Dad.","Then {he} saw the penguins and wagged {his} tail."],
+   qs:[["Who went to the zoo with {name}?",["Dad","Mom","Grandma"]],
+       ["Which animal was tall?",["the giraffe","the penguin","the lion"]],
+       ["What did {name} do when the lion roared?",["hid behind Dad","ran to the lion","went to sleep"]]]},
+  {title:"The Big Puddle", art:"🌧️💦",
+   text:["Drip, drip, drip. It is raining.","{name} sees a big puddle.","{He} jumps in with all four feet. Splat!","Mud is on {his} nose.","Mud is on {his} tail.","Now {name} needs a bath!"],
+   qs:[["What is the weather?",["rainy","sunny","snowy"]],
+       ["What did {name} jump in?",["a puddle","a pool","a box"]],
+       ["What does {name} need now?",["a bath","a nap","a hat"]]]},
+  {title:"The Big Slide", art:"🛝🏊",
+   text:["The pool has a big slide.","{name} goes up, up, up the steps.","{He} looks down. It is so high!","{name} sits down and goes.","Whoosh! Splash!","{He} wants to go again."],
+   qs:[["What does the pool have?",["a big slide","a big cake","a big boat"]],
+       ["Where does {name} go first?",["up the steps","into the car","to bed"]],
+       ["What does {name} want at the end?",["to go again","to go home","to eat"]]]},
+  {title:"Bones at the Museum", art:"🦖🦴",
+   text:["{name} went to the museum.","{He} saw a big dinosaur.","It was made of old bones.","{name} wanted a bone to chew.","\"No, no!\" said the man.","{name} got a dog treat. Yum!"],
+   qs:[["What did {name} see?",["a dinosaur","a shark","a car"]],
+       ["What was it made of?",["bones","rocks","sticks"]],
+       ["What did {name} get to eat?",["a dog treat","a bone","a hat"]]]},
+  {title:"Up the Mountain", art:"⛰️🐦",
+   text:["{name} and Mom went up a mountain.","The path was long and steep.","{name} saw a bird up in a tree.","At the top, the wind was cold.","They sat on a rock and ate a snack.","What a view!"],
+   qs:[["Who went up the mountain with {name}?",["Mom","Dad","a cat"]],
+       ["What did {name} see in a tree?",["a bird","a dog","a fish"]],
+       ["What did they do at the top?",["ate a snack","went for a swim","went to sleep"]]]},
+  {title:"The Loud Storm", art:"⛈️🛏️",
+   text:["Boom! Crash! The thunder is loud.","{name} is scared.","{He} hides under the bed.","Mom sits with {him} and pats {his} back.","Soon the rain stops.","The sun comes out, and {name} wags {his} tail."],
+   qs:[["What is loud?",["the thunder","a cat","a bell"]],
+       ["Where does {name} hide?",["under the bed","in the tub","in the car"]],
+       ["What comes out at the end?",["the sun","the moon","a frog"]]]},
+  {title:"Treasure!", art:"🗺️🧰",
+   text:["{name} found a map.","The map had a big red X.","{name} ran to the X and sniffed.","{He} dug and dug and dug.","{He} found a box!","In the box was a gold bone."],
+   qs:[["What did {name} find first?",["a map","a hat","a cat"]],
+       ["What was on the map?",["a big red X","a big blue dot","a little fish"]],
+       ["What was in the box?",["a gold bone","a sock","a ball"]]]},
+  {title:"Beach Day", art:"🏖️🦀",
+   text:["{name} is at the beach.","The sun is hot. The sand is hot.","{He} sees a little red crab.","The crab walks to the side.","{name} walks to the side too!","Then they both go in the sea."],
+   qs:[["Where is {name}?",["at the beach","at the zoo","at school"]],
+       ["What color is the crab?",["red","green","black"]],
+       ["Where do they go at the end?",["in the sea","in the car","in the house"]]]}
 ];
 
 /* ---------- state ---------- */
 let S = null;
 
-function startGame(breedKey){
+function mulberry32(a){
+  return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+}
+function pick(arr, r){ return arr[Math.floor((r || Math.random)() * arr.length)]; }
+function shuffle(arr, r){
+  const a = arr.slice(), rnd = r || Math.random;
+  for(let i=a.length-1; i>0; i--){ const j = Math.floor(rnd()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
+  return a;
+}
+
+function scatterGround(r){
+  const out = {};
+  for(const [k,p] of Object.entries(PLACES)){
+    const n = p.indoor ? 3 : 9, items = [], puddles = [];
+    for(let i=0;i<n;i++){
+      const x = r() < .5 ? 2 + r()*34 : 65 + r()*32;   // keep out of the dog's patch
+      const b = 6 + r()*62;
+      items.push({e:pick(p.ground, r), x, b, s:Math.round(25 - b*.14)});
+    }
+    for(let i=0;i<3;i++) puddles.push({x:4 + r()*84, b:8 + r()*48, w:60 + r()*70});
+    out[k] = {items, puddles};
+  }
+  return out;
+}
+
+function startGame(breedKey, seed){
   const b = BREEDS[breedKey];
+  const r = mulberry32(seed != null ? seed : (Date.now() ^ (Math.random()*1e9)) >>> 0);
   S = {
     breedKey, breed:b, name:b.name,
     t:DAY_START, loc:"home", busy:false, over:false,
     energy:78, happy:62, full:46, clean:72,
     sinceExercise:0, actions:0, exerciseMins:0, treats:0, washes:0, peakHappy:62,
-    log:[]
+    log:[],
+    weather:makeWeather(r),
+    ground:scatterGround(r),
+    story:{s:pick(STORIES, r), done:false, stars:0},
+    hunt:{steps:shuffle(Object.keys(CLUES), r).slice(0,3), i:0, done:false, prize:null},
+    finds:[], visited:new Set(["home"]), wxSeen:new Set(), cuddledAt:-999,
+    shownLoc:null, shownWx:null
   };
   document.documentElement.style.setProperty("--coat", b.coat);
   document.documentElement.style.setProperty("--coat-dark", b.dark);
   document.documentElement.style.setProperty("--belly", b.belly);
   setPose("idle", breedKey);
-  document.getElementById("pickOverlay").classList.add("hide");
-  say(`<b>${b.name}</b> is awake, stretched, and looking at you like the day is already late.`);
+  $("pickOverlay").classList.add("hide");
+  say(`<b>${b.name}</b> is awake, stretched, and looking at you like the day is already late. A 🗺️ treasure map is taped to the front door, and today's 📖 story is on the table.`);
   render();
 }
 
@@ -423,10 +1045,12 @@ function startGame(breedKey){
 const $  = id => document.getElementById(id);
 const dog = $("dog");
 const clamp = v => Math.max(0, Math.min(100, v));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
 // NB: SVG elements have a read-only .className (SVGAnimatedString) — must use setAttribute
 function setPose(pose, breedKey){
   dog.setAttribute("class", `breed-${breedKey || S.breedKey} pose-${pose}`);
 }
+function exposedHere(){ return S.loc !== "home" && !PLACES[S.loc].indoor; }
 
 function fmtTime(m){
   let h = Math.floor(m/60), mm = String(m%60).padStart(2,"0");
@@ -452,47 +1076,79 @@ const SKY = [
   [0.90, [0xe8,0x8a,0x62], [0xf6,0xc4,0x9a]],  // sunset
   [1.00, [0x4a,0x3c,0x6e], [0xa8,0x72,0x8c]]   // dusk
 ];
+/* the colour of the light itself — multiplied over the whole scene, dog included */
+const LIGHT = [
+  [0.00, [255,218,186]],  // warm dawn
+  [0.12, [255,240,222]],
+  [0.30, [255,255,255]],  // plain daylight
+  [0.62, [255,250,238]],
+  [0.78, [255,226,184]],  // golden
+  [0.90, [250,184,146]],  // sunset orange
+  [1.00, [150,138,204]]   // blue dusk
+];
 function lerp(a,b,t){ return Math.round(a+(b-a)*t); }
-function skyAt(p){
-  for(let i=0;i<SKY.length-1;i++){
-    const [p0,t0,b0] = SKY[i], [p1,t1,b1] = SKY[i+1];
-    if(p <= p1){
-      const k = (p-p0)/(p1-p0);
-      const top = t0.map((c,j)=>lerp(c,t1[j],k));
-      const bot = b0.map((c,j)=>lerp(c,b1[j],k));
-      return [`rgb(${top.join(",")})`, `rgb(${bot.join(",")})`];
+function mix(a,b,k){ return a.map((c,i)=>lerp(c,b[i],k)); }
+const rgb = a => `rgb(${a.join(",")})`;
+function sample(stops, p, col){
+  p = Math.max(0, Math.min(1, p));
+  for(let i=0;i<stops.length-1;i++){
+    if(p <= stops[i+1][0]){
+      const k = (p - stops[i][0]) / (stops[i+1][0] - stops[i][0]);
+      return mix(stops[i][col], stops[i+1][col], k);
     }
   }
-  return ["rgb(74,60,110)","rgb(168,114,140)"];
+  return stops[stops.length-1][col];
 }
+function skyRGB(p){ return [sample(SKY,p,1), sample(SKY,p,2)]; }
+function skyAt(p){ return skyRGB(p).map(rgb); }
 
 /* ---------- rendering ---------- */
 function render(){
-  const p = (S.t - DAY_START) / (DAY_END - DAY_START);
+  const p = Math.min(1, (S.t - DAY_START) / (DAY_END - DAY_START));
+  const wxKey = weatherAt(S.t), W = WX[wxKey], place = PLACES[S.loc];
 
   $("clock").textContent = fmtTime(S.t);
   $("phase").textContent = phaseName(S.t);
   $("daybar").style.width = (p*100).toFixed(1)+"%";
-  $("where").textContent = PLACES[S.loc].label;
+  $("where").textContent = `${place.icon} ${place.name}`;
+  $("wxNow").textContent = `${W.icon} ${W.name}`;
+  const seg = weatherSeg(S.t), next = S.weather[S.weather.indexOf(seg)+1];
+  $("wxNext").textContent = next && next.wx !== wxKey ? `then ${WX[next.wx].icon} at ${fmtTime(next.from)}` : "for the rest of the day";
 
-  const [top,bot] = skyAt(Math.min(1,p));
   const scene = $("scene");
-  scene.style.background = `linear-gradient(${top}, ${bot})`;
-  scene.className = "scene " + PLACES[S.loc].cls;
+  scene.className = `scene ${S.loc} wx-${wxKey}${place.indoor ? " indoor" : ""}`;
+  if(S.shownLoc !== S.loc){ buildPlace(); S.shownLoc = S.loc; }
+  if(S.shownWx !== wxKey){
+    buildWeather(wxKey);
+    if(S.shownWx) say(`<b>${W.icon} ${W.name}.</b> ${WX_SAY[wxKey]}`);
+    S.shownWx = wxKey; S.wxSeen.add(wxKey);
+  }
 
-  // sun arcs across and sets
+  // sky, darkened by the weather
+  const [top,bot] = skyRGB(p).map(c => mix(c, W.to, W.mix));
+  scene.style.background = `linear-gradient(${rgb(top)}, ${rgb(bot)})`;
+  scene.style.setProperty("--skyTop", rgb(top));
+
+  // sun arcs across and sets; clouds hide it
   const sun = $("sun");
   sun.style.left = (10 + p*70) + "%";
   sun.style.top  = (150 - Math.sin(p*Math.PI)*130) + "px";
   sun.style.background = p > .8 ? "#ff9d5c" : "#fff3c4";
-  sun.style.opacity = p > .97 ? 0 : 1;
+  sun.style.opacity = (p > .97 ? 0 : 1) * W.sun;
+  const night = Math.max(0, Math.min(1, (p - .86) / .12));
+  $("stars").style.opacity = night * (W.mix < .3 ? 1 : .15);
+  $("moon").style.opacity  = night * (W.mix < .45 ? 1 : .3);
 
-  // props for this location
-  $("props").innerHTML = PLACES[S.loc].props
-    .map(([e,x,c]) => `<div class="prop ${c}" style="left:${x}%">${e}</div>`).join("");
+  // the light: time of day × weather; indoors mostly lamp-light
+  let light = sample(LIGHT, p, 1).map((c,i)=>Math.round(c * W.light[i] / 255));
+  if(place.indoor) light = mix(sample(LIGHT, p, 1), [255,246,230], .7);
+  $("tint").style.background = rgb(light);
+  const dim = p > .8 || W.mix >= .5;
+  scene.style.setProperty("--win", dim ? "#ffd66b" : "#cfe3ee");
+  scene.style.setProperty("--glow", place.indoor ? .8 : (p > .82 ? .9 : W.mix >= .5 ? .55 : 0));
 
   // stat bars
-  [["energy","Energy"],["happy","Happy"],["full","Full"],["clean","Clean"]].forEach(([k])=>{
+  ["energy","happy","full","clean"].forEach(k=>{
     const el = $("st-"+k);
     el.querySelector("i").style.width = S[k]+"%";
     el.querySelector("b").textContent = Math.round(S[k]);
@@ -503,8 +1159,43 @@ function render(){
   if(!S.busy && !S.over){ setPose(idlePose()); showCue(); }
 }
 
+function buildPlace(){
+  const place = PLACES[S.loc], g = S.ground[S.loc];
+  $("backdrop").innerHTML = BACKDROPS[S.loc];
+  $("props").innerHTML = place.props
+    .map(([e,x,c]) => `<div class="prop ${c}" style="left:${x}%">${e}</div>`).join("");
+  $("gitems").innerHTML =
+    g.puddles.map(u=>`<div class="puddle" style="left:${u.x}%;bottom:${u.b}px;width:${u.w}px"></div>`).join("") +
+    g.items.map(i=>`<div class="gi" style="left:${i.x.toFixed(1)}%;bottom:${i.b.toFixed(0)}px;font-size:${i.s}px">${i.e}</div>`).join("");
+}
+
+function buildWeather(wx){
+  const W = WX[wx], c = $("clouds"), f = $("wx");
+  c.innerHTML = ""; f.innerHTML = "";
+  for(let i=0;i<W.clouds;i++){
+    const el = document.createElement("div");
+    el.className = "cloud " + W.kind;
+    const dur = (W.fast ? 22 : 70) + Math.random()*40;
+    el.style.cssText = `top:${14+Math.random()*(W.mix > .3 ? 60 : 90)}px;--s:${(.6+Math.random()*.7).toFixed(2)};animation-duration:${dur}s;animation-delay:-${(Math.random()*dur).toFixed(1)}s`;
+    c.appendChild(el);
+  }
+  const add = (cls, css, txt) => { const el = document.createElement("div"); el.className = cls; el.style.cssText = css; if(txt) el.textContent = txt; f.appendChild(el); };
+  if(wx === "rain" || wx === "storm"){
+    const n = wx === "storm" ? 110 : 70;
+    for(let i=0;i<n;i++) add("drop", `left:${-5+Math.random()*112}%;animation-duration:${(.45+Math.random()*.35).toFixed(2)}s;animation-delay:-${Math.random().toFixed(2)}s`);
+  }
+  if(wx === "snow"){
+    for(let i=0;i<55;i++) add("flake", `left:${Math.random()*100}%;font-size:${8+Math.random()*10}px;animation-duration:${(4+Math.random()*4).toFixed(1)}s;animation-delay:-${(Math.random()*8).toFixed(1)}s`, Math.random()<.5 ? "❄" : "●");
+  }
+  if(wx === "wind" || wx === "storm"){
+    for(let i=0;i<(wx === "wind" ? 10 : 4);i++) add("leaf", `top:${20+Math.random()*240}px;animation-duration:${(3+Math.random()*3).toFixed(1)}s;animation-delay:-${(Math.random()*6).toFixed(1)}s`, Math.random()<.5 ? "🍂" : "🍃");
+    for(let i=0;i<8;i++) add("gust", `top:${20+Math.random()*260}px;animation-duration:${(1.2+Math.random()*1.2).toFixed(1)}s;animation-delay:-${(Math.random()*2).toFixed(1)}s`);
+  }
+}
+
 /* what he looks like when you're not telling him to do anything */
 function idlePose(){
+  if(weatherAt(S.t) === "storm" && !PLACES[S.loc].indoor) return "sad";
   if(S.energy < 22) return "sad";
   if(S.happy  < 28) return "sad";
   return "idle";
@@ -512,7 +1203,10 @@ function idlePose(){
 
 /* the behavioural half of the feedback: he tells you before the bars do */
 function currentCue(){
-  const cues = [];
+  const cues = [], wx = weatherAt(S.t);
+  if(wx === "storm" && !PLACES[S.loc].indoor)
+                   cues.push(["⛈️", S.loc === "home" ? "He's under the table, flinching at every rumble. A cuddle would help."
+                                                      : "He's pressed against your legs, trembling. He wants to be indoors."]);
   if(S.full  < 30) cues.push(S.loc === "home"
       ? ["🍖", "He is sitting by the bowl, staring into it with intent."]
       : ["🍖", "He keeps checking your pockets. There is nothing in your pockets."]);
@@ -521,6 +1215,11 @@ function currentCue(){
   if(S.sinceExercise > 170*(1/S.breed.exerciseNeed))
                    cues.push(["🚪", "He keeps pacing to the door and looking back at you."]);
   if(S.happy < 30) cues.push(["😔", "Chin on the floor. Not sulking exactly. Sulking."]);
+  if(!cues.length && exposedHere()){
+    if(wx === "snow") cues.push(["❄️", "He's snapping at snowflakes and missing every one."]);
+    if(wx === "rain") cues.push(["🌧️", "He shakes off the rain and gives you a pointed look."]);
+    if(wx === "wind") cues.push(["🌬️", "Ears inside out, nose working overtime. The wind smells of everything."]);
+  }
   if(!cues.length && S.happy > 78 && S.energy > 60)
                    cues.push(["✨", "Bouncing on his front paws, ready for absolutely anything."]);
   return cues[0] || null;
@@ -555,33 +1254,56 @@ function floatFx(emoji, n){
     setTimeout(()=>el.remove(), 1900 + i*180);
   }
 }
+function throwItem(emoji){
+  const el = document.createElement("div");
+  el.className = "thrown"; el.textContent = emoji;
+  $("scene").appendChild(el);
+  setTimeout(()=>el.remove(), 1400);
+  setTimeout(()=>$("stage").style.left = "76%", 350);
+  setTimeout(()=>$("stage").style.left = "50%", 1000);
+}
+function dropItems(emoji, n){
+  for(let i=0;i<n;i++){
+    const el = document.createElement("div");
+    el.className = "falling"; el.textContent = emoji;
+    el.style.left = (36 + Math.random()*30) + "%";
+    el.style.animationDelay = (i*0.16) + "s";
+    $("scene").appendChild(el);
+    setTimeout(()=>el.remove(), 1500 + i*160);
+  }
+}
 
 /* ---------- buttons ---------- */
 function timeLeft(){ return DAY_END - S.t; }
 
 function drawButtons(){
+  const wx = weatherAt(S.t), place = PLACES[S.loc];
+  $("actTitle").textContent = S.loc === "home" ? "What now? · at home" : `What now? · at the ${place.name.toLowerCase()}`;
   const wrap = $("actions");
   wrap.innerHTML = "";
-  ACTIONS.forEach(a=>{
-    const here    = a.locs.includes(S.loc);
-    const noTime  = a.mins > timeLeft();
+  ACTIONS.filter(a => a.locs.includes(S.loc) && (!a.weather || a.weather.includes(wx))).forEach(a=>{
+    const noTime = a.mins > timeLeft();
+    const scared = wx === "storm" && a.outside && !place.indoor;
     const btn = document.createElement("button");
-    btn.innerHTML = `${a.icon} ${a.label}<span class="t">${a.mins} min${here ? "" : " · at home"}</span>`;
-    btn.disabled = S.busy || S.over || !here || noTime;
-    if(!here) btn.querySelector(".t").textContent = `only ${a.locs.map(l=>PLACES[l].label.split(" ")[1]).join("/")}`;
-    if(noTime && here) btn.querySelector(".t").textContent = "not enough daylight";
+    if(a.weather) btn.className = "wxact";
+    let tag = `${a.mins} min${a.weather ? " · " + WX[wx].icon + " only today" : ""}`;
+    if(noTime) tag = "not enough daylight";
+    else if(scared) tag += " · ⛈️ he's scared";
+    btn.innerHTML = `${a.icon} ${a.label}<span class="t">${tag}</span>`;
+    btn.disabled = S.busy || S.over || noTime;
     btn.onclick = ()=>doAction(a);
     wrap.appendChild(btn);
   });
 
   const tw = $("travel");
   tw.innerHTML = "";
-  TRAVEL.filter(t=>t.from === S.loc).forEach(t=>{
+  Object.keys(PLACES).filter(k => k !== S.loc).map(route).sort((a,b)=>a.mins-b.mins).forEach(r=>{
+    const P = PLACES[r.to];
     const btn = document.createElement("button");
     btn.className = "go";
-    btn.innerHTML = `${t.label}<span class="t">${t.mins} min</span>`;
-    btn.disabled = S.busy || S.over || t.mins > timeLeft();
-    btn.onclick = ()=>doTravel(t);
+    btn.innerHTML = `${P.icon} ${P.name}<span class="t">${r.mins} min ${r.walk ? "walk" : "drive"} · ${P.hint}</span>`;
+    btn.disabled = S.busy || S.over || r.mins > timeLeft();
+    btn.onclick = ()=>doTravel(r);
     tw.appendChild(btn);
   });
   const bed = document.createElement("button");
@@ -590,10 +1312,44 @@ function drawButtons(){
   bed.disabled = S.busy || S.over;
   bed.onclick = ()=>endDay(true);
   tw.appendChild(bed);
+
+  drawQuests();
+}
+
+function drawQuests(){
+  const st = S.story, qs = $("qStory");
+  qs.className = "quest" + (st.done ? " done" : "");
+  if(st.done){
+    qs.innerHTML = `<div class="qi">📖</div><div class="qt"><b>Today's story · read</b>“${esc(fill(st.s.title))}” ${"⭐".repeat(st.stars)}${"☆".repeat(st.s.qs.length - st.stars)}</div>`;
+  } else {
+    const late = 20 > timeLeft();
+    qs.innerHTML = `<div class="qi">📖</div><div class="qt"><b>Today's story</b>“${esc(fill(st.s.title))}” — read it before bedtime.</div>`;
+    const b = document.createElement("button");
+    b.innerHTML = `Read it<span class="t">${late ? "at bedtime" : "20 min"}</span>`;
+    b.disabled = S.busy || S.over || late;
+    b.onclick = doStory;
+    qs.appendChild(b);
+  }
+
+  const h = S.hunt, qh = $("qHunt");
+  qh.className = "quest" + (h.done ? " done" : "");
+  if(h.done){
+    qh.innerHTML = `<div class="qi">${h.prize[0]}</div><div class="qt"><b>Treasure hunt · found it!</b>He dug up ${esc(h.prize[1])}.</div>`;
+  } else {
+    const last = h.i === h.steps.length - 1;
+    qh.innerHTML = `<div class="qi">🗺️</div><div class="qt"><b>Treasure hunt · clue ${h.i+1} of ${h.steps.length}</b><span class="clue">${last ? "X marks the spot! " : ""}${esc(CLUES[h.steps[h.i]].go)}</span></div>`;
+    const b = document.createElement("button");
+    b.innerHTML = `🐽 Sniff here<span class="t">15 min</span>`;
+    b.disabled = S.busy || S.over || 15 > timeLeft();
+    b.onclick = doSniff;
+    qh.appendChild(b);
+  }
 }
 
 /* ---------- the clock: passive drift ---------- */
-function passTime(mins){
+function passTime(mins, wx){
+  wx = wx || weatherAt(S.t);
+  const calm = S.t - S.cuddledAt < 120;
   S.t += mins;
   S.full  = clamp(S.full  - mins*0.055);
   S.clean = clamp(S.clean - mins*0.012*S.breed.dirtRate);
@@ -607,91 +1363,313 @@ function passTime(mins){
   // being hungry or filthy erodes mood on its own
   if(S.full  < 25) S.happy = clamp(S.happy - mins*0.03);
   if(S.clean < 25) S.happy = clamp(S.happy - mins*0.015);
+
+  // weather: rain muddies an exposed dog; a storm frays his nerves unless he's indoors or cuddled
+  if(exposedHere() && (wx === "rain" || wx === "storm")) S.clean = clamp(S.clean - mins*0.03*S.breed.dirtRate);
+  if(wx === "storm" && !PLACES[S.loc].indoor)
+    S.happy = clamp(S.happy - mins*(exposedHere() ? 0.05 : (calm ? 0 : 0.02)));
 }
 
-function applyEffects(eff, id){
+function applyEffects(eff, id, outside, wx){
   const b = S.breed;
-  const joy = (b.joy && b.joy[id]) || 1;
-  if(eff.energy) S.energy = clamp(S.energy + (eff.energy < 0 ? eff.energy*b.energyDrain : eff.energy));
+  let joy = (b.joy && b.joy[id]) || 1, eMul = b.energyDrain, dMul = b.dirtRate;
+  if(outside && !PLACES[S.loc].indoor){
+    if(wx === "rain" || wx === "storm") dMul *= 1.7;
+    if(wx === "snow"){ eMul *= 1.15; dMul *= .8; joy *= b.snow || 1; }
+    if(wx === "wind") eMul *= 1.1;
+  }
+  if(id === "cuddle" && wx === "storm"){ joy *= 1.6; S.cuddledAt = S.t; }
+  if(eff.energy) S.energy = clamp(S.energy + (eff.energy < 0 ? eff.energy*eMul : eff.energy));
   if(eff.happy)  S.happy  = clamp(S.happy  + (eff.happy  > 0 ? eff.happy*joy : eff.happy));
   if(eff.full)   S.full   = clamp(S.full   + eff.full);
-  if(eff.clean)  S.clean  = clamp(S.clean  + (eff.clean < 0 ? eff.clean*b.dirtRate : eff.clean));
+  if(eff.clean)  S.clean  = clamp(S.clean  + (eff.clean < 0 ? eff.clean*dMul : eff.clean));
   S.peakHappy = Math.max(S.peakHappy, S.happy);
 }
 
 /* ---------- doing things ---------- */
+function refuse(line, stat){
+  S.busy = true;
+  setPose("sad");
+  speak("🚫  " + line, true);
+  $("st-"+stat).classList.add("pulse");
+  setTimeout(()=>$("st-"+stat).classList.remove("pulse"), 1500);
+  say(`<b>No.</b> ${line}`);
+  setTimeout(()=>{ S.busy = false; render(); }, 1500);
+}
+
 function doAction(a){
   if(S.busy || S.over) return;
+  const wx = weatherAt(S.t);
 
+  // a thunderstorm is a visible reason, same as a visible stat
+  if(wx === "storm" && a.outside && !PLACES[S.loc].indoor)
+    return refuse("He's pressed flat against your legs, trembling. Not while the sky is doing that.", "happy");
   // needs-based refusal — he has a body and it has opinions
   const refusal = a.gate(S);
-  if(refusal){
-    S.busy = true;
-    setPose("sad");
-    speak("🚫  " + refusal, true);
-    const worst = a.id === "feed" || a.id === "treat" ? "full"
-                : a.id === "nap" ? "energy" : (a.id === "wash" ? "clean" : "energy");
-    $("st-"+worst).classList.add("pulse");
-    setTimeout(()=>$("st-"+worst).classList.remove("pulse"), 1500);
-    say(`<b>No.</b> ${refusal}`);
-    setTimeout(()=>{ S.busy = false; render(); }, 1500);
-    return;
-  }
+  if(refusal) return refuse(refusal, a.stat || "energy");
 
+  const ctx = a.pick ? a.pick() : {};
+  const line = typeof a.say === "function" ? a.say(S, ctx) : a.say;
   S.busy = true;
   S.actions++;
   setPose(a.pose);
   if(a.fx) floatFx(a.fx, 3);
-  speak(`${a.icon}  ${a.say}`);
+  if(a.anim) a.anim(ctx);
+  speak(`${a.icon}  ${line}`);
 
   const dur = a.id === "nap" ? 2200 : 1500;
   setTimeout(()=>{
-    passTime(a.mins);
-    applyEffects(a.eff, a.id);
+    passTime(a.mins, wx);
+    applyEffects(Object.assign({}, a.eff, (a.effAt && a.effAt[S.loc]) || {}), a.id, a.outside, wx);
     if(a.exercise){ S.exerciseMins += a.exercise; S.sinceExercise = 0; }
     if(a.id === "treat"){ S.treats++; if(S.treats > 3) S.happy = clamp(S.happy - (S.treats-3)*2); }
     if(a.id === "wash")  S.washes++;
+    if(a.done) a.done(ctx);
     S.busy = false;
-    say(`<b>${a.label}.</b> ${a.say}`);
+    say(`<b>${a.label}.</b> ${line}`);
     render();
     if(S.t >= DAY_END) endDay(false);
   }, dur);
 }
 
-function doTravel(t){
+function doTravel(r){
   if(S.busy || S.over) return;
+  const wx = weatherAt(S.t);
   S.busy = true;
-  setPose(t.pose);
-  floatFx(t.pose === "car" ? "💨" : "🐾", 3);
-  speak((t.pose === "car" ? "🚗  " : "🐾  ") + t.label + "…");
-  $("stage").style.left = t.pose === "car" ? "78%" : "26%";
+  setPose(r.pose);
+  floatFx(r.walk ? "🐾" : "💨", 3);
+  speak((r.walk ? "🐾  Walking to " : "🚗  Driving to ") + PLACES[r.to].to + "…");
+  $("stage").style.left = r.walk ? "26%" : "78%";
 
   setTimeout(()=>{
-    passTime(t.mins);
-    applyEffects({energy:t.energy, happy:t.happy, clean:t.clean}, "travel");
-    if(t.exercise){ S.exerciseMins += t.exercise; S.sinceExercise = 0; }
-    S.loc = t.to;
+    passTime(r.mins, wx);
+    const soaked = r.walk && (wx === "rain" || wx === "storm") ? -8 : 0;
+    applyEffects({energy:r.energy, happy:r.happy, clean:r.clean + soaked}, "travel", false, wx);
+    if(r.exercise){ S.exerciseMins += r.exercise; S.sinceExercise = 0; }
+    S.loc = r.to;
+    S.visited.add(r.to);
     S.busy = false;
     $("stage").style.left = "50%";
-    say(`<b>${t.label}.</b> ${PLACES[t.to].label.split(" ")[1]} it is.`);
+    say(`<b>${r.walk ? "Walked" : "Drove"} to ${PLACES[r.to].to}.</b> ${PLACES[r.to].arrive}`);
     render();
     if(S.t >= DAY_END) endDay(false);
   }, 1600);
+}
+
+/* the treasure hunt: he sniffs, you read the clue and pick the place */
+function doSniff(){
+  if(S.busy || S.over || S.hunt.done) return;
+  const wx = weatherAt(S.t), h = S.hunt;
+  if(wx === "storm" && exposedHere())
+    return refuse("He won't put his nose to the ground in this. He wants to be indoors.", "happy");
+  if(S.energy < 12) return refuse("He sniffs once, sighs, and lies down on the clue. Too tired to detect.", "energy");
+
+  S.busy = true;
+  setPose("dig");
+  floatFx("👃", 2);
+  speak("🐽  Nose to the ground…");
+  setTimeout(()=>{
+    passTime(15, wx);
+    applyEffects({energy:-5, happy:5}, "sniff", exposedHere(), wx);
+    const target = h.steps[h.i];
+    if(S.loc === target){
+      h.i++;
+      if(h.i >= h.steps.length){
+        h.done = true;
+        h.prize = pick(PRIZES);
+        applyEffects({happy:25}, "treasure");
+        floatFx("✨", 6); floatFx(h.prize[0], 3);
+        speak(`🧰  He digs like a maniac and hits wood. A treasure chest! Inside: ${h.prize[1]}!`);
+        say(`<b>TREASURE!</b> ${S.name} dug up a chest ${CLUES[target].spot}. Inside: ${h.prize[0]} ${h.prize[1]}.`);
+      } else {
+        applyEffects({happy:6}, "clue");
+        floatFx("📜", 3);
+        speak(`📜  He found a note ${CLUES[target].spot}! Read the next clue.`);
+        say(`<b>Clue found!</b> ${CLUES[target].spot[0].toUpperCase() + CLUES[target].spot.slice(1)}. Next: “${CLUES[h.steps[h.i]].go}”`);
+      }
+    } else {
+      speak("🐽  Nothing here but a very interesting smell.");
+      say(`<b>No clue here.</b> Read the clue again: “${CLUES[target].go}”`);
+    }
+    S.busy = false;
+    render();
+    if(S.t >= DAY_END) endDay(false);
+  }, 1500);
+}
+
+/* ---------- story book ---------- */
+const canSpeak = "speechSynthesis" in window;
+let ST = null;
+
+function fill(t){
+  const [he,him,his] = S.breed.pro, cap = s => s[0].toUpperCase() + s.slice(1);
+  return t.replace(/\{name\}/g, S.name).replace(/\{He\}/g, cap(he)).replace(/\{he\}/g, he)
+          .replace(/\{His\}/g, cap(his)).replace(/\{his\}/g, his).replace(/\{him\}/g, him);
+}
+function wordSpans(text){
+  let html = "", c = 0;
+  text.split(/(\s+)/).forEach(tok=>{
+    if(!tok) return;
+    html += /^\s+$/.test(tok) ? tok : `<span class="w" data-c="${c}">${esc(tok)}</span>`;
+    c += tok.length;
+  });
+  return html;
+}
+function speakText(text, el){
+  if(!canSpeak) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = .8; u.lang = "en-US";
+  if(el){
+    const spans = [...el.querySelectorAll(".w")];
+    u.onboundary = e => {
+      let cur = null;
+      for(const s of spans) if(+s.dataset.c <= e.charIndex) cur = s;
+      spans.forEach(s => s.classList.toggle("hl", s === cur));
+    };
+    u.onend = () => spans.forEach(s => s.classList.remove("hl"));
+  }
+  speechSynthesis.speak(u);
+}
+function stopSpeech(){ if(canSpeak) speechSynthesis.cancel(); }
+
+function openStory(bedtime, done){
+  S.busy = true;
+  drawButtons();
+  const s = S.story.s, lines = s.text.map(fill), pages = [];
+  for(let i=0;i<lines.length;i+=2) pages.push(lines.slice(i,i+2).join(" "));
+  ST = {s, pages, page:0, q:-1, stars:0, tried:false, bedtime, done};
+  $("storyBadge").textContent = bedtime ? "🌙 Bedtime story" : "📖 Today's story";
+  $("storyTitle").textContent = fill(s.title);
+  $("storyPeekText").textContent = lines.join(" ");
+  $("storyRead").style.display = canSpeak ? "" : "none";
+  $("storyTip").style.display = canSpeak ? "" : "none";
+  $("storyOverlay").classList.remove("hide");
+  showStoryPage();
+}
+function showStoryPage(){
+  stopSpeech();
+  $("storyProg").textContent = `Page ${ST.page+1} of ${ST.pages.length}`;
+  $("storyArt").textContent = ST.s.art;
+  $("storyText").className = "storytext";
+  $("storyText").innerHTML = wordSpans(ST.pages[ST.page]);
+  $("storyOpts").innerHTML = "";
+  $("storyHint").textContent = "";
+  $("storyPeek").style.display = "none";
+  $("storyNext").style.display = "";
+  $("storyNext").textContent = ST.page < ST.pages.length-1 ? "Next page →" : "Questions →";
+}
+function showQuestion(){
+  stopSpeech();
+  const [q, opts] = ST.s.qs[ST.q];
+  ST.tried = false;
+  $("storyProg").textContent = `Question ${ST.q+1} of ${ST.s.qs.length}`;
+  $("storyArt").textContent = "❓";
+  $("storyText").className = "storytext q";
+  $("storyText").innerHTML = wordSpans(fill(q));
+  const box = $("storyOpts");
+  box.innerHTML = "";
+  shuffle(opts.map((o,i)=>[fill(o), i === 0])).forEach(([txt, right])=>{
+    const b = document.createElement("button");
+    b.textContent = txt;
+    b.onclick = () => answer(b, right);
+    box.appendChild(b);
+  });
+  $("storyHint").textContent = "";
+  $("storyPeek").style.display = ""; $("storyPeek").open = false;
+  $("storyNext").style.display = "none";
+}
+function answer(btn, right){
+  if(right){
+    btn.classList.add("right");
+    if(!ST.tried) ST.stars++;
+    [...$("storyOpts").children].forEach(b => b.disabled = true);
+    $("storyHint").textContent = ST.tried ? "Yes! You found it." : pick(["Yes! ⭐","Great reading! ⭐","You got it! ⭐"]);
+    setTimeout(()=>{ ST.q++; ST.q < ST.s.qs.length ? showQuestion() : showStoryEnd(); }, 900);
+  } else {
+    btn.classList.add("wrong");
+    btn.disabled = true;
+    ST.tried = true;
+    $("storyHint").textContent = "Not quite — try again! You can peek at the story.";
+  }
+}
+function showStoryEnd(){
+  const n = ST.s.qs.length;
+  $("storyProg").textContent = "All done!";
+  $("storyArt").textContent = "⭐".repeat(ST.stars) + "☆".repeat(n - ST.stars);
+  $("storyText").className = "storytext q";
+  $("storyText").textContent = ST.stars === n ? "Perfect! You read it all by yourself."
+                             : ST.stars > 0   ? `You got ${ST.stars} of ${n} on the first try. Good reading!`
+                             : "You kept trying and found every answer. Well done!";
+  $("storyOpts").innerHTML = "";
+  $("storyHint").textContent = "";
+  $("storyPeek").style.display = "none";
+  $("storyNext").style.display = "";
+  $("storyNext").textContent = ST.bedtime ? "Good night →" : "Back to the day →";
+}
+function finishStory(){
+  stopSpeech();
+  $("storyOverlay").classList.add("hide");
+  const done = ST.done, stars = ST.stars;
+  ST = null;
+  done(stars);
+}
+$("storyNext").onclick = ()=>{
+  if(ST.q < 0){
+    if(ST.page < ST.pages.length-1){ ST.page++; showStoryPage(); }
+    else { ST.q = 0; showQuestion(); }
+  } else if(ST.q >= ST.s.qs.length) finishStory();
+};
+$("storyRead").onclick = ()=> speakText($("storyText").textContent, $("storyText"));
+$("storyText").addEventListener("click", e=>{
+  const w = e.target.closest(".w");
+  if(w) speakText(w.textContent.replace(/[^A-Za-z']/g, ""));
+});
+
+function doStory(){
+  if(S.busy || S.over || S.story.done) return;
+  openStory(false, stars=>{
+    S.story.done = true; S.story.stars = stars;
+    passTime(20);
+    applyEffects({happy:10, energy:5}, "story");
+    floatFx("📖", 2);
+    say(`<b>Story time.</b> ${S.name} listened to “${fill(S.story.s.title)}” with ${S.breed.pro[2]} head on your knee. ${"⭐".repeat(stars)}`);
+    S.busy = false;
+    render();
+    if(S.t >= DAY_END) endDay(false);
+  });
 }
 
 /* ---------- dusk ---------- */
 function endDay(early){
   if(S.over) return;
   S.over = true; S.busy = true;
+  drawButtons();
+  if(!S.story.done){
+    // the story is the one thing every day needs — if it wasn't read, it becomes the bedtime story
+    setPose("idle");
+    speak("📖  Not without a bedtime story. He's brought you the book.");
+    setTimeout(()=>openStory(true, stars=>{
+      S.story.done = true; S.story.stars = stars;
+      goToSleep(early);
+    }), 1100);
+    return;
+  }
+  goToSleep(early);
+}
+
+function goToSleep(early){
   setPose("sleep");
   floatFx("💤", 4);
   speak("💤  Out like a light.");
   drawButtons();
 
   setTimeout(()=>{
+    const storyBonus = S.story.stars * 2;
+    const treasureBonus = S.hunt.done ? 8 : 0;
     const score = Math.round(
       S.happy*0.40 + S.energy*0.18 + S.full*0.21 + S.clean*0.21
-    ) + Math.min(10, Math.floor(S.exerciseMins/30)*2);
+    ) + Math.min(10, Math.floor(S.exerciseMins/30)*2) + storyBonus + treasureBonus;
 
     const stats = [["happy",S.happy,"happiness"],["energy",S.energy,"rest"],
                    ["full",S.full,"food"],["clean",S.clean,"grooming"]];
@@ -702,21 +1680,28 @@ function endDay(early){
       happy:  "He had a flat day. More walking, more fetch, fewer baths.",
       energy: "You ran him into the ground. A nap earlier would have bought you a better evening.",
       full:   "He went to bed hungry. Feeding is cheap — twenty minutes and it lifts three stats.",
-      clean:  "He's asleep and he smells. The beach and the bath aren't optional together."
+      clean:  "He's asleep and he smells. A bath — or the pool slide — would have fixed that."
     };
     let verdict = notes[worst[0]];
     if(score >= 85) verdict = "Near-perfect day. He's asleep on his side with his paws twitching. " + (worst[1] < 60 ? notes[worst[0]] : "Nothing to fix.");
     else if(score >= 70) verdict = "A good day by any dog's reckoning. " + notes[worst[0]];
     else if(score < 45) verdict = "A thin day. " + notes[worst[0]];
+    if(S.hunt.done) verdict += ` And he found the treasure: ${S.hunt.prize[1]}.`;
 
     $("endTitle").textContent = early ? `${S.name} turns in early` : `${S.name} is asleep`;
     $("endSub").textContent = `${S.breed.label} · ${fmtTime(S.t)} · ${S.actions} things done · ${S.exerciseMins} min of exercise`;
     $("endScore").textContent = score;
     $("endVerdict").textContent = verdict;
+    const n = S.story.s.qs.length;
     $("endTally").innerHTML = [
       ["Happiness", Math.round(S.happy)], ["Energy left", Math.round(S.energy)],
       ["Fullness", Math.round(S.full)],   ["Cleanliness", Math.round(S.clean)],
-      ["Exercise", S.exerciseMins+" min"],["Treats", S.treats]
+      ["Exercise", S.exerciseMins+" min"],["Treats", S.treats],
+      ["Story", "⭐".repeat(S.story.stars) + "☆".repeat(n - S.story.stars)],
+      ["Treasure", S.hunt.done ? S.hunt.prize[0] + " found" : `${S.hunt.i} of ${S.hunt.steps.length} clues`],
+      ["Places visited", `${S.visited.size} of ${Object.keys(PLACES).length}`],
+      ["Weather", [...S.wxSeen].map(w=>WX[w].icon).join(" ")],
+      ["Dug up", S.finds.length ? S.finds.join(" ") : "—"]
     ].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
     $("endOverlay").classList.remove("hide");
   }, 1800);
@@ -726,22 +1711,33 @@ function endDay(early){
 const EARS = {
   husky:     'M170 40 l6 -38 l24 26 z',
   retriever: 'M168 34 q-16 8 -12 40 q16 6 24 -14 z',
-  bulldog:   'M168 36 q-14 2 -12 24 q14 2 20 -12 z'
+  bulldog:   'M168 36 q-14 2 -12 24 q14 2 20 -12 z',
+  dachshund: 'M168 34 q-20 6 -16 50 q18 4 26 -24 z',
+  poodle:    'M166 34 q-22 10 -16 46 q6 8 16 2 q10 -6 12 -34 z',
+  dalmatian: 'M168 34 q-16 8 -12 36 q16 6 24 -12 z',
+  corgi:     'M166 42 l2 -44 l32 30 z'
 };
+const SHAPES = {bulldog:[1.06,.9], dachshund:[1.18,.8], corgi:[1.06,.84], poodle:[.97,1.04]};
 function miniDog(b, key){
-  return `<svg viewBox="0 0 250 170">
+  const [sx,sy] = SHAPES[key] || [1,1];
+  const spots = key === "dalmatian" ? `<g fill="#34343d"><circle cx="90" cy="78" r="6"/><circle cx="118" cy="70" r="5"/><circle cx="142" cy="86" r="4.5"/><circle cx="100" cy="98" r="4"/><circle cx="192" cy="40" r="4"/></g>` : "";
+  const poms = key === "poodle" ? `<circle cx="30" cy="45" r="11" fill="${b.belly}"/><circle cx="186" cy="31" r="16" fill="${b.belly}"/>` : "";
+  const earFill = key === "dalmatian" ? "#34343d" : b.dark;
+  return `<svg viewBox="0 0 250 170"><g transform="translate(125 150) scale(${sx} ${sy}) translate(-125 -150)">
     <ellipse cx="112" cy="92" rx="58" ry="33" fill="${b.coat}"/>
     <ellipse cx="118" cy="104" rx="45" ry="19" fill="${b.belly}"/>
     <rect x="75" y="100" width="17" height="46" rx="8" fill="${b.dark}"/>
     <rect x="143" y="98" width="17" height="48" rx="8" fill="${b.dark}"/>
     <path d="M64 80 q-30 -4 -36 -34 q18 18 36 20 z" fill="${b.dark}"/>
     <path d="M150 96 q4 -30 26 -36 l14 26 z" fill="${b.coat}"/>
+    ${poms}
     <ellipse cx="190" cy="56" rx="31" ry="27" fill="${b.coat}"/>
     <ellipse cx="216" cy="66" rx="21" ry="14" fill="${b.belly}"/>
     <ellipse cx="234" cy="60" rx="8" ry="6.5" fill="#2b2b33"/>
     <circle cx="203" cy="52" r="5.5" fill="#2b2b33"/>
-    <path d="${EARS[key]}" fill="${b.dark}"/>
-  </svg>`;
+    ${spots}
+    <path d="${EARS[key]}" fill="${earFill}"/>
+  </g></svg>`;
 }
 $("picks").innerHTML = Object.entries(BREEDS).map(([k,b])=>`
   <div class="pick" onclick="startGame('${k}')">
