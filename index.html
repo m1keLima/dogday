@@ -528,8 +528,8 @@
           <li><span>☀️</span>You have one day, from morning until night.</li>
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
-          <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You get 1 listen for each page!</li>
-          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. You get 1 listen per riddle.</li>
+          <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. Each page gives you 1 listen — save them up if you don't need them!</li>
+          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. Each riddle gives you 1 listen, and you can save them.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
           <li><span>🚽</span>Dogs need to go to the bathroom outside. Watch the Potty bar!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
@@ -540,9 +540,9 @@
       <div class="hcol hparents">
         <h2>👩👨 For parents</h2>
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
-        <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, with 1 listen per page (5 per story), so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
-        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, with 1 listen per riddle (5 in all). The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
-        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It has 1 listen per page (3). Right answers earn points, once per weather type each day.</p>
+        <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, earning 1 listen per page; unused listens carry over to later pages and the questions, so there's a reason to try sounding words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
+        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, earning 1 listen per riddle, saved up if unused. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
+        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It earns 1 listen per page (3 in all), saved up if unused. Right answers earn points, once per weather type each day.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -584,7 +584,7 @@
       <button id="huntRead">🔊 Read riddle<span class="t">uses 1 listen</span></button>
       <button class="go" id="huntGo">Go find it →</button>
     </div>
-    <p class="tip" id="huntTip">Hard word? Tap it to hear it, have the whole riddle read, or press 🔊 next to an answer. You get 1 listen per riddle, 5 in all.</p>
+    <p class="tip" id="huntTip">Hard word? Tap it to hear it, have the whole riddle read, or press 🔊 next to an answer. Every riddle gives you 1 listen — the ones you don't use are saved for later riddles.</p>
   </div>
 </div>
 
@@ -609,8 +609,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v10";
-const RELEASED = "2026-09-27 10:11";
+const VERSION  = "v11";
+const RELEASED = "2026-09-27 10:13";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1227,7 +1227,7 @@ function makeHunt(r){
   let steps = shuffle(Object.keys(CLUES), r).slice(0, HUNT_STEPS);
   if(steps[0] === "house") steps.push(steps.shift());   // don't start where he wakes up
   return {steps, riddles:steps.map(k => pick(CLUES[k].riddles, r)), i:0, solved:false, done:false, prize:null,
-          listens:HUNT_LISTENS, heard:[]};
+          listens:0, earned:0, heard:[]};
 }
 const PRIZES = [["👑","a gold crown"],["💎","a big shiny gem"],["🦴","a GOLDEN bone"],["🪙","a bag of gold coins"],["🏆","a tiny trophy"]];
 
@@ -1643,7 +1643,6 @@ function startGame(breedKey, seed){
     finds:[], wxRead:{}, visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
   };
-  S.story.listens = pagesOf(S.story.s.text);
   document.documentElement.style.setProperty("--coat", b.coat);
   document.documentElement.style.setProperty("--coat-dark", b.dark);
   document.documentElement.style.setProperty("--belly", b.belly);
@@ -1988,6 +1987,7 @@ function closeHunt(){
 }
 function drawHunt(){
   const h = S.hunt, rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
+  earnListen(h, h.i + 1);
   $("huntProg").textContent = `Riddle ${h.i+1} of ${h.steps.length}  ${huntDots()}`;
   $("huntArt").innerHTML = chestSVG(false);
   $("huntText").innerHTML = wordSpans(rd.q);
@@ -2019,8 +2019,7 @@ function drawHunt(){
 function drawHuntListen(){
   const h = S.hunt, el = $("huntListen");
   el.className = "listen" + (h.listens ? "" : " out");
-  el.textContent = h.listens ? `🔊 ${"●".repeat(h.listens)}${"○".repeat(HUNT_LISTENS - h.listens)}  ${h.listens} listen${h.listens === 1 ? "" : "s"} left`
-                             : "🔇 No listens left — sound it out!";
+  el.textContent = listenText(h.listens, HUNT_LISTENS - (h.earned || 0), "riddle");
   $("huntRead").disabled = !h.listens;
 }
 function huntSpeak(span){
@@ -2283,12 +2282,15 @@ function wordSpans(text){
 }
 /* the child reads; a tap hears one word (or a page). 5 listens per story — hearing
    the same word again is free, so the counter never punishes a re-check. */
-const LISTENS = 5;   // fallback; the real pool is pagesOf(story text)
+function listenText(have, toCome, unit){
+  const more = toCome > 0 ? ` · +1 each new ${unit}` : "";
+  return have ? `🔊 ${"●".repeat(have)}  ${have} listen${have === 1 ? "" : "s"} saved${more}`
+              : (toCome > 0 ? `🔇 No listens now${more}` : "🔇 No listens left — sound it out!");
+}
 function drawListens(){
   const st = ST.pool, left = st.listens, el = $("storyListen");
   el.className = "listen" + (left ? "" : " out");
-  el.textContent = left ? `🔊 ${"●".repeat(left)}${"○".repeat(ST.max-left)}  ${left} listen${left === 1 ? "" : "s"} left`
-                        : "🔇 No listens left — sound it out!";
+  el.textContent = listenText(left, ST.max - (st.earned || 0), "page");
   $("storyRead").disabled = !left;
 }
 function readPage(){
@@ -2356,13 +2358,21 @@ function openStory(bedtime, done, opt){
   $("storyRead").style.display = canSpeak ? "" : "none";
   $("storyExit").style.display = bedtime ? "none" : "";
   $("storyTip").style.display = canSpeak ? "" : "none";
-  $("storyTip").textContent = `Stuck? Tap a word to hear it, or have the whole page read — each one uses 1 of your ${opt.max} listens. Save them for the hard parts!`;
+  $("storyTip").textContent = "Every page gives you 1 listen: tap a word to hear it, or have the whole page read. Don't need it? It's saved for later pages and the questions!";
   drawListens();
   $("storyOverlay").classList.remove("hide");
   showStoryPage();
 }
+/* one listen per page, earned when the page is first reached; unused ones are saved
+   for later pages and the questions — within this reading only */
+function earnListen(pool, upTo){
+  pool.earned = pool.earned || 0;
+  if(upTo > pool.earned){ pool.listens += upTo - pool.earned; pool.earned = upTo; return true; }
+  return false;
+}
 function showStoryPage(){
   stopSpeech();
+  if(earnListen(ST.pool, ST.page + 1)) drawListens();
   $("storyProg").textContent = `Page ${ST.page+1} of ${ST.pages.length}`;
   $("storyArt").textContent = ST.s.art;
   $("storyText").className = "storytext";
@@ -2473,7 +2483,7 @@ function openWeather(){
   if(!S || S.busy || S.over) return;
   const wx = weatherAt(S.t), W = WX[wx];
   const max = pagesOf(WX_READ[wx].text);
-  const entry = S.wxRead[wx] = S.wxRead[wx] || {listens:max, heard:[], done:false, stars:0};
+  const entry = S.wxRead[wx] = S.wxRead[wx] || {listens:0, earned:0, heard:[], done:false, stars:0};
   openStory(false, stars=>{
     if(!entry.done){
       entry.done = true; entry.stars = stars;
