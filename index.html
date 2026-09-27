@@ -263,7 +263,13 @@
   .xbtn{font-size:13px;padding:4px 10px;border-width:2px;box-shadow:0 2px 0 var(--ink);border-radius:10px}
   .ver{font-size:13px;font-weight:800;color:var(--ink-soft);background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:2px 9px;vertical-align:middle}
   .help{max-width:820px;position:relative}
-  .help .xclose{position:absolute;top:14px;right:14px;font-size:18px;padding:4px 12px;border-radius:12px}
+  .help .xclose,.endm .xclose{position:absolute;top:14px;right:14px;font-size:18px;padding:4px 12px;border-radius:12px}
+  .endm{position:relative}
+  .endm h1{margin-right:44px}
+  #endOverlay{background:rgba(43,43,51,.38)}
+  .afterbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:15;display:flex;gap:10px;
+    background:var(--card);border:3px solid var(--ink);border-radius:18px;padding:10px;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+  .afterbar.hide{display:none}
   .help h1{margin:0 44px 4px 0}
   .hcols{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin:14px 0 16px}
   .hcol{border:3px solid var(--line);border-radius:18px;padding:14px 16px;background:#fff}
@@ -598,7 +604,8 @@
 
 <!-- ---------- score card ---------- -->
 <div class="overlay hide" id="endOverlay">
-  <div class="modal">
+  <div class="modal endm">
+    <button class="xclose" onclick="closeEnd()" title="Close to watch the family" aria-label="Close">✕</button>
     <h1 id="endTitle">Good night</h1>
     <p class="sub" id="endSub"></p>
     <div class="score" id="endScore">0</div>
@@ -606,6 +613,10 @@
     <div class="tally" id="endTally"></div>
     <button class="go" onclick="location.reload()">Another day →</button>
   </div>
+</div>
+<div class="afterbar hide" id="afterBar">
+  <button onclick="openEnd()">📊 Show my score</button>
+  <button class="go" onclick="location.reload()">Another day →</button>
 </div>
 
 <script>
@@ -617,8 +628,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v15";
-const RELEASED = "2026-09-27 10:31";
+const VERSION  = "v16";
+const RELEASED = "2026-09-27 10:32";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -2621,8 +2632,14 @@ function puppyScene(n, then){
   speak(`🏠  ${S.name} comes inside — and ${mum} is waiting with their ${word}!`);
   say(`<b>Puppy time!</b> ${S.name} comes home to ${mum} and their ${word}. They play until the stars come out.`);
   setTimeout(()=>{ setPose("jump"); speak("🐾  Tag, tumble, tail-chase… then one by one the puppies curl up in a heap."); }, 3500);
-  setTimeout(()=>{ extras.forEach(e=>e.remove()); $("stage").style.left = "50%"; then(); }, 7500);
+  setTimeout(()=>{
+    hearts.remove();
+    document.querySelectorAll(".pup").forEach(p=>p.style.animationDuration = "6s");
+    then();
+  }, 7500);
 }
+function closeEnd(){ $("endOverlay").classList.add("hide"); $("afterBar").classList.remove("hide"); window.scrollTo({top:0, behavior:"smooth"}); }
+function openEnd(){ $("afterBar").classList.add("hide"); $("endOverlay").classList.remove("hide"); }
 function sleepAndCard(early, score){
   setPose("sleep");
   floatFx("💤", 4);
