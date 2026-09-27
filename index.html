@@ -495,7 +495,7 @@
           <li><span>☀️</span>You have one day, from morning until night.</li>
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
-          <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You only get 3 listens!</li>
+          <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You only get 5 listens!</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
           <li><span>🐾</span>Have a great day, and you will see the puppies at night!</li>
@@ -504,7 +504,7 @@
       <div class="hcol hparents">
         <h2>👩👨 For parents</h2>
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
-        <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, but only 3 times per story, so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
+        <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, but only 5 times per story, so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
         <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
@@ -530,7 +530,7 @@
       <button id="storyRead">🔊 Read this page<span class="t">uses 1 listen</span></button>
       <button class="go" id="storyNext">Next →</button>
     </div>
-    <p class="tip" id="storyTip">Stuck? Tap a word to hear it, or have the whole page read — each one uses 1 of your 3 listens. Save them for the hard parts!</p>
+    <p class="tip" id="storyTip">Stuck? Tap a word to hear it, or have the whole page read — each one uses 1 of your 5 listens. Save them for the hard parts!</p>
   </div>
 </div>
 
@@ -555,8 +555,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v5";
-const RELEASED = "2026-09-26 19:07";
+const VERSION  = "v6";
+const RELEASED = "2026-09-27 09:23";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1480,7 +1480,7 @@ function startGame(breedKey, seed){
     log:[],
     weather:makeWeather(r),
     ground:scatterGround(r),
-    story:{s:pick(STORIES, r), done:false, stars:0, listens:3},
+    story:{s:pick(STORIES, r), done:false, stars:0, listens:LISTENS},
     hunt:makeHunt(r),
     finds:[], visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
@@ -2028,9 +2028,9 @@ function wordSpans(text){
   });
   return html;
 }
-/* the child reads; a tap hears one word. 3 different words per story — hearing
+/* the child reads; a tap hears one word (or a page). 5 listens per story — hearing
    the same word again is free, so the counter never punishes a re-check. */
-const LISTENS = 3;
+const LISTENS = 5;
 function drawListens(){
   const st = S.story, left = st.listens, el = $("storyListen");
   el.className = "listen" + (left ? "" : " out");
