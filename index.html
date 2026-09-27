@@ -500,7 +500,7 @@
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
           <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You only get 5 listens!</li>
-          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You get 2 listens for the whole hunt.</li>
+          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You get 3 listens for the whole hunt.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
           <li><span>🐾</span>Have a great day, and you will see the puppies at night!</li>
@@ -510,7 +510,7 @@
         <h2>👩👨 For parents</h2>
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, but only 5 times per story, so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
-        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word or the whole riddle, but only 2 times in the whole hunt. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
+        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word or the whole riddle, but only 3 times in the whole hunt. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -560,8 +560,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v7";
-const RELEASED = "2026-09-27 09:26";
+const VERSION  = "v8";
+const RELEASED = "2026-09-27 09:27";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1045,7 +1045,7 @@ const ACTIONS = [
 /* Each step is a riddle with 4 answers (RIGHT answer first — shuffled on screen).
    The answer tells you where to go; there you sniff for the next note. */
 const HUNT_STEPS = 5;
-const HUNT_LISTENS = 2;   // read-alouds for the whole hunt (its own pool, separate from the story's)
+const HUNT_LISTENS = 3;   // read-alouds for the whole hunt (its own pool, separate from the story's)
 const CLUES = {
   park:{spot:"under the park bench", riddles:[
     {q:"I am brown and fluffy. I have a big bushy tail. I hide nuts in trees. What am I?", a:["a squirrel","a fish","a cow","a frog"], icon:"🐿️", where:"Squirrels live in the park."},
