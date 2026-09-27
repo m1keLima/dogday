@@ -47,6 +47,31 @@
   .daybar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd166,#e8743c,#6b4a8f)}
   .where{font-size:14px;background:var(--ink);color:#fff;padding:5px 12px;border-radius:99px}
   .wxb{font-size:14px;border:2px solid var(--ink);border-radius:14px;padding:3px 11px;background:#fff;line-height:1.3}
+  .hat{display:none}
+  .hat-on-santa .hat-santa,.hat-on-witch .hat-witch,.hat-on-pilgrim .hat-pilgrim,.hat-on-leprechaun .hat-leprechaun,
+  .hat-on-party .hat-party,.hat-on-stars .hat-stars,.hat-on-bunny .hat-bunny,.hat-on-heart .hat-heart,
+  .hat-on-flower .hat-flower,.hat-on-shades .hat-shades,.hat-on-scarf .hat-scarf{display:block}
+  #decor{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .indoor #decor{display:none}
+  .garland{position:absolute;left:0;right:0;top:0;height:26px;display:none;pointer-events:none;
+    background-repeat:repeat-x;background-size:44px 26px;animation:twinkle 1.6s steps(2) infinite}
+  .garland.g-xmas{display:block;background-image:radial-gradient(circle at 11px 16px,#d9534f 5px,transparent 6px),radial-gradient(circle at 33px 16px,#3aa655 5px,transparent 6px),linear-gradient(#2b2b33,#2b2b33);background-size:44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 9px}
+  .garland.g-spooky{display:block;background-image:radial-gradient(circle at 11px 16px,#f28b2c 5px,transparent 6px),radial-gradient(circle at 33px 16px,#6b4a8f 5px,transparent 6px),linear-gradient(#2b2b33,#2b2b33);background-size:44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 9px}
+  .garland.g-hearts{display:block;background-image:radial-gradient(circle at 11px 16px,#e86aa6 5px,transparent 6px),radial-gradient(circle at 33px 16px,#fff 5px,transparent 6px),linear-gradient(#e86aa6,#e86aa6);background-size:44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 9px}
+  .garland.g-green{display:block;background-image:radial-gradient(circle at 11px 16px,#3aa655 5px,transparent 6px),radial-gradient(circle at 33px 16px,#f0b429 5px,transparent 6px),linear-gradient(#2e8b4a,#2e8b4a);background-size:44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 9px}
+  .garland.g-usa{display:block;background-image:radial-gradient(circle at 8px 16px,#d9534f 5px,transparent 6px),radial-gradient(circle at 22px 16px,#fff 5px,transparent 6px),radial-gradient(circle at 36px 16px,#2d5fb3 5px,transparent 6px),linear-gradient(#2b2b33,#2b2b33);background-size:44px 26px,44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 0,0 9px}
+  .garland.g-party{display:block;background-image:radial-gradient(circle at 11px 16px,#f0b429 5px,transparent 6px),radial-gradient(circle at 33px 16px,#57a9d6 5px,transparent 6px),linear-gradient(#6b4a8f,#6b4a8f);background-size:44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 9px}
+  @keyframes twinkle{50%{filter:brightness(1.35)}}
+  .counters{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:-4px}
+  .cnt{font-size:13px;font-weight:800;background:var(--card);border:2px solid var(--ink);border-radius:99px;padding:3px 10px}
+  .cnt.ok{background:#e6f5ea;border-color:var(--good)}
+  .pickopts{display:grid;gap:10px;margin:0 0 14px}
+  .pickopts > div{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .pickopts b{font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
+  .seg{font-size:14px;padding:6px 12px;border-width:2px;box-shadow:0 3px 0 var(--ink);border-radius:12px}
+  .seg.on{background:var(--accent-2)}
+  .seg .t{display:inline;margin-left:4px}
+  .devtag{font-size:12px;font-weight:800;color:#fff;background:#6b4a8f;border-radius:99px;padding:2px 8px}
   .wxb{cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .08s}
   .wxb:hover{transform:translateY(-1px)}
   .wxb .rd{font-size:11px;background:var(--accent-2);border-radius:99px;padding:0 6px;margin-left:4px;vertical-align:middle}
@@ -402,6 +427,7 @@
     <div class="where" id="where">🏠 Home</div>
   </div>
 
+  <div class="counters" id="counters"></div>
   <div class="stats">
     <div class="stat s-energy" id="st-energy"><div class="k"><span>Energy</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-happy"  id="st-happy"><div class="k"><span>Happy</span><b>—</b></div><div class="bar"><i></i></div></div>
@@ -415,10 +441,12 @@
     <div class="sun" id="sun"></div>
     <div id="moon">🌙</div>
     <div id="clouds"></div>
+    <div id="decor"></div>
     <svg id="backdrop" viewBox="0 0 880 234" preserveAspectRatio="xMidYMax slice"></svg>
     <div class="ground"></div>
     <div id="gitems"></div>
     <div id="props"></div>
+    <div class="garland" id="garland"></div>
     <div id="stage">
       <svg id="dog" class="breed-retriever pose-idle" viewBox="0 0 250 170">
         <g id="dogShape">
@@ -478,6 +506,17 @@
             <circle class="eye-open" cx="203" cy="52" r="5.5" fill="#2b2b33"/>
             <circle class="eye-open" cx="205" cy="50" r="1.8" fill="#fff"/>
             <path  class="eye-shut" d="M197 52 q6 6 12 0" stroke="#2b2b33" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+            <g class="hat hat-santa"><path d="M166 32 L192 -8 L214 28 Z" fill="#d9534f"/><rect x="162" y="24" width="56" height="10" rx="5" fill="#fff"/><circle cx="192" cy="-8" r="7" fill="#fff"/></g>
+            <g class="hat hat-witch"><ellipse cx="190" cy="30" rx="34" ry="7" fill="#2b2b33"/><path d="M172 30 L194 -18 L208 30 Z" fill="#2b2b33"/><rect x="176" y="20" width="28" height="6" fill="#f28b2c"/></g>
+            <g class="hat hat-pilgrim"><ellipse cx="190" cy="30" rx="30" ry="6" fill="#2b2b33"/><rect x="174" y="0" width="32" height="30" fill="#2b2b33"/><rect x="183" y="18" width="14" height="10" fill="none" stroke="#f0b429" stroke-width="3"/></g>
+            <g class="hat hat-leprechaun"><ellipse cx="190" cy="30" rx="30" ry="6" fill="#2e8b4a"/><rect x="174" y="0" width="32" height="30" fill="#3aa655"/><rect x="174" y="18" width="32" height="6" fill="#2b2b33"/><rect x="185" y="17" width="10" height="8" fill="#f0b429"/></g>
+            <g class="hat hat-party"><path d="M176 30 L192 -12 L206 30 Z" fill="#57a9d6"/><circle cx="186" cy="18" r="3" fill="#fff"/><circle cx="196" cy="8" r="3" fill="#f0b429"/><circle cx="192" cy="-12" r="6" fill="#e8743c"/></g>
+            <g class="hat hat-stars"><path d="M176 30 L192 -12 L206 30 Z" fill="#d9534f"/><path d="M181 20 h22" stroke="#fff" stroke-width="5"/><circle cx="192" cy="-12" r="6" fill="#2d5fb3"/><text x="185" y="10" font-size="11" fill="#fff">★</text></g>
+            <g class="hat hat-bunny"><ellipse cx="180" cy="4" rx="8" ry="24" fill="#fff"/><ellipse cx="180" cy="6" rx="4" ry="16" fill="#f5a3c7"/><ellipse cx="202" cy="2" rx="8" ry="24" fill="#fff"/><ellipse cx="202" cy="4" rx="4" ry="16" fill="#f5a3c7"/></g>
+            <g class="hat hat-heart"><path d="M190 32 C178 22 176 12 184 10 C188 9 190 12 190 14 C190 12 192 9 196 10 C204 12 202 22 190 32 Z" fill="#e86aa6"/></g>
+            <g class="hat hat-flower"><circle cx="180" cy="30" r="7" fill="#f5a3c7"/><circle cx="192" cy="26" r="7" fill="#fff3a0"/><circle cx="204" cy="30" r="7" fill="#b9a3e3"/><circle cx="192" cy="26" r="3" fill="#f0b429"/></g>
+            <g class="hat hat-shades"><rect x="194" y="45" width="16" height="11" rx="4" fill="#2b2b33"/><rect x="211" y="45" width="14" height="11" rx="4" fill="#2b2b33"/><path d="M210 50 h2" stroke="#2b2b33" stroke-width="3"/></g>
+            <g class="hat hat-scarf"><path d="M158 82 q16 18 34 8" stroke="#c8553d" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M168 88 l-6 26 l10 2 l4 -24" fill="#c8553d"/></g>
             <!-- collar -->
             <path d="M162 84 q12 14 26 8" stroke="var(--accent)" stroke-width="9" fill="none" stroke-linecap="round"/>
             <circle cx="176" cy="94" r="5" fill="var(--accent-2)" stroke="#2b2b33" stroke-width="2"/>
@@ -521,6 +560,10 @@
   <div class="modal">
     <h1>Dog Day <span class="ver" id="verPick"></span></h1>
     <p class="sub">One day, sunrise to dusk. Read the day's story, follow the treasure map, and get your dog to bed happy.</p>
+    <div class="pickopts">
+      <div><b>📚 Reading level</b><span id="levelChoices"><button class="seg" data-lv="K" onclick="LEVEL='K';drawPickerOptions()">Kindergarten</button><button class="seg" data-lv="1" onclick="LEVEL='1';drawPickerOptions()">1st grade</button></span></div>
+      <div><b>🎨 Theme</b> <span class="devtag" id="devTag">🛠 developer mode: all themes</span><span id="themeChoices"></span></div>
+    </div>
     <div class="picks" id="picks"></div>
     <button class="helpbtn" onclick="showHelp()">❓ How to play</button>
   </div>
@@ -536,7 +579,7 @@
       <div class="hcol hkids">
         <h2>👧🧒 For kids</h2>
         <ul>
-          <li><span>🐶</span>Pick your dog.</li>
+          <li><span>🐶</span>Pick your reading level, a theme and your dog.</li>
           <li><span>☀️</span>You have one day, from morning until night.</li>
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
@@ -555,6 +598,7 @@
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, earning 1 listen per page; unused listens carry over to later pages and the questions, so there's a reason to try sounding words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
         <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, earning 1 listen per riddle, saved up if unused. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
         <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It earns 1 listen per page (3 in all), saved up if unused. Right answers earn points, once per weather type each day.</p>
+        <p><b>Reading level & theme.</b> On the first screen pick <b>Kindergarten</b> (3 tiny pages, very short words and riddles) or <b>1st grade</b>. Pick a theme too: the current season is always there, and each holiday (Halloween, Thanksgiving, Christmas, Valentine's, St. Patrick's, Easter, 4th of July, New Year) unlocks 3 weeks before its date, with decorations, dog outfits and a matching story.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -628,8 +672,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v16";
-const RELEASED = "2026-09-27 10:32";
+const VERSION  = "v17";
+const RELEASED = "2026-09-27 11:08";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -700,7 +744,7 @@ const BREEDS = {
    props: big emoji [emoji, left%, class]. Keep them out of ~40–62%, that's where he stands.
    ground: small things scattered on the ground once per day. */
 const PLACES = {
-  house:{name:"Inside", icon:"🛋️", to:"inside", pos:[0,0], indoor:true, hint:"🍖 food · 💧 water · 🛁 bath · 💤 nap",
+  house:{name:"Inside", icon:"🏠", to:"inside", pos:[0,0], indoor:true, hint:"🍖 food · 💧 water · 🛁 bath · 💤 nap",
         props:[["🪴",15,""],["🧸",31,"small"]],
         ground:["🧦","🧸","🦴","🎾","🧦"],
         arrive:"Inside. He does one lap of the living room to check nothing's changed."},
@@ -1245,9 +1289,11 @@ const CLUES = {
 function makeHunt(r){
   let steps = shuffle(Object.keys(CLUES), r).slice(0, HUNT_STEPS);
   if(steps[0] === "house") steps.push(steps.shift());   // don't start where he wakes up
-  return {steps, riddles:steps.map(k => pick(CLUES[k].riddles, r)), i:0, solved:false, done:false, prize:null,
+  return {steps, riddles:steps.map(k => LEVEL === "K" ? RIDDLES_K[k] : pick(CLUES[k].riddles, r)), i:0, solved:false, done:false, prize:null,
           listens:0, earned:0, heard:[]};
 }
+/* kindergarten riddles: one per place, very short */
+const RIDDLES_K = {"park": {"q": "I am in the park. I have a big tail. I like nuts. What am I?", "a": ["a squirrel", "a fish", "a cow", "a frog"], "icon": "🐿️", "where": "Squirrels live in the park."}, "beach": {"q": "I am on the sand. I walk to the side. What am I?", "a": ["a crab", "a cat", "a cow", "a bee"], "icon": "🦀", "where": "Crabs live at the beach."}, "mountains": {"q": "I am big and tall. I have snow on top. What am I?", "a": ["a mountain", "a cup", "a bed", "a bug"], "icon": "⛰️", "where": "Go to the mountains!"}, "lake": {"q": "I am green. I hop. I say ribbit. What am I?", "a": ["a frog", "a pig", "a hen", "a cat"], "icon": "🐸", "where": "Frogs live at the lake."}, "pool": {"q": "You go up. You go down. Splash! What am I?", "a": ["a slide", "a bed", "a hat", "a box"], "icon": "🛝", "where": "The slide is at the pool."}, "museum": {"q": "I am very old. I am big bones. What am I?", "a": ["a dinosaur", "a pup", "a cat", "a hen"], "icon": "🦖", "where": "Dinosaur bones are in the museum."}, "zoo": {"q": "I am big and gray. I have a long nose. What am I?", "a": ["an elephant", "a bug", "a fish", "a hen"], "icon": "🐘", "where": "Elephants live at the zoo."}, "house": {"q": "You sleep in me at night. What am I?", "a": ["a bed", "a car", "a tree", "a boat"], "icon": "🛏️", "where": "Beds are inside the house."}};
 const PRIZES = [["👑","a gold crown"],["💎","a big shiny gem"],["🦴","a GOLDEN bone"],["🪙","a bag of gold coins"],["🏆","a tiny trophy"]];
 
 /* ---------- stories (1st-grade reading level) ----------
@@ -1617,6 +1663,253 @@ const STORIES = [
    qs:[["Whose birthday was it?", ["Dad", "Mom", "Sam"]], ["What color was the cake?", ["pink", "green", "blue"]], ["Where did {name} hide?", ["under the table", "in the car", "up a tree"]]]}
 ];
 
+/* ---------- seasons & holidays ----------
+   season: which weather tweaks apply. decor: props [emoji, left%, class] out = outdoor
+   places, house = inside. ground: extra ground clutter. sky: emoji that drift across the
+   sky. hat: dog outfit (SVG in #head). garland: string of lights in the house & yard.
+   date(y): the holiday's date that year. Holidays unlock 21 days before → 2 days after. */
+const THEMES = {
+  spring:     {name:"Spring", icon:"🌷", season:"spring", hat:"flower", collar:"#f5a3c7",
+               decor:{out:[["🌷",36,"small"],["🦋",66,"small"]], house:[["💐",66,"small"]]}, ground:["🌷","🌼","🌸"], sky:["🦋"],
+               stories:["Spring Flowers","Seeds in the Garden","The Blue Butterfly","Spring Cleaning"]},
+  summer:     {name:"Summer", icon:"☀️", season:"summer", hat:"shades", collar:"#f0b429",
+               decor:{out:[["🌻",36,""],["🍦",66,"small"]], house:[["🍉",66,"small"]]}, ground:["🌻","🐚","🍦"],
+               stories:["Summer Hose Fun","Beach Day","The Ice Cream Truck","Sandcastle Fun"]},
+  fall:       {name:"Fall", icon:"🍂", season:"fall", hat:"scarf", collar:"#c8553d",
+               decor:{out:[["🍁",36,"small"],["🎃",66,"small"]], house:[["🍎",66,"small"]]}, ground:["🍂","🍁","🍂","🌰"], sky:["🍂","🍁"],
+               stories:["A Pile of Leaves","Leaf Pile Jump","The Pumpkin Patch","Pumpkin Picking"]},
+  winter:     {name:"Winter", icon:"❄️", season:"winter", hat:"scarf", collar:"#57a9d6",
+               decor:{out:[["⛄",66,""],["🌲",36,"small"]], house:[["☕",66,"small"]]}, ground:["❄️","⛄"],
+               stories:["Snow Day","The Silly Snowman","Snowman Nose","The Red Sled"]},
+  newyear:    {name:"New Year", icon:"🎉", season:"winter", hat:"party", collar:"#6b4a8f", date:y=>new Date(y,0,1),
+               decor:{out:[["🎉",36,"small"],["🎈",66,"small"]], house:[["🎈",66,"small"],["🥳",36,"small"]]}, ground:["🎊"], sky:["🎊","🎉"], garland:"party"},
+  valentine:  {name:"Valentine's Day", icon:"💘", season:"winter", hat:"heart", collar:"#e86aa6", date:y=>new Date(y,1,14),
+               decor:{out:[["💝",36,"small"],["🌹",66,"small"]], house:[["💐",66,"small"],["💌",36,"small"]]}, ground:["❤️","💕"], sky:["💕","❤️"], garland:"hearts",
+               stories:["A Card for Grandpa","A Gift for Mom"]},
+  stpatrick:  {name:"St. Patrick's Day", icon:"☘️", season:"spring", hat:"leprechaun", collar:"#3aa655", date:y=>new Date(y,2,17),
+               decor:{out:[["🌈",66,""],["🪙",36,"small"]], house:[["☘️",66,"small"],["🪙",36,"small"]]}, ground:["🍀","☘️","🪙"], sky:["☘️"], garland:"green"},
+  easter:     {name:"Easter", icon:"🐣", season:"spring", hat:"bunny", collar:"#b9a3e3", date:y=>easterDate(y),
+               decor:{out:[["🐣",36,"small"],["🐰",66,"small"]], house:[["🧺",66,"small"],["🥚",36,"small"]]}, ground:["🥚","🥚","🌷"], sky:["🦋"],
+               stories:["The Bunny Hop"]},
+  july4:      {name:"4th of July", icon:"🎆", season:"summer", hat:"stars", collar:"#2d5fb3", date:y=>new Date(y,6,4),
+               decor:{out:[["🇺🇸",36,"small"],["🌭",66,"small"]], house:[["🇺🇸",66,"small"]]}, ground:["⭐","🎆"], sky:["🎆","🎇"], garland:"usa",
+               stories:["The Duck Parade"]},
+  halloween:  {name:"Halloween", icon:"🎃", season:"fall", hat:"witch", collar:"#f28b2c", date:y=>new Date(y,9,31),
+               decor:{out:[["🎃",36,"small"],["🎃",66,""],["👻",97,"small"]], house:[["🎃",66,"small"],["🕯️",36,"small"]]}, ground:["🎃","🍬","🕸️"], sky:["🦇","👻"], garland:"spooky",
+               stories:["The Costume Party","The Pumpkin Patch","Pumpkin Picking"]},
+  thanksgiving:{name:"Thanksgiving", icon:"🦃", season:"fall", hat:"pilgrim", collar:"#8a5a3c", date:y=>nthWeekday(y,10,4,4),
+               decor:{out:[["🦃",66,"small"],["🌽",36,"small"]], house:[["🥧",36,"small"],["🦃",66,"small"]]}, ground:["🍂","🌽","🍁"], sky:["🍂"],
+               stories:["Soup for Grandpa","Setting the Table","Pancake Morning"]},
+  christmas:  {name:"Christmas", icon:"🎄", season:"winter", hat:"santa", collar:"#d9534f", date:y=>new Date(y,11,25),
+               decor:{out:[["⛄",66,""],["🎁",36,"small"]], house:[["🎄",66,""],["🎁",36,"small"]]}, ground:["🎁","❄️"], sky:["❄️"], garland:"xmas",
+               stories:["Holiday Lights","The Red Sled","The Silly Snowman"]}
+};
+function nthWeekday(y, m, dow, n){ const d = new Date(y, m, 1); d.setDate(1 + (dow - d.getDay() + 7) % 7 + (n-1)*7); return d; }
+function easterDate(y){   // anonymous Gregorian algorithm
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+        h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451);
+  return new Date(y, Math.floor((h+l-7*m+114)/31)-1, ((h+l-7*m+114)%31)+1);
+}
+function seasonOf(d){
+  const md = (d.getMonth()+1)*100 + d.getDate();
+  return md >= 1221 || md < 320 ? "winter" : md < 621 ? "spring" : md < 922 ? "summer" : "fall";
+}
+function daysUntil(key, now){
+  const th = THEMES[key]; if(!th.date) return null;
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let best = null;
+  for(const y of [now.getFullYear()-1, now.getFullYear(), now.getFullYear()+1]){
+    const dd = Math.round((th.date(y) - t0) / 864e5);
+    if(best === null || Math.abs(dd) < Math.abs(best)) best = dd;
+  }
+  return best;
+}
+let DEV = /[?&]dev=1/.test(location.search);
+let LEVEL = "1";
+let THEME = null;
+function themeChoices(){
+  const now = new Date(), out = [seasonOf(now)];
+  for(const k of Object.keys(THEMES)){
+    const d = daysUntil(k, now);
+    if(d !== null && d <= 21 && d >= -2) out.push(k);
+  }
+  return DEV ? Object.keys(THEMES) : out;
+}
+function drawPickerOptions(){
+  const ch = themeChoices();
+  if(!THEME || !ch.includes(THEME)) THEME = ch.find(k=>THEMES[k].date) || ch[0];
+  $("themeChoices").innerHTML = ch.map(k=>{
+    const d = daysUntil(k, new Date());
+    const when = d === null ? "" : d > 0 ? ` · in ${d} day${d === 1 ? "" : "s"}` : d === 0 ? " · today!" : "";
+    return `<button class="seg${k === THEME ? " on" : ""}" onclick="THEME='${k}';drawPickerOptions()">${THEMES[k].icon} ${THEMES[k].name}<span class="t">${when}</span></button>`;
+  }).join("");
+  document.querySelectorAll("#levelChoices .seg").forEach(b=>b.classList.toggle("on", b.dataset.lv === LEVEL));
+  $("devTag").style.display = DEV ? "" : "none";
+}
+/* seasons shape the weather: no snow in summer, more snow in winter */
+function seasonWeather(segs, season, r){
+  segs.forEach(sg=>{
+    if(season === "summer" && sg.wx === "snow") sg.wx = "sunny";
+    if(season === "spring" && sg.wx === "snow") sg.wx = "rain";
+    if(season === "winter" && sg.wx === "rain" && r() < .6) sg.wx = "snow";
+  });
+  return segs;
+}
+
+/* kindergarten stories: 6 sentences (3 pages), very short words */
+const STORIES_K = [
+  {title:"At Home", art:"🏠🐶",
+   text:["{name} is at home.", "{His} home is little.", "{He} sits on the rug.", "Mom sits with {him}.", "Dad pats {his} head.", "{name} likes {his} home."],
+   qs:[["Is the home big or little?", ["little", "big", "wet"]], ["Where does {name} sit?", ["rug", "tub", "hill"]], ["Who sits with {him}?", ["Mom", "the cat", "a fox"]]]},
+  {title:"Dinner Time", art:"🍖🐶",
+   text:["{name} is hungry.", "Dad gets {his} red bowl.", "Dad puts food in it.", "{name} eats and eats.", "Yum yum yum!", "Now {his} tummy is full."],
+   qs:[["What color is the bowl?", ["red", "blue", "green"]], ["Who gets the bowl?", ["Dad", "Mom", "the cat"]], ["Is {his} tummy full?", ["yes", "no", "wet"]]]},
+  {title:"Time for Bed", art:"🛏️🌙",
+   text:["It is time for bed.", "{name} is sleepy.", "{He} gets in {his} bed.", "Mom gives {him} a pat.", "The moon is up.", "{name} sleeps all night."],
+   qs:[["Who gives {him} a pat?", ["Mom", "Dad", "a hen"]], ["What is up?", ["the moon", "the sun", "a kite"]], ["How does {name} feel?", ["sleepy", "mad", "wet"]]]},
+  {title:"Bath Time", art:"🛁🐶",
+   text:["{name} has mud on {him}.", "Dad fills the tub.", "{name} hops in the tub.", "Splash splash splash!", "The mud is all gone.", "{name} is wet and happy."],
+   qs:[["What is on {name}?", ["mud", "jam", "a hat"]], ["Who fills the tub?", ["Dad", "Mom", "the cat"]], ["Is {name} wet or dry?", ["wet", "dry", "hot"]]]},
+  {title:"The Toy Duck", art:"🦆🐶",
+   text:["{name} has a toy duck.", "The duck is yellow.", "It says quack quack.", "{name} plays with the duck.", "{He} puts it in {his} bed.", "The duck is {his} best toy."],
+   qs:[["What toy does {name} have?", ["a duck", "a ball", "a bone"]], ["What color is the duck?", ["yellow", "red", "blue"]], ["Where does {he} put it?", ["in bed", "in mud", "in a box"]]]},
+  {title:"So Many Colors", art:"🌈🐶",
+   text:["{name} sees a red ball.", "{He} sees a blue cup.", "{He} sees a green frog.", "{He} sees a pink pig.", "The colors are fun!", "{name} likes red best."],
+   qs:[["What is blue?", ["the cup", "the ball", "the frog"]], ["What color is the frog?", ["green", "red", "pink"]], ["What color does {name} like best?", ["red", "blue", "green"]]]},
+  {title:"Count to Five", art:"🖐️🐶",
+   text:["{name} sees one hen.", "{He} sees two cats.", "{He} sees three bugs.", "{He} sees four ducks.", "{He} sees five fish.", "{name} can count to five!"],
+   qs:[["How many hens?", ["one", "two", "five"]], ["How many ducks?", ["four", "three", "one"]], ["What does {he} see five of?", ["fish", "cats", "hens"]]]},
+  {title:"In the Yard", art:"🌳🐶",
+   text:["{name} runs in the yard.", "The grass is green.", "{He} digs a little hole.", "{He} finds a stick.", "Dad tosses the stick.", "{name} runs to get it."],
+   qs:[["Where does {name} run?", ["the yard", "the tub", "the car"]], ["What does {he} find?", ["a stick", "a bone", "a sock"]], ["Who tosses the stick?", ["Dad", "Mom", "the cat"]]]},
+  {title:"Rain Day", art:"🌧️🐶",
+   text:["It is a rainy day.", "{name} looks out.", "Drip drop drip drop.", "{He} puts on {his} coat.", "{He} jumps in a puddle.", "{He} gets wet and has fun."],
+   qs:[["What kind of day is it?", ["rainy", "sunny", "snowy"]], ["What does {he} put on?", ["a coat", "a hat", "a sock"]], ["Where does {he} jump?", ["a puddle", "a bed", "a box"]]]},
+  {title:"Sunny Day", art:"☀️🐶",
+   text:["The sun is up.", "It is hot.", "{name} sits in the sun.", "{He} gets very hot.", "{He} naps in the shade.", "Now {name} is cool."],
+   qs:[["What is up?", ["the sun", "the moon", "a kite"]], ["Where does {he} nap?", ["the shade", "the tub", "the car"]], ["How is {name} at the end?", ["cool", "hot", "wet"]]]},
+  {title:"Snow Fun", art:"❄️🐶",
+   text:["Look at the snow!", "The snow is white.", "{name} runs in the snow.", "{His} paws get cold.", "{He} rolls in the snow.", "Then {he} gets warm inside."],
+   qs:[["What color is the snow?", ["white", "red", "blue"]], ["What gets cold?", ["paws", "ears", "nose"]], ["What does {he} roll in?", ["snow", "mud", "grass"]]]},
+  {title:"A Cat Friend", art:"🐱🐶",
+   text:["{name} has a cat friend.", "The cat is named Kit.", "Kit is little and gray.", "{name} and Kit play tag.", "Then they nap in the sun.", "They are best pals."],
+   qs:[["What is the cat named?", ["Kit", "Max", "Sam"]], ["What color is Kit?", ["gray", "red", "blue"]], ["What game do they play?", ["tag", "ball", "hide"]]]},
+  {title:"The Big Box", art:"📦🐶",
+   text:["Dad has a big box.", "{name} looks in the box.", "It is empty!", "{name} hops in the box.", "{He} sits in it.", "The box is {his} new bed."],
+   qs:[["Who has the box?", ["Dad", "Mom", "the cat"]], ["Is the box big or little?", ["big", "little", "wet"]], ["What does {he} do in it?", ["sits", "eats", "digs"]]]},
+  {title:"A Hat That Fits", art:"👒🐶",
+   text:["Mom has a red hat.", "She puts it on {name}.", "The hat is too big!", "{He} can not see.", "Mom gets a little hat.", "Now the hat fits {him}."],
+   qs:[["What does Mom have?", ["a hat", "a cup", "a box"]], ["What color is the hat?", ["red", "blue", "green"]], ["Who gets a little hat?", ["Mom", "Dad", "the cat"]]]},
+  {title:"Fetch the Ball", art:"⚽🐶",
+   text:["{name} has a blue ball.", "Dad throws the ball.", "It goes far.", "{name} runs and runs.", "{He} gets the ball.", "{He} brings it back to Dad."],
+   qs:[["What color is the ball?", ["blue", "red", "green"]], ["Who throws the ball?", ["Dad", "Mom", "the cat"]], ["Where does {he} bring it?", ["to Dad", "to Mom", "to bed"]]]},
+  {title:"A Big Bone", art:"🦴🐶",
+   text:["{name} gets a big bone.", "{He} licks the bone.", "{He} digs a hole.", "{He} puts the bone in.", "Later {he} digs it up.", "{name} is so happy."],
+   qs:[["What does {name} get?", ["a bone", "a ball", "a hat"]], ["What does {he} dig?", ["a hole", "a pond", "a box"]], ["Is the bone big or little?", ["big", "little", "red"]]]},
+  {title:"Nap Time", art:"💤🐶",
+   text:["{name} is tired.", "{He} finds a sunny spot.", "{He} lies down.", "{He} shuts {his} eyes.", "{He} naps a long time.", "Then {he} wakes up happy."],
+   qs:[["How does {name} feel?", ["tired", "mad", "wet"]], ["Where does {he} nap?", ["sunny spot", "wet tub", "big box"]], ["How does {he} wake up?", ["happy", "sad", "wet"]]]},
+  {title:"A Big Hug", art:"🤗🐶",
+   text:["Dad comes home.", "{name} runs to the door.", "{He} jumps up on Dad.", "Dad gives {him} a big hug.", "{name} licks Dad.", "Dad and {name} are happy."],
+   qs:[["Who comes home?", ["Dad", "Mom", "the cat"]], ["Where does {name} run?", ["the door", "the yard", "the bed"]], ["What does Dad give {him}?", ["a hug", "a bone", "a hat"]]]},
+  {title:"A Little Bug", art:"🐞🐶",
+   text:["{name} sees a little bug.", "The bug is red.", "It has black dots.", "The bug hops on {his} nose.", "{name} sits very still.", "Then the bug flies away."],
+   qs:[["What color is the bug?", ["red", "blue", "green"]], ["What does the bug have?", ["dots", "a hat", "a bone"]], ["Where does the bug hop?", ["nose", "tail", "paw"]]]},
+  {title:"At the Pond", art:"🦆🌊",
+   text:["{name} goes to the pond.", "{He} sees a duck.", "The duck says quack.", "{He} sees a fish.", "{name} dips {his} paw in.", "The water is cold!"],
+   qs:[["Where does {name} go?", ["the pond", "the hill", "the yard"]], ["What does the duck say?", ["quack", "moo", "woof"]], ["Is the water hot or cold?", ["cold", "hot", "red"]]]},
+  {title:"Up the Hill", art:"⛰️🐶",
+   text:["{name} sees a big hill.", "{He} runs up the hill.", "It is a long way.", "At the top {he} sits.", "Then {he} rolls down.", "Roll roll roll!"],
+   qs:[["Is the hill big or little?", ["big", "little", "wet"]], ["What does {he} do on top?", ["sits", "eats", "digs"]], ["How does {he} go down?", ["rolls", "hops", "flies"]]]},
+  {title:"A Car Ride", art:"🚗🐶",
+   text:["{name} gets in the car.", "Mom drives the car.", "{name} looks out.", "{He} sees trees go by.", "The wind is in {his} ears.", "{name} loves car rides."],
+   qs:[["Who drives the car?", ["Mom", "Dad", "the cat"]], ["What does {he} see?", ["trees", "cats", "snow"]], ["What is in {his} ears?", ["the wind", "the rain", "mud"]]]},
+  {title:"The Bike Ride", art:"🚲🐶",
+   text:["Dad has a blue bike.", "Dad rides the bike.", "{name} runs next to Dad.", "The bike goes fast.", "{name} goes fast too.", "Then they stop to rest."],
+   qs:[["What color is the bike?", ["blue", "red", "green"]], ["Who rides the bike?", ["Dad", "Mom", "the cat"]], ["How does the bike go?", ["fast", "slow", "up"]]]},
+  {title:"A Pink Cake", art:"🎂🐶",
+   text:["Mom makes a cake.", "The cake is pink.", "It has one candle.", "{name} sits and waits.", "Mom gives {him} a bite.", "{name} likes the cake."],
+   qs:[["Who makes the cake?", ["Mom", "Dad", "the cat"]], ["What color is the cake?", ["pink", "blue", "green"]], ["How many candles?", ["one", "two", "five"]]]},
+  {title:"Dad's Sock", art:"🧦🐶",
+   text:["Dad has one sock.", "Where is the other sock?", "{name} looks in the tub.", "{He} looks under the bed.", "{He} finds the sock!", "Dad gives {him} a pat."],
+   qs:[["How many socks does Dad have?", ["one", "two", "five"]], ["Where does {he} find it?", ["the bed", "the car", "the yard"]], ["What does Dad give {him}?", ["a pat", "a bone", "a hat"]]]},
+  {title:"The Park", art:"🌳🐕",
+   text:["{name} goes to the park.", "The sun is up.", "{He} runs on the grass.", "{He} sees a red ball.", "{He} gets the ball.", "{name} has fun!"],
+   qs:[["Where does {name} go?", ["the park", "the bed", "the tub"]], ["What color is the ball?", ["red", "blue", "green"]], ["What does {he} run on?", ["the grass", "the mud", "the bed"]]]},
+  {title:"The Beach", art:"🏖️☀️",
+   text:["{name} is at the beach.", "The sand is hot.", "{He} runs to the sea.", "A big wave comes in.", "{name} gets all wet.", "{He} dries in the sun."],
+   qs:[["Where is {name}?", ["the beach", "the zoo", "the farm"]], ["What is hot?", ["the sand", "the sea", "the cup"]], ["What comes in?", ["a wave", "a bus", "a cat"]]]},
+  {title:"At the Zoo", art:"🦁🐒",
+   text:["{name} goes to the zoo.", "{He} sees a big lion.", "The lion takes a nap.", "{He} sees a monkey.", "The monkey eats a banana.", "{name} likes the zoo."],
+   qs:[["Where does {name} go?", ["the zoo", "the pool", "the bus"]], ["What does the lion take?", ["a nap", "a bath", "a cup"]], ["What does the monkey eat?", ["a banana", "a bug", "a hat"]]]},
+  {title:"On the Farm", art:"🐄🐔",
+   text:["{name} is on the farm.", "{He} sees a cow.", "The cow says moo.", "{He} sees a red hen.", "The hen sits on eggs.", "{name} says woof!"],
+   qs:[["Where is {name}?", ["the farm", "the beach", "the moon"]], ["What does the cow say?", ["moo", "quack", "oink"]], ["What color is the hen?", ["red", "blue", "pink"]]]},
+  {title:"A Muddy Pig", art:"🐷🛁",
+   text:["{name} sees a pig.", "The pig is in the mud.", "The pig says oink.", "{name} jumps in too.", "Now they are both muddy.", "Mom gives {him} a bath."],
+   qs:[["What does {name} see?", ["a pig", "a duck", "a fox"]], ["Where is the pig?", ["the mud", "a tree", "a box"]], ["What does Mom give {him}?", ["a bath", "a hat", "a cup"]]]},
+  {title:"Duck Pals", art:"🦆🍞",
+   text:["{name} is at the pond.", "A little duck swims by.", "{name} has some bread.", "{He} gives it to the duck.", "The duck says quack.", "They are pals now."],
+   qs:[["Where is {name}?", ["the pond", "the zoo", "in bed"]], ["What does {name} have?", ["bread", "a hat", "a ball"]], ["What does the duck say?", ["quack", "moo", "woof"]]]},
+  {title:"Hop Frog", art:"🐸🪵",
+   text:["{name} sees a green frog.", "The frog sits on a log.", "The frog says ribbit.", "It hops up and down.", "{name} hops too.", "Hop hop hop!"],
+   qs:[["What does {name} see?", ["a frog", "a pig", "a hen"]], ["Where does the frog sit?", ["a log", "a bed", "a bus"]], ["What does the frog say?", ["ribbit", "moo", "oink"]]]},
+  {title:"A Little Fish", art:"🐟🫧",
+   text:["{name} looks in the tank.", "{He} sees a little fish.", "The fish is orange.", "It swims round and round.", "{name} wags {his} tail.", "The fish blows a bubble."],
+   qs:[["What does {name} see?", ["a fish", "a frog", "a bug"]], ["What color is the fish?", ["orange", "blue", "red"]], ["What does the fish blow?", ["a bubble", "a kiss", "a horn"]]]},
+  {title:"A Blue Bird", art:"🐦🎵",
+   text:["{name} sees a bird.", "The bird is in a tree.", "It is a blue bird.", "The bird sings a song.", "{name} sits to listen.", "{He} likes the song."],
+   qs:[["Where is the bird?", ["a tree", "a box", "a pond"]], ["What color is the bird?", ["blue", "red", "pink"]], ["What does the bird do?", ["sings", "swims", "digs"]]]},
+  {title:"The Big Bus", art:"🚌👋",
+   text:["{name} gets on the bus.", "The bus is big and yellow.", "Mom sits with {him}.", "The bus goes up a hill.", "{name} looks out.", "They get to the shop."],
+   qs:[["What does {name} get on?", ["the bus", "a boat", "a bike"]], ["What color is the bus?", ["yellow", "red", "blue"]], ["Who sits with {him}?", ["Mom", "Dad", "a cat"]]]},
+  {title:"A Red Boat", art:"⛵🌊",
+   text:["{name} is on a boat.", "Dad is on the boat too.", "The boat is red.", "It goes on the lake.", "{name} sees a fish jump.", "Splash goes the fish!"],
+   qs:[["Who is on the boat?", ["Dad", "Mom", "a cat"]], ["What color is the boat?", ["red", "blue", "green"]], ["Where does the boat go?", ["the lake", "the road", "the sky"]]]},
+  {title:"A Kite", art:"🪁💨",
+   text:["{name} and Dad have a kite.", "The kite is red and blue.", "The wind is big today.", "The kite goes up high.", "{name} runs and barks.", "The kite is in the sky!"],
+   qs:[["What do they have?", ["a kite", "a ball", "a hat"]], ["Where does the kite go?", ["up high", "down low", "in mud"]], ["Who has the kite too?", ["Dad", "Mom", "a pig"]]]},
+  {title:"The Big Tree", art:"🌳🍎",
+   text:["{name} sits by a big tree.", "The tree gives {him} shade.", "A red apple falls down.", "It lands on {his} head.", "{name} eats the apple.", "Yum yum yum!"],
+   qs:[["Where does {name} sit?", ["a tree", "a pond", "a bus"]], ["What falls down?", ["an apple", "a hat", "a bird"]], ["What color is the apple?", ["red", "blue", "pink"]]]},
+  {title:"Fall Leaves", art:"🍂🍁",
+   text:["{name} is in the yard.", "Dad rakes the leaves.", "Dad makes a big pile.", "The leaves are red and yellow.", "{name} jumps in the pile.", "Leaves go all over!"],
+   qs:[["Who rakes the leaves?", ["Dad", "Mom", "a pig"]], ["What does Dad make?", ["a pile", "a cake", "a hat"]], ["What does {name} jump in?", ["the pile", "the pool", "the mud"]]]},
+  {title:"Orange Face", art:"🎃😀",
+   text:["Mom has a big squash.", "It is round and orange.", "Mom cuts a face on it.", "The face has a big grin.", "{name} barks at the face.", "Then {he} wags {his} tail."],
+   qs:[["What does Mom have?", ["a squash", "a hat", "a cup"]], ["What color is it?", ["orange", "blue", "pink"]], ["What does Mom cut on it?", ["a face", "a hat", "a star"]]]},
+  {title:"A Snow Man", art:"⛄❄️",
+   text:["It is a snow day.", "{name} and Dad go out.", "They make a snow man.", "It has a red hat.", "It has a carrot nose.", "{name} licks the nose!"],
+   qs:[["What do they make?", ["snow man", "a cake", "a box"]], ["What color is the hat?", ["red", "blue", "green"]], ["What does {name} lick?", ["the nose", "the hat", "the sun"]]]},
+  {title:"The Pool", art:"🏊💦",
+   text:["{name} sees the pool.", "The pool is blue and cool.", "{He} jumps in with a splash.", "{He} swims to Dad.", "Dad gives {him} a hug.", "The pool is fun!"],
+   qs:[["What color is the pool?", ["blue", "red", "pink"]], ["Who does {name} swim to?", ["Dad", "Mom", "a duck"]], ["What does Dad give {him}?", ["a hug", "a hat", "a bone"]]]},
+  {title:"A New Friend", art:"🐕🐈",
+   text:["{name} meets a little cat.", "The cat is gray.", "The cat says meow.", "{name} says woof.", "They play with a ball.", "The cat is {his} friend."],
+   qs:[["Who does {name} meet?", ["a cat", "a pig", "a fox"]], ["What color is the cat?", ["gray", "red", "blue"]], ["What do they play with?", ["a ball", "a box", "a kite"]]]},
+  {title:"The Race", art:"🏁🐇",
+   text:["{name} has a race.", "{He} runs with a rabbit.", "The rabbit is fast.", "{name} is fast too.", "They run to the tree.", "They both win!"],
+   qs:[["Who does {name} race?", ["a rabbit", "a cat", "a pig"]], ["Where do they run to?", ["the tree", "the pool", "the bus"]], ["Who wins?", ["both", "the cat", "the pig"]]]},
+  {title:"Dig Dig Dig", art:"🕳️🦴",
+   text:["{name} digs in the sand.", "{He} digs a big hole.", "Sand goes all over.", "{He} finds an old bone.", "{name} is so happy.", "{He} wags {his} tail."],
+   qs:[["Where does {name} dig?", ["the sand", "the bed", "the tub"]], ["What does {he} dig?", ["a hole", "a cake", "a hat"]], ["What does {he} find?", ["a bone", "a hat", "a cup"]]]},
+  {title:"A Gift", art:"🎁🎀",
+   text:["{name} gets a gift.", "It is in a blue box.", "{He} rips the paper.", "Inside is a new toy.", "The toy is a duck.", "It goes squeak squeak!"],
+   qs:[["What does {name} get?", ["a gift", "a bath", "a nap"]], ["What color is the box?", ["blue", "red", "green"]], ["What is the toy?", ["a duck", "a frog", "a ball"]]]},
+  {title:"Party Time", art:"🎉🎂",
+   text:["It is {his} party.", "Mom has a big cake.", "The cake has one candle.", "Kids sing to {him}.", "{name} gets a hat.", "What a fun party!"],
+   qs:[["What does Mom have?", ["a cake", "a kite", "a box"]], ["What does the cake have?", ["one candle", "a bug", "a hat"]], ["What does {name} get?", ["a hat", "a bone", "a bath"]]]},
+  {title:"Night Star", art:"⭐🌃",
+   text:["It is night.", "{name} looks up.", "{He} sees a big star.", "The star is so bright.", "{name} makes a wish.", "Then {he} goes to bed."],
+   qs:[["What does {name} see?", ["a star", "the sun", "a bird"]], ["What does {name} make?", ["a wish", "a cake", "a mess"]], ["Where does {he} go?", ["to bed", "the zoo", "the pool"]]]},
+  {title:"Hi Moon", art:"🌕🐕",
+   text:["The moon is up.", "It is big and round.", "{name} sits on the step.", "{He} howls at the moon.", "Dad sits with {him}.", "They look at the moon."],
+   qs:[["What is up?", ["the moon", "the sun", "a kite"]], ["What does {name} sit on?", ["the step", "the bed", "a box"]], ["Who sits with {him}?", ["Dad", "Mom", "a cat"]]]},
+  {title:"Lost and Found", art:"🧸🔍",
+   text:["{name} lost {his} toy.", "It is a little bear.", "{He} looks in the box.", "It is not there.", "{He} looks under the bed.", "There it is!"],
+   qs:[["What did {name} lose?", ["a toy", "a hat", "a cup"]], ["What is the toy?", ["a bear", "a duck", "a ball"]], ["Where does {he} find it?", ["the bed", "the tub", "the car"]]]}
+];
+
 /* ---------- state ---------- */
 let S = null;
 
@@ -1631,14 +1924,15 @@ function shuffle(arr, r){
   return a;
 }
 
-function scatterGround(r){
+function scatterGround(r, extra){
   const out = {};
   for(const [k,p] of Object.entries(PLACES)){
     const n = p.indoor ? 3 : 9, items = [], puddles = [];
     for(let i=0;i<n;i++){
       const x = r() < .5 ? 2 + r()*34 : 65 + r()*32;   // keep out of the dog's patch
       const b = 6 + r()*62;
-      items.push({e:pick(p.ground, r), x, b, s:Math.round(25 - b*.14)});
+      const pool = extra && extra.length && !p.indoor && r() < .45 ? extra : p.ground;
+      items.push({e:pick(pool, r), x, b, s:Math.round(25 - b*.14)});
     }
     for(let i=0;i<3;i++) puddles.push({x:4 + r()*84, b:8 + r()*48, w:60 + r()*70});
     out[k] = {items, puddles};
@@ -1649,15 +1943,19 @@ function scatterGround(r){
 function startGame(breedKey, seed){
   const b = BREEDS[breedKey];
   const r = mulberry32(seed != null ? seed : (Date.now() ^ (Math.random()*1e9)) >>> 0);
+  const theme = THEME || seasonOf(new Date()), TH = THEMES[theme];
+  const bank = LEVEL === "K" && STORIES_K.length ? STORIES_K : STORIES;
+  const themed = LEVEL === "K" ? [] : bank.filter(st => (TH.stories || []).includes(st.title));
+  const story = themed.length && r() < .6 ? pick(themed, r) : pick(bank, r);
   S = {
-    breedKey, breed:b, name:b.name,
+    breedKey, breed:b, name:b.name, level:LEVEL, theme,
     t:DAY_START, loc:"house", busy:false, over:false,
     energy:78, happy:62, full:46, clean:72, potty:38, potties:0, lastDrink:-999,
     sinceExercise:0, actions:0, exerciseMins:0, treats:0, washes:0, peakHappy:62,
     log:[],
-    weather:makeWeather(r),
-    ground:scatterGround(r),
-    story:{s:pick(STORIES, r), done:false, stars:0, listens:0},
+    weather:seasonWeather(makeWeather(r), TH.season, r),
+    ground:scatterGround(r, TH.ground),
+    story:{s:story, done:false, stars:0, listens:0},
     hunt:makeHunt(r),
     finds:[], wxRead:{}, didActs:{}, visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
@@ -1665,9 +1963,10 @@ function startGame(breedKey, seed){
   document.documentElement.style.setProperty("--coat", b.coat);
   document.documentElement.style.setProperty("--coat-dark", b.dark);
   document.documentElement.style.setProperty("--belly", b.belly);
+  document.documentElement.style.setProperty("--accent", TH.collar);
   setPose("idle", breedKey);
   $("pickOverlay").classList.add("hide");
-  say(`<b>${b.name}</b> is awake, stretched, and looking at you like the day is already late. A 🗺️ treasure map with five riddles is taped to the fridge, and today's 📖 story is on the table.`);
+  say(`${TH.icon} <b>${TH.name}</b>! <b>${b.name}</b> is awake, stretched, and looking at you like the day is already late. A 🗺️ treasure map with five riddles is taped to the fridge, and today's 📖 story is on the table.`);
   render();
 }
 
@@ -1678,7 +1977,7 @@ const clamp = v => Math.max(0, Math.min(100, v));
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"})[c]);
 // NB: SVG elements have a read-only .className (SVGAnimatedString) — must use setAttribute
 function setPose(pose, breedKey){
-  dog.setAttribute("class", `breed-${breedKey || S.breedKey} pose-${pose}`);
+  dog.setAttribute("class", `breed-${breedKey || S.breedKey} pose-${pose} theme-${S ? S.theme : ""} hat-on-${S ? THEMES[S.theme].hat : ""}`);
 }
 function exposedHere(){ return !PLACES[S.loc].indoor; }
 function stormCalm(){ return S.t - S.cuddledAt < 120; }
@@ -1779,6 +2078,10 @@ function render(){
   scene.style.setProperty("--glow", place.indoor ? .8 : (p > .82 ? .9 : W.mix >= .5 ? .55 : 0));
 
   // stat bars
+  const meals = S.didActs.feed || 0, drinks = S.didActs.drink || 0;
+  $("counters").innerHTML =
+    `<span class="cnt${meals >= 2 ? " ok" : ""}">🍖 Meals <b>${meals}</b> / 2${meals >= 2 ? " ✓" : ""}</span>` +
+    `<span class="cnt${drinks >= 4 ? " ok" : ""}">💧 Water <b>${drinks}</b> / 4${drinks >= 4 ? " ✓" : ""}</span>`;
   ["energy","happy","full","clean","potty"].forEach(k=>{
     const el = $("st-"+k);
     el.querySelector("i").style.width = S[k]+"%";
@@ -1793,8 +2096,12 @@ function render(){
 function buildPlace(){
   const place = PLACES[S.loc], g = S.ground[S.loc];
   $("backdrop").innerHTML = BACKDROPS[S.loc];
-  $("props").innerHTML = place.props
+  const TH = THEMES[S.theme], decor = (TH.decor && TH.decor[S.loc === "house" ? "house" : (place.indoor ? "none" : "out")]) || [];
+  $("props").innerHTML = place.props.concat(decor)
     .map(([e,x,c]) => `<div class="prop ${c}" style="left:${x}%">${e}</div>`).join("");
+  $("garland").className = TH.garland && homeish(S.loc) ? "garland g-" + TH.garland : "garland";
+  $("decor").innerHTML = (TH.sky || []).length && !place.indoor
+    ? Array.from({length:6}, (_,i)=>`<div class="leaf" style="top:${20+((i*47)%150)}px;animation-duration:${9+i*2}s;animation-delay:-${i*2.3}s">${TH.sky[i % TH.sky.length]}</div>`).join("") : "";
   $("gitems").innerHTML =
     g.puddles.map(u=>`<div class="puddle" style="left:${u.x}%;bottom:${u.b}px;width:${u.w}px"></div>`).join("") +
     g.items.map(i=>`<div class="gi" style="left:${i.x.toFixed(1)}%;bottom:${i.b.toFixed(0)}px;font-size:${i.s}px">${i.e}</div>`).join("");
@@ -2490,46 +2797,62 @@ $("storyText").addEventListener("click", e=>{
 
 /* ---------- weather reading: tap the weather badge ---------- */
 
+/* one page to read, then 3 questions — for each kind of weather seen that day */
 const WX_READ = {
-  sunny: {title:"The Sun", art:"☀️😎",
-    text:["The sun is out today.","It is hot and bright.","The sun gives us light.","Plants need the sun to grow.","Dogs like to nap in a warm, sunny spot.","Drink lots of water on a hot day!"],
-    qs:[["What do plants need to grow?",["the sun","the moon","snow"]],
-        ["What should you drink on a hot day?",["water","mud","soup"]]]},
+  sunny:{title:"The Sun", art:"☀️😎",
+    text:["The sun is out, and it is hot and bright. Plants need the sun to grow.", "Dogs like to nap in a warm, sunny spot. Drink lots of water on a hot day!"],
+    qs:[["What do plants need to grow?", ["the sun", "the moon", "snow"]], ["Where do dogs like to nap?", ["in a sunny spot", "in the rain", "up a tree"]], ["What should you drink on a hot day?", ["water", "mud", "soup"]]]},
   cloudy:{title:"Clouds", art:"☁️🌥️",
-    text:["Clouds are made of tiny drops of water.","They float high in the sky.","Some clouds are white and fluffy.","Gray clouds can bring rain.","When clouds cover the sun, the day gets dim.","Look up! Can you see a cloud shaped like a dog?"],
-    qs:[["What are clouds made of?",["tiny drops of water","cotton","smoke"]],
-        ["What can gray clouds bring?",["rain","sun","cake"]]]},
-  rain:  {title:"Rain", art:"🌧️☔",
-    text:["Rain falls from gray clouds.","Drip, drop, drip!","Rain gives water to plants and trees.","It makes puddles on the ground.","Dogs get muddy in the rain.","Wear boots and a coat to stay dry."],
-    qs:[["Where does rain fall from?",["gray clouds","the sun","a tree"]],
-        ["What does rain make on the ground?",["puddles","sand","snow"]]]},
-  storm: {title:"Thunderstorms", art:"⛈️⚡",
-    text:["A storm has rain, wind, thunder and lightning.","Lightning is a big flash of light in the sky.","Thunder is the loud boom it makes.","Many dogs are scared of thunder.","Stay inside when there is a storm.","A hug helps a scared dog feel safe."],
-    qs:[["What is the loud boom called?",["thunder","lightning","rain"]],
-        ["Where should you stay in a storm?",["inside","up a tree","in the pool"]]]},
-  snow:  {title:"Snow", art:"❄️⛄",
-    text:["Snow falls when it is very cold.","Snow is made of tiny bits of ice.","Each snowflake has six sides.","Snow is white and soft.","You can make a snowman with it.","Dogs love to run and roll in the snow!"],
-    qs:[["When does snow fall?",["when it is very cold","when it is hot","at the beach"]],
-        ["How many sides does a snowflake have?",["six","two","ten"]]]},
-  wind:  {title:"Wind", art:"🌬️🪁",
-    text:["Wind is air that moves.","You can not see the wind.","But you can see what it does!","It makes leaves fly and trees sway.","Wind helps a kite go up high.","On a windy day, hold on to your hat!"],
-    qs:[["What is wind?",["air that moves","water","a bird"]],
-        ["What does wind help go up high?",["a kite","a rock","a car"]]]}
+    text:["Clouds are made of tiny drops of water. They float high in the sky.", "White clouds are soft and fluffy. Gray clouds can bring rain."],
+    qs:[["What are clouds made of?", ["tiny drops of water", "cotton", "smoke"]], ["Where do clouds float?", ["high in the sky", "in the sea", "under the bed"]], ["What can gray clouds bring?", ["rain", "sun", "cake"]]]},
+  rain:{title:"Rain", art:"🌧️☔",
+    text:["Rain falls from gray clouds. Drip, drop, drip!", "Rain gives water to plants and makes puddles. Wear boots to stay dry."],
+    qs:[["Where does rain fall from?", ["gray clouds", "the sun", "a tree"]], ["What does rain give to plants?", ["water", "cake", "sand"]], ["What should you wear to stay dry?", ["boots", "a crown", "a bow"]]]},
+  storm:{title:"Thunderstorms", art:"⛈️⚡",
+    text:["A storm has rain, wind, thunder and lightning. Lightning is a big flash of light.", "Thunder is the loud boom. Stay inside, and give a scared dog a hug."],
+    qs:[["What is the big flash of light?", ["lightning", "thunder", "a star"]], ["What is the loud boom?", ["thunder", "rain", "a drum"]], ["Where should you stay in a storm?", ["inside", "up a tree", "in the pool"]]]},
+  snow:{title:"Snow", art:"❄️⛄",
+    text:["Snow falls when it is very cold. Snow is made of tiny bits of ice.", "Each snowflake has six sides. You can make a snowman!"],
+    qs:[["When does snow fall?", ["when it is very cold", "when it is hot", "at the beach"]], ["What is snow made of?", ["tiny bits of ice", "sugar", "sand"]], ["How many sides does a snowflake have?", ["six", "two", "ten"]]]},
+  wind:{title:"Wind", art:"🌬️🪁",
+    text:["Wind is air that moves. You can not see it, but you can see what it does.", "Wind makes leaves fly and helps a kite go up high. Hold on to your hat!"],
+    qs:[["What is wind?", ["air that moves", "water", "a bird"]], ["What does wind help go up high?", ["a kite", "a rock", "a car"]], ["What should you hold on to?", ["your hat", "your shoe", "a cup"]]]}
+};
+const WX_READ_K = {
+  sunny:{title:"The Sun", art:"☀️😎",
+    text:["The sun is up. It is hot.", "The dog naps in the sun. He drinks water."],
+    qs:[["Is it hot or cold?", ["hot", "cold", "wet"]], ["Where does the dog nap?", ["in the sun", "in the tub", "in a box"]], ["What does he drink?", ["water", "mud", "milk"]]]},
+  cloudy:{title:"Clouds", art:"☁️🌥️",
+    text:["Look up at the sky. I see a big cloud.", "The cloud is gray. It can rain."],
+    qs:[["Where do I look?", ["up", "down", "in a box"]], ["What color is the cloud?", ["gray", "red", "pink"]], ["What can the cloud do?", ["rain", "run", "sing"]]]},
+  rain:{title:"Rain", art:"🌧️☔",
+    text:["It is rain. Drip, drop, drip.", "I see a big puddle. I get wet!"],
+    qs:[["What is it?", ["rain", "sun", "snow"]], ["What do I see?", ["a puddle", "a cat", "a hat"]], ["What do I get?", ["wet", "hot", "big"]]]},
+  storm:{title:"A Storm", art:"⛈️⚡",
+    text:["Boom! It is a storm.", "The dog is sad. I give him a hug."],
+    qs:[["What sound is it?", ["boom", "tweet", "moo"]], ["How is the dog?", ["sad", "hot", "big"]], ["What do I give him?", ["a hug", "a bath", "a hat"]]]},
+  snow:{title:"Snow", art:"❄️⛄",
+    text:["It is cold. I see snow.", "The snow is white. We make a snowman!"],
+    qs:[["Is it hot or cold?", ["cold", "hot", "wet"]], ["What color is snow?", ["white", "red", "blue"]], ["What do we make?", ["a snowman", "a cake", "a boat"]]]},
+  wind:{title:"Wind", art:"🌬️🪁",
+    text:["The wind is big. It can push.", "My hat flies up! My kite flies up!"],
+    qs:[["Is the wind big or little?", ["big", "little", "wet"]], ["What can the wind do?", ["push", "sing", "eat"]], ["What flies up?", ["my hat", "my dog", "my bed"]]]}
 };
 function openWeather(){
   if(!S || S.busy || S.over) return;
   const wx = weatherAt(S.t), W = WX[wx];
-  const max = pagesOf(WX_READ[wx].text);
+  const R = S.level === "K" ? WX_READ_K : WX_READ;
+  const max = pagesOf(R[wx].text);
   const entry = S.wxRead[wx] = S.wxRead[wx] || {listens:0, earned:0, heard:[], done:false, stars:0};
   openStory(false, stars=>{
     if(!entry.done){
       entry.done = true; entry.stars = stars;
       floatFx(W.icon, 2);
-      say(`<b>${W.icon} You read about ${WX_READ[wx].title.toLowerCase()}!</b> ${stars ? `+${stars*2} points.` : "Good try!"}`);
+      say(`<b>${W.icon} You read about ${R[wx].title.toLowerCase()}!</b> ${stars ? `+${stars*2} points.` : "Good try!"}`);
     }
     S.busy = false;
     render();
-  }, {s:WX_READ[wx], pool:entry, max, kind:"weather",
+  }, {s:R[wx], pool:entry, max, kind:"weather",
       badge: entry.done ? `${W.icon} About the weather · already read` : `${W.icon} About the weather · +2 points a question`});
 }
 $("wxBadge").onclick = openWeather;
@@ -2590,7 +2913,7 @@ function lighten(hex, k){
 function cloneDog(pose, extraClass){
   const svg = dog.cloneNode(true);
   svg.removeAttribute("id");
-  svg.setAttribute("class", `breed-${S.breedKey} pose-${pose}${extraClass ? " " + extraClass : ""}`);
+  svg.setAttribute("class", `breed-${S.breedKey} pose-${pose} hat-on-${THEMES[S.theme].hat}${extraClass ? " " + extraClass : ""}`);
   return svg;
 }
 function puppyScene(n, then){
@@ -2727,6 +3050,10 @@ function miniDog(b, key){
   </g></svg>`;
 }
 $("verPick").textContent = VERSION;
+{ let taps = 0, tm = null;
+  $("verPick").onclick = ()=>{ taps++; clearTimeout(tm); tm = setTimeout(()=>taps = 0, 1500);
+    if(taps >= 5){ taps = 0; DEV = !DEV; drawPickerOptions(); } }; }
+drawPickerOptions();
 $("verFoot").innerHTML = `Dog Day ${VERSION} · released ${RELEASED} <button onclick="showHelp()">❓ How to play</button>`;
 function showHelp(){ $("helpOverlay").classList.remove("hide"); }
 function hideHelp(){ $("helpOverlay").classList.add("hide"); }
