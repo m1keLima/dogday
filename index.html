@@ -613,8 +613,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v12";
-const RELEASED = "2026-09-27 10:15";
+const VERSION  = "v13";
+const RELEASED = "2026-09-27 10:17";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -2006,7 +2006,7 @@ function drawHunt(){
     b.textContent = txt;
     if(h.wrong.includes(txt)){ b.className = "wrong"; b.disabled = true; }
     if(h.solved){ b.disabled = true; if(right) b.className = "right"; }
-    b.onclick = ()=> solveRiddle(txt, right);
+    b.onclick = ()=>{ sayAnswer(txt); solveRiddle(txt, right); };
     const ear = document.createElement("button");
     ear.className = "ear"; ear.textContent = "🔊"; ear.title = "Hear this answer (uses 1 listen)";
     ear.style.display = canSpeak ? "" : "none";
@@ -2411,7 +2411,16 @@ function showQuestion(){
   $("storyPeek").style.display = ""; $("storyPeek").open = false;
   $("storyNext").style.display = "none";
 }
+/* the answer you tap is read back to you (free — it's already chosen) */
+function sayAnswer(text){
+  if(!canSpeak) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = .8; u.lang = "en-US";
+  speechSynthesis.speak(u);
+}
 function answer(btn, right){
+  sayAnswer(btn.textContent);
   if(right){
     btn.classList.add("right");
     if(!ST.tried) ST.stars++;
