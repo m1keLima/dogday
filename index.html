@@ -401,7 +401,7 @@
     <div class="stat s-happy"  id="st-happy"><div class="k"><span>Happy</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-full"   id="st-full"><div class="k"><span>Full</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-clean"  id="st-clean"><div class="k"><span>Clean</span><b>—</b></div><div class="bar"><i></i></div></div>
-    <div class="stat s-potty"  id="st-potty" title="Fills up over time — take him out to the bathroom when it's high"><div class="k"><span>Potty 🚽</span><b>—</b></div><div class="bar"><i></i></div></div>
+    <div class="stat s-potty"  id="st-potty" title="Goes down over time — take him out to the bathroom when it's low"><div class="k"><span>Potty 🚽</span><b>—</b></div><div class="bar"><i></i></div></div>
   </div>
 
   <div class="scene home" id="scene">
@@ -537,7 +537,7 @@
           <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. Each page gives you 1 listen — save them up if you don't need them!</li>
           <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. Each riddle gives you 1 listen, and you can save them.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
-          <li><span>🚽</span>Dogs need to go to the bathroom outside. Watch the Potty bar!</li>
+          <li><span>🚽</span>Dogs go to the bathroom outside. When the Potty bar gets low, take him out!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
           <li><span>🌦️</span>Tap the weather to read about it. Answer the questions for points!</li>
           <li><span>🐾</span>At night your dog goes home to his family. More points = more puppies (up to 5)!</li>
@@ -617,8 +617,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v14";
-const RELEASED = "2026-09-27 10:19";
+const VERSION  = "v15";
+const RELEASED = "2026-09-27 10:31";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1031,7 +1031,7 @@ const ACTIONS = [
     say:()=>pick(["Sniffed nine spots, picked the tenth. Ahh. Much better.",
                   "Found the perfect bush. Very private. Very relieved.",
                   "Did his business, then kicked grass at it like a tiny bull."]),
-    gate:s => s.potty < 20 ? "He sniffs around, lifts a leg… nothing. False alarm." : null, stat:"potty" },
+    gate:s => s.potty > 80 ? "He sniffs around, lifts a leg… nothing. False alarm." : null, stat:"potty" },
 
   { id:"treat", label:"Give a treat", icon:"🦴", mins:5, locs:Object.keys(PLACES),
     eff:{energy:3,happy:9,clean:-1,full:11}, exercise:0, pose:"eat", fx:"🦴",
@@ -1641,7 +1641,7 @@ function startGame(breedKey, seed){
   S = {
     breedKey, breed:b, name:b.name,
     t:DAY_START, loc:"house", busy:false, over:false,
-    energy:78, happy:62, full:46, clean:72, potty:62, potties:0, lastDrink:-999,
+    energy:78, happy:62, full:46, clean:72, potty:38, potties:0, lastDrink:-999,
     sinceExercise:0, actions:0, exerciseMins:0, treats:0, washes:0, peakHappy:62,
     log:[],
     weather:makeWeather(r),
@@ -1772,7 +1772,7 @@ function render(){
     const el = $("st-"+k);
     el.querySelector("i").style.width = S[k]+"%";
     el.querySelector("b").textContent = Math.round(S[k]);
-    el.classList.toggle("low", k === "potty" ? S[k] > 70 : S[k] < 30);
+    el.classList.toggle("low", S[k] < 30);
   });
 
   drawButtons();
@@ -1828,7 +1828,7 @@ function currentCue(){
                    cues.push(["⛈️", "He's pressed against your legs, trembling. He wants to be indoors."]);
   if(wx === "storm" && S.loc === "house" && !stormCalm())
                    cues.push(["⛈️", "He's under the table, flinching at every rumble. A cuddle would help."]);
-  if(S.potty > 70) cues.push(S.loc === "house"
+  if(S.potty < 30) cues.push(S.loc === "house"
       ? ["🚽", "He's doing the potty dance by the front door. Take him outside!"]
       : ["🚽", "He's sniffing every bush with great urgency. Bathroom time!"]);
   if(S.full  < 30) cues.push(S.loc === "house"
@@ -2126,8 +2126,8 @@ function passTime(mins, wx){
   // being hungry or filthy erodes mood on its own
   if(S.full  < 25) S.happy = clamp(S.happy - mins*0.03);
   if(S.clean < 25) S.happy = clamp(S.happy - mins*0.015);
-  S.potty = Math.min(100, S.potty + mins*0.3);
-  if(S.potty > 85) S.happy = clamp(S.happy - mins*0.04);
+  S.potty = clamp(S.potty - mins*0.3);            // like the other bars: 100 = fine, 0 = has to go NOW
+  if(S.potty < 15) S.happy = clamp(S.happy - mins*0.04);
 
   // weather: rain muddies an exposed dog; a storm frays his nerves — badly outside,
   // a little in the house unless cuddled, not at all in the museum
@@ -2192,10 +2192,10 @@ function doAction(a){
     if(a.exercise){ S.exerciseMins += a.exercise; S.sinceExercise = 0; }
     if(a.id === "treat"){ S.treats++; if(S.treats > 3) S.happy = clamp(S.happy - (S.treats-3)*2); }
     if(a.id === "wash")  S.washes++;
-    if(a.id === "feed")  S.potty = Math.min(100, S.potty + 15);
-    if(a.id === "drink"){ S.potty = Math.min(100, S.potty + 22); S.lastDrink = S.t; }
-    if(a.id === "swim")  S.potty = Math.min(100, S.potty + 5);
-    if(a.id === "potty"){ S.potty = 0; S.potties++; }
+    if(a.id === "feed")  S.potty = clamp(S.potty - 15);
+    if(a.id === "drink"){ S.potty = clamp(S.potty - 22); S.lastDrink = S.t; }
+    if(a.id === "swim")  S.potty = clamp(S.potty - 5);
+    if(a.id === "potty"){ S.potty = 100; S.potties++; }
     if(a.done) a.done(ctx);
     S.didActs[a.id] = (S.didActs[a.id] || 0) + 1;
     S.busy = false;
@@ -2563,7 +2563,7 @@ function nextPupTier(n){ const t = PUP_TIERS.slice().reverse().find(([,c])=>c ==
 function dayScore(){
   return Math.round(S.happy*0.40 + S.energy*0.18 + S.full*0.21 + S.clean*0.21)
        + Math.min(10, Math.floor(S.exerciseMins/30)*2) + S.story.stars*2 + (S.hunt.done ? 8 : 0)
-       - (S.potty > 80 ? 5 : 0)
+       - (S.potty < 20 ? 5 : 0)
        + Object.values(S.wxRead).reduce((n,e)=>n + (e.done ? e.stars*2 : 0), 0);
 }
 function goToSleep(early){
@@ -2643,7 +2643,7 @@ function sleepAndCard(early, score){
       clean:  "He's asleep and he smells. A bath — or the pool slide — would have fixed that."
     };
     let verdict = notes[worst[0]];
-    const pottyNote = S.potty > 80 ? " Also: he went to bed REALLY needing the bathroom (−5)." : "";
+    const pottyNote = S.potty < 20 ? " Also: he went to bed REALLY needing the bathroom (−5)." : "";
     if(score >= 85) verdict = "Near-perfect day. He's asleep on his side with his paws twitching. " + (worst[1] < 60 ? notes[worst[0]] : "Nothing to fix.");
     else if(score >= 70) verdict = "A good day by any dog's reckoning. " + notes[worst[0]];
     else if(score < 45) verdict = "A thin day. " + notes[worst[0]];
@@ -2668,7 +2668,7 @@ function sleepAndCard(early, score){
       ["Weather", [...S.wxSeen].map(w=>WX[w].icon).join(" ")],
       ["Dug up", S.finds.length ? S.finds.join(" ") : "—"],
       ["Weather reading", Object.entries(S.wxRead).filter(([,e])=>e.done).map(([k,e])=>WX[k].icon+"⭐".repeat(e.stars)).join(" ") || "—"],
-      ["Bathroom trips", S.potties + (S.potty > 80 ? " · needs to go!" : "")],
+      ["Bathroom trips", S.potties + (S.potty < 20 ? " · needs to go!" : "")],
       ["Puppies", S.pups ? "🐶".repeat(S.pups) : "—"]
     ].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
     $("endOverlay").classList.remove("hide");
