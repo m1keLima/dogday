@@ -528,8 +528,8 @@
           <li><span>☀️</span>You have one day, from morning until night.</li>
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
-          <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You only get 5 listens!</li>
-          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. You get 4 listens for the whole hunt.</li>
+          <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You get 1 listen for each page!</li>
+          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. You get 1 listen per riddle.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
           <li><span>🚽</span>Dogs need to go to the bathroom outside. Watch the Potty bar!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
@@ -540,9 +540,9 @@
       <div class="hcol hparents">
         <h2>👩👨 For parents</h2>
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
-        <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, but only 5 times per story, so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
-        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, but only 4 times in the whole hunt. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
-        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. Right answers earn points, once per weather type each day.</p>
+        <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, with 1 listen per page (5 per story), so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
+        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, with 1 listen per riddle (5 in all). The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
+        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It has 1 listen per page (3). Right answers earn points, once per weather type each day.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -584,7 +584,7 @@
       <button id="huntRead">🔊 Read riddle<span class="t">uses 1 listen</span></button>
       <button class="go" id="huntGo">Go find it →</button>
     </div>
-    <p class="tip" id="huntTip">Hard word? Tap it to hear it, have the whole riddle read, or press 🔊 next to an answer. You get 4 listens for the whole hunt.</p>
+    <p class="tip" id="huntTip">Hard word? Tap it to hear it, have the whole riddle read, or press 🔊 next to an answer. You get 1 listen per riddle, 5 in all.</p>
   </div>
 </div>
 
@@ -609,8 +609,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v9";
-const RELEASED = "2026-09-27 09:40";
+const VERSION  = "v10";
+const RELEASED = "2026-09-27 10:11";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1194,7 +1194,9 @@ function stageAction(a){
 /* Each step is a riddle with 4 answers (RIGHT answer first — shuffled on screen).
    The answer tells you where to go; there you sniff for the next note. */
 const HUNT_STEPS = 5;
-const HUNT_LISTENS = 4;   // read-alouds for the whole hunt (its own pool, separate from the story's)
+/* one listen per page, everywhere: story = its pages, weather = its pages, hunt = one per riddle */
+const pagesOf = text => Math.ceil(text.length / 2);
+const HUNT_LISTENS = HUNT_STEPS;   // the hunt's own pool, separate from the story's
 const CLUES = {
   park:{spot:"under the park bench", riddles:[
     {q:"I am brown and fluffy. I have a big bushy tail. I hide nuts in trees. What am I?", a:["a squirrel","a fish","a cow","a frog"], icon:"🐿️", where:"Squirrels live in the park."},
@@ -1636,11 +1638,12 @@ function startGame(breedKey, seed){
     log:[],
     weather:makeWeather(r),
     ground:scatterGround(r),
-    story:{s:pick(STORIES, r), done:false, stars:0, listens:LISTENS},
+    story:{s:pick(STORIES, r), done:false, stars:0, listens:0},
     hunt:makeHunt(r),
     finds:[], wxRead:{}, visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
   };
+  S.story.listens = pagesOf(S.story.s.text);
   document.documentElement.style.setProperty("--coat", b.coat);
   document.documentElement.style.setProperty("--coat-dark", b.dark);
   document.documentElement.style.setProperty("--belly", b.belly);
@@ -2280,7 +2283,7 @@ function wordSpans(text){
 }
 /* the child reads; a tap hears one word (or a page). 5 listens per story — hearing
    the same word again is free, so the counter never punishes a re-check. */
-const LISTENS = 5;
+const LISTENS = 5;   // fallback; the real pool is pagesOf(story text)
 function drawListens(){
   const st = ST.pool, left = st.listens, el = $("storyListen");
   el.className = "listen" + (left ? "" : " out");
@@ -2339,7 +2342,7 @@ function stopSpeech(){ if(canSpeak) speechSynthesis.cancel(); }
 
 /* opt lets the same book show other readings (the weather): its own text, listen pool and badge */
 function openStory(bedtime, done, opt){
-  opt = opt || {s:S.story.s, pool:S.story, max:LISTENS, kind:"story",
+  opt = opt || {s:S.story.s, pool:S.story, max:pagesOf(S.story.s.text), kind:"story",
                 badge: bedtime ? "🌙 Bedtime story" : "📖 Today's story"};
   S.busy = true;
   drawButtons();
@@ -2439,7 +2442,7 @@ $("storyText").addEventListener("click", e=>{
 });
 
 /* ---------- weather reading: tap the weather badge ---------- */
-const WX_LISTENS = 2;
+
 const WX_READ = {
   sunny: {title:"The Sun", art:"☀️😎",
     text:["The sun is out today.","It is hot and bright.","The sun gives us light.","Plants need the sun to grow.","Dogs like to nap in a warm, sunny spot.","Drink lots of water on a hot day!"],
@@ -2469,7 +2472,8 @@ const WX_READ = {
 function openWeather(){
   if(!S || S.busy || S.over) return;
   const wx = weatherAt(S.t), W = WX[wx];
-  const entry = S.wxRead[wx] = S.wxRead[wx] || {listens:WX_LISTENS, heard:[], done:false, stars:0};
+  const max = pagesOf(WX_READ[wx].text);
+  const entry = S.wxRead[wx] = S.wxRead[wx] || {listens:max, heard:[], done:false, stars:0};
   openStory(false, stars=>{
     if(!entry.done){
       entry.done = true; entry.stars = stars;
@@ -2478,7 +2482,7 @@ function openWeather(){
     }
     S.busy = false;
     render();
-  }, {s:WX_READ[wx], pool:entry, max:WX_LISTENS, kind:"weather",
+  }, {s:WX_READ[wx], pool:entry, max, kind:"weather",
       badge: entry.done ? `${W.icon} About the weather · already read` : `${W.icon} About the weather · +2 points a question`});
 }
 $("wxBadge").onclick = openWeather;
