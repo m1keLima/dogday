@@ -159,6 +159,10 @@
   .ropts{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
   .quest .ropts button{font-size:17px;padding:9px 12px;text-align:left;margin-left:0;white-space:normal}
   .ropts button.wrong{background:#fde3e1;animation:nope .3s}
+  .quest .clue .w{cursor:pointer;border-radius:6px;padding:0 1px;transition:background .15s}
+  .quest .clue .w:hover{background:#ffe7c2}
+  .quest .clue .w.hl{background:var(--accent-2)}
+  .qbtns{align-items:center;flex-wrap:wrap}
   .quest .solved{display:block;margin-top:4px;font-size:15px;color:var(--good)}
   .hdots{letter-spacing:3px;font-size:13px}
   .listen{font-size:15px;font-weight:800;color:var(--ink-soft);align-self:center}
@@ -496,6 +500,7 @@
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
           <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You only get 5 listens!</li>
+          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You get 2 listens for the whole hunt.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
           <li><span>🐾</span>Have a great day, and you will see the puppies at night!</li>
@@ -505,7 +510,7 @@
         <h2>👩👨 For parents</h2>
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, but only 5 times per story, so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
-        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
+        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word or the whole riddle, but only 2 times in the whole hunt. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -555,8 +560,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v6";
-const RELEASED = "2026-09-27 09:23";
+const VERSION  = "v7";
+const RELEASED = "2026-09-27 09:26";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1040,6 +1045,7 @@ const ACTIONS = [
 /* Each step is a riddle with 4 answers (RIGHT answer first — shuffled on screen).
    The answer tells you where to go; there you sniff for the next note. */
 const HUNT_STEPS = 5;
+const HUNT_LISTENS = 2;   // read-alouds for the whole hunt (its own pool, separate from the story's)
 const CLUES = {
   park:{spot:"under the park bench", riddles:[
     {q:"I am brown and fluffy. I have a big bushy tail. I hide nuts in trees. What am I?", a:["a squirrel","a fish","a cow","a frog"], icon:"🐿️", where:"Squirrels live in the park."},
@@ -1069,7 +1075,8 @@ const CLUES = {
 function makeHunt(r){
   let steps = shuffle(Object.keys(CLUES), r).slice(0, HUNT_STEPS);
   if(steps[0] === "house") steps.push(steps.shift());   // don't start where he wakes up
-  return {steps, riddles:steps.map(k => pick(CLUES[k].riddles, r)), i:0, solved:false, done:false, prize:null};
+  return {steps, riddles:steps.map(k => pick(CLUES[k].riddles, r)), i:0, solved:false, done:false, prize:null,
+          listens:HUNT_LISTENS, heard:[]};
 }
 const PRIZES = [["👑","a gold crown"],["💎","a big shiny gem"],["🦴","a GOLDEN bone"],["🪙","a bag of gold coins"],["🏆","a tiny trophy"]];
 
@@ -1807,8 +1814,8 @@ function drawQuests(){
   pause.title = "Pause the treasure hunt";
   if(!h.solved){
     if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
-    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span></div>`;
-    addBtns(pause);
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${wordSpans(rd.q)}</span></div>`;
+    addBtns(...huntReadBits(), pause);
     const box = document.createElement("div");
     box.className = "ropts";
     h.opts.forEach(([txt, right])=>{
@@ -1820,13 +1827,64 @@ function drawQuests(){
     });
     qh.appendChild(box);
   } else {
-    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span>` +
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${wordSpans(rd.q)}</span>` +
       `<span class="solved">✔ ${rd.icon} It's ${esc(rd.a[0])}! ${esc(rd.where)} ${last ? "The treasure is buried there!" : "The next note is hidden there."}</span></div>`;
     const sniff = mk(`🐽 Sniff here<span class="t">15 min</span>`, doSniff);
     sniff.disabled = S.busy || S.over || 15 > timeLeft();
-    addBtns(sniff, pause);
+    addBtns(sniff, ...huntReadBits(), pause);
   }
 }
+/* hunt read-aloud: tap a word or read the whole riddle, from the hunt's own pool */
+function huntReadBits(){
+  const h = S.hunt;
+  if(!canSpeak) return [];
+  const c = document.createElement("span");
+  c.className = "listen" + (h.listens ? "" : " out");
+  c.textContent = h.listens ? `🔊 ${"●".repeat(h.listens)}${"○".repeat(HUNT_LISTENS - h.listens)}` : "🔇";
+  c.title = `${h.listens} riddle listen${h.listens === 1 ? "" : "s"} left for the whole hunt`;
+  const b = document.createElement("button");
+  b.innerHTML = `🔊 Read riddle<span class="t">${h.listens} listen${h.listens === 1 ? "" : "s"} left</span>`;
+  b.disabled = !h.listens;
+  b.onclick = ()=> huntSpeak(null);
+  return [c, b];
+}
+function huntSpeak(span){
+  const h = S.hunt, el = $("qHunt").querySelector(".clue");
+  if(!canSpeak || !el) return;
+  if(span){
+    const word = span.textContent.replace(/[^A-Za-z']/g, ""), key = word.toLowerCase();
+    if(!word) return;
+    if(!h.heard.includes(key)){
+      if(h.listens <= 0) return speak("🔇  No riddle listens left. Sound it out — you can do it!", true);
+      h.listens--; h.heard.push(key);
+    }
+    speakOut(word, [span]);
+  } else {
+    if(h.listens <= 0) return;
+    h.listens--;
+    speakOut(el.textContent, [...el.querySelectorAll(".w")]);
+  }
+  drawQuests();
+}
+/* speak text, highlighting word spans as they're read (spans must carry data-c offsets unless single) */
+function speakOut(text, spans){
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = .75; u.lang = "en-US";
+  const live = () => spans.map(sp => sp.isConnected ? sp : document.querySelector(`#qHunt .clue .w[data-c="${sp.dataset.c}"]`)).filter(Boolean);
+  if(spans.length === 1){ live().forEach(sp=>sp.classList.add("hl")); setTimeout(()=>live().forEach(sp=>sp.classList.remove("hl")), 1500); }
+  else u.onboundary = e => {
+    const cur = live(); let hit = null;
+    for(const sp of cur) if(+sp.dataset.c <= e.charIndex) hit = sp;
+    cur.forEach(sp => sp.classList.toggle("hl", sp === hit));
+  };
+  u.onend = () => live().forEach(sp => sp.classList.remove("hl"));
+  speechSynthesis.speak(u);
+}
+$("qHunt").addEventListener("click", e=>{
+  const w = e.target.closest(".clue .w");
+  if(w) huntSpeak(w);
+});
 /* the treasure-hunt icon: a little chest; open (with the prize) once found */
 function chestSVG(open, prize){
   const lid = open
