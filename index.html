@@ -251,6 +251,8 @@
   .optrow button:first-child{flex:1}
   .optrow .ear{font-size:18px;padding:6px 10px;border-width:2px;box-shadow:0 3px 0 var(--ink)}
   .optrow button.hl{background:var(--accent-2)}
+  .pbar{height:14px;border:3px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden;margin:10px 0 2px}
+  .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent-2),var(--accent));border-radius:99px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
   .shint.ok{color:var(--good);font-weight:800}
   .tip{margin:12px 0 0;font-size:13px;color:var(--ink-soft);font-weight:600}
   .sctl{align-items:center}
@@ -556,6 +558,7 @@
 <div class="overlay hide" id="storyOverlay">
   <div class="modal story">
     <div class="shead"><span class="sbadge" id="storyBadge">📖 Today's story</span><span id="storyProg"></span><button class="xbtn" id="storyExit" title="Stop reading for now">✕ Exit</button></div>
+    <div class="pbar"><i id="storyBar"></i></div>
     <h2 id="storyTitle"></h2>
     <div class="art" id="storyArt"></div>
     <div class="storytext" id="storyText"></div>
@@ -575,6 +578,7 @@
 <div class="overlay hide" id="huntOverlay">
   <div class="modal story hunt">
     <div class="shead"><span class="sbadge">🧰 Treasure hunt</span><span id="huntProg"></span><button class="xbtn" id="huntExit" title="Close the riddle for now">✕ Exit</button></div>
+    <div class="pbar"><i id="huntBar"></i></div>
     <div class="art hchest" id="huntArt"></div>
     <div class="storytext q" id="huntText"></div>
     <div class="opts hopts" id="huntOpts"></div>
@@ -609,8 +613,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v11";
-const RELEASED = "2026-09-27 10:13";
+const VERSION  = "v12";
+const RELEASED = "2026-09-27 10:15";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1989,6 +1993,7 @@ function drawHunt(){
   const h = S.hunt, rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
   earnListen(h, h.i + 1);
   $("huntProg").textContent = `Riddle ${h.i+1} of ${h.steps.length}  ${huntDots()}`;
+  setBar("huntBar", (h.i + (h.solved ? 1 : .5)) / h.steps.length);
   $("huntArt").innerHTML = chestSVG(false);
   $("huntText").innerHTML = wordSpans(rd.q);
   if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
@@ -2365,6 +2370,7 @@ function openStory(bedtime, done, opt){
 }
 /* one listen per page, earned when the page is first reached; unused ones are saved
    for later pages and the questions — within this reading only */
+function setBar(id, frac){ $(id).style.width = (Math.max(0, Math.min(1, frac))*100).toFixed(1) + "%"; }
 function earnListen(pool, upTo){
   pool.earned = pool.earned || 0;
   if(upTo > pool.earned){ pool.listens += upTo - pool.earned; pool.earned = upTo; return true; }
@@ -2374,6 +2380,7 @@ function showStoryPage(){
   stopSpeech();
   if(earnListen(ST.pool, ST.page + 1)) drawListens();
   $("storyProg").textContent = `Page ${ST.page+1} of ${ST.pages.length}`;
+  setBar("storyBar", (ST.page+1) / (ST.pages.length + ST.s.qs.length));
   $("storyArt").textContent = ST.s.art;
   $("storyText").className = "storytext";
   $("storyText").innerHTML = wordSpans(ST.pages[ST.page]);
@@ -2388,6 +2395,7 @@ function showQuestion(){
   const [q, opts] = ST.s.qs[ST.q];
   ST.tried = false;
   $("storyProg").textContent = `Question ${ST.q+1} of ${ST.s.qs.length}`;
+  setBar("storyBar", (ST.pages.length + ST.q + 1) / (ST.pages.length + ST.s.qs.length));
   $("storyArt").textContent = "❓";
   $("storyText").className = "storytext q";
   $("storyText").innerHTML = wordSpans(fill(q));
@@ -2420,6 +2428,7 @@ function answer(btn, right){
 function showStoryEnd(){
   const n = ST.s.qs.length;
   $("storyProg").textContent = "All done!";
+  setBar("storyBar", 1);
   $("storyArt").textContent = "⭐".repeat(ST.stars) + "☆".repeat(n - ST.stars);
   $("storyText").className = "storytext q";
   $("storyText").textContent = ST.stars === n ? "Perfect! You read it all by yourself."
