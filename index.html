@@ -327,13 +327,14 @@
   .breed-dachshund #dogShape{transform:scale(1.18,.8)}
   .breed-corgi     #dogShape{transform:scale(1.06,.84)}
   .breed-poodle    #dogShape{transform:scale(.97,1.04)}
-  .ear-husky,.ear-bulldog,.ear-retriever,.ear-dachshund,.ear-poodle,.ear-dalmatian,.ear-corgi{display:none}
+  .ear-husky,.ear-bulldog,.ear-retriever,.ear-dachshund,.ear-poodle,.ear-dalmatian,.ear-corgi,.ear-beagle{display:none}
   .breed-husky .ear-husky,.breed-bulldog .ear-bulldog,.breed-retriever .ear-retriever,
   .breed-dachshund .ear-dachshund,.breed-poodle .ear-poodle,.breed-dalmatian .ear-dalmatian,
-  .breed-corgi .ear-corgi{display:block}
+  .breed-corgi .ear-corgi,.breed-beagle .ear-beagle{display:block}
   .ear-dalmatian{fill:#34343d}
-  .deco-poodle,.deco-dalmatian{display:none}
-  .breed-poodle .deco-poodle,.breed-dalmatian .deco-dalmatian{display:block}
+  .deco-poodle,.deco-dalmatian,.deco-beagle{display:none}
+  .breed-poodle .deco-poodle,.breed-dalmatian .deco-dalmatian,.breed-beagle .deco-beagle{display:block}
+  .breed-beagle    #dogShape{transform:scale(1.02,.95)}
 
   @media(max-width:640px){
     .stats{grid-template-columns:repeat(2,1fr)}
@@ -383,6 +384,7 @@
           <g id="tail" style="transform-origin:62px 78px">
             <path d="M64 80 q-30 -4 -36 -34 q18 18 36 20 z" fill="var(--coat-dark)"/>
             <circle class="deco-poodle" cx="30" cy="45" r="11" fill="var(--belly)"/>
+            <circle class="deco-beagle" cx="31" cy="47" r="6.5" fill="#fff"/>
           </g>
           <!-- back legs -->
           <g class="leg b" style="transform-origin:82px 106px">
@@ -395,6 +397,7 @@
           </g>
           <!-- body -->
           <ellipse cx="112" cy="92" rx="58" ry="33" fill="var(--coat)"/>
+          <path class="deco-beagle" d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="#3a2f2a"/>
           <ellipse cx="118" cy="104" rx="45" ry="19" fill="var(--belly)"/>
           <g class="deco-dalmatian" fill="#34343d">
             <circle cx="90" cy="78" r="6"/><circle cx="118" cy="70" r="5"/><circle cx="142" cy="86" r="4.5"/>
@@ -427,6 +430,7 @@
               <path class="ear-poodle"    d="M166 34 q-22 10 -16 46 q6 8 16 2 q10 -6 12 -34 z" fill="var(--coat-dark)"/>
               <path class="ear-dalmatian" d="M168 34 q-16 8 -12 36 q16 6 24 -12 z"/>
               <path class="ear-corgi"     d="M166 42 l2 -44 l32 30 z" fill="var(--coat-dark)"/>
+              <path class="ear-beagle"    d="M168 34 q-19 6 -15 46 q17 6 23 -20 z" fill="var(--coat-dark)"/>
             </g>
             <circle class="eye-open" cx="203" cy="52" r="5.5" fill="#2b2b33"/>
             <circle class="eye-open" cx="205" cy="50" r="1.8" fill="#fff"/>
@@ -551,8 +555,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v4";
-const RELEASED = "2026-09-26 19:06";
+const VERSION  = "v5";
+const RELEASED = "2026-09-26 19:07";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -601,6 +605,13 @@ const BREEDS = {
     desc:"Runs forever and wants to meet every animal on Earth. The zoo is his favourite place.",
     energyDrain:0.85, dirtRate:1.0, exerciseNeed:1.4, snow:1,
     joy:{walk:1.2, animals:1.5, fetch:1.2, sealions:1.3}
+  },
+  beagle:{
+    name:"Scout", label:"Beagle", pro:["she","her","her"],
+    coat:"#c98a45", dark:"#5a4034", belly:"#ffffff",
+    desc:"A nose with a dog attached. The best treasure hunter there is — sniffing makes her happiest.",
+    energyDrain:1.0, dirtRate:1.1, exerciseNeed:1.2, snow:1,
+    joy:{sniff:1.8, dig:1.3, walk:1.2, clue:1.5}
   },
   corgi:{
     name:"Waffles", label:"Corgi", pro:["he","him","his"],
@@ -2299,9 +2310,10 @@ const EARS = {
   dachshund: 'M168 34 q-20 6 -16 50 q18 4 26 -24 z',
   poodle:    'M166 34 q-22 10 -16 46 q6 8 16 2 q10 -6 12 -34 z',
   dalmatian: 'M168 34 q-16 8 -12 36 q16 6 24 -12 z',
-  corgi:     'M166 42 l2 -44 l32 30 z'
+  corgi:     'M166 42 l2 -44 l32 30 z',
+  beagle:    'M168 34 q-19 6 -15 46 q17 6 23 -20 z'
 };
-const SHAPES = {bulldog:[1.06,.9], dachshund:[1.18,.8], corgi:[1.06,.84], poodle:[.97,1.04]};
+const SHAPES = {bulldog:[1.06,.9], dachshund:[1.18,.8], corgi:[1.06,.84], poodle:[.97,1.04], beagle:[1.02,.95]};
 function miniDog(b, key){
   const [sx,sy] = SHAPES[key] || [1,1];
   const spots = key === "dalmatian" ? `<g fill="#34343d"><circle cx="90" cy="78" r="6"/><circle cx="118" cy="70" r="5"/><circle cx="142" cy="86" r="4.5"/><circle cx="100" cy="98" r="4"/><circle cx="192" cy="40" r="4"/></g>` : "";
@@ -2309,6 +2321,7 @@ function miniDog(b, key){
   const earFill = key === "dalmatian" ? "#34343d" : b.dark;
   return `<svg viewBox="0 0 250 170"><g transform="translate(125 150) scale(${sx} ${sy}) translate(-125 -150)">
     <ellipse cx="112" cy="92" rx="58" ry="33" fill="${b.coat}"/>
+    ${key === "beagle" ? '<path d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="#3a2f2a"/>' : ""}
     <ellipse cx="118" cy="104" rx="45" ry="19" fill="${b.belly}"/>
     <rect x="75" y="100" width="17" height="46" rx="8" fill="${b.dark}"/>
     <rect x="143" y="98" width="17" height="48" rx="8" fill="${b.dark}"/>
