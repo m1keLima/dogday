@@ -30,6 +30,10 @@
     -webkit-font-smoothing:antialiased;
   }
   .wrap{width:100%;max-width:880px;display:flex;flex-direction:column;gap:14px}
+  /* top bar, stats and scene stay on screen; only the panels below scroll */
+  .pinned{position:sticky;top:0;z-index:6;background:var(--paper);display:flex;flex-direction:column;gap:10px;
+    margin:-16px -4px 0;padding:12px 4px 10px;box-shadow:0 8px 10px -8px rgba(43,43,51,.25)}
+  @media(max-height:560px){ .pinned{position:static;box-shadow:none} }
 
   /* ---------- top bar ---------- */
   .topbar{
@@ -43,10 +47,14 @@
   .daybar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd166,#e8743c,#6b4a8f)}
   .where{font-size:14px;background:var(--ink);color:#fff;padding:5px 12px;border-radius:99px}
   .wxb{font-size:14px;border:2px solid var(--ink);border-radius:14px;padding:3px 11px;background:#fff;line-height:1.3}
+  .wxb{cursor:pointer;box-shadow:0 3px 0 var(--ink);transition:transform .08s}
+  .wxb:hover{transform:translateY(-1px)}
+  .wxb .rd{font-size:11px;background:var(--accent-2);border-radius:99px;padding:0 6px;margin-left:4px;vertical-align:middle}
   .wxb .wxnext{font-size:11px;color:var(--ink-soft);font-weight:800}
 
   /* ---------- stats ---------- */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .s-potty i{background:#a37ad1}
   .stat{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:9px 11px;box-shadow:var(--shadow)}
   .stat .k{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft)}
   .stat .k b{color:var(--ink);font-size:13px}
@@ -60,7 +68,8 @@
 
   /* ---------- scene ---------- */
   .scene{
-    position:relative;height:330px;border:3px solid var(--ink);border-radius:22px;
+    --sh:clamp(210px, 38vh, 330px);
+    position:relative;height:var(--sh);border:3px solid var(--ink);border-radius:22px;
     overflow:hidden;box-shadow:var(--shadow);isolation:isolate;
     background:linear-gradient(#bfe6f5,#e7f4f7);
     transition:background 1.2s linear;
@@ -113,8 +122,11 @@
   .wx-wind .prop.sway,.wx-storm .prop.sway{animation:sway 1.3s ease-in-out infinite;transform-origin:50% 100%}
   @keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(6deg)}}
 
-  #stage{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);transition:left .8s cubic-bezier(.3,.7,.3,1)}
-  #dog{width:250px;height:auto;display:block;overflow:visible}
+  #stage{position:absolute;left:50%;bottom:64px;transform:translateX(-50%);transition:left .8s cubic-bezier(.3,.7,.3,1),bottom .6s ease}
+  #stage.flip #dog{transform:scaleX(-1)}
+  .actprop{position:absolute;line-height:1;pointer-events:none;transform:translateX(-50%);animation:popin .35s ease-out}
+  @keyframes popin{from{transform:translateX(-50%) scale(.3);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+  #dog{width:calc(var(--sh) * .76);height:auto;display:block;overflow:visible}
 
   #wx{position:absolute;inset:0;pointer-events:none;overflow:hidden}
   .drop{position:absolute;top:-30px;width:2px;height:22px;background:linear-gradient(rgba(220,235,255,0),rgba(220,235,255,.95));animation:fall linear infinite}
@@ -133,7 +145,7 @@
   .indoor #sun,.indoor #moon,.indoor #stars,.indoor #clouds,.indoor #wx{display:none}
 
   .bubble{
-    position:absolute;left:50%;bottom:250px;transform:translateX(-50%);
+    position:absolute;left:50%;top:10px;transform:translateX(-50%);
     background:#fff;border:3px solid var(--ink);border-radius:16px;
     padding:8px 14px;font-size:15px;max-width:360px;text-align:center;
     box-shadow:var(--shadow);opacity:0;transition:opacity .3s, transform .3s;pointer-events:none
@@ -156,9 +168,6 @@
 
   /* ---------- quests ---------- */
   .quests{display:grid;grid-template-columns:1fr;gap:10px}
-  .ropts{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
-  .quest .ropts button{font-size:17px;padding:9px 12px;text-align:left;margin-left:0;white-space:normal}
-  .ropts button.wrong{background:#fde3e1;animation:nope .3s}
   .quest .clue .w{cursor:pointer;border-radius:6px;padding:0 1px;transition:background .15s}
   .quest .clue .w:hover{background:#ffe7c2}
   .quest .clue .w.hl{background:var(--accent-2)}
@@ -236,6 +245,13 @@
   .peek{margin-bottom:12px;font-size:17px;font-weight:600;line-height:1.6;color:var(--ink-soft)}
   .peek summary{cursor:pointer;font-weight:800;color:var(--ink)}
   .sctl{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+  .hunt .hchest svg{width:92px;height:auto;display:inline-block}
+  .hunt .opts{grid-template-columns:1fr 1fr}
+  .optrow{display:flex;gap:6px}
+  .optrow button:first-child{flex:1}
+  .optrow .ear{font-size:18px;padding:6px 10px;border-width:2px;box-shadow:0 3px 0 var(--ink)}
+  .optrow button.hl{background:var(--accent-2)}
+  .shint.ok{color:var(--good);font-weight:800}
   .tip{margin:12px 0 0;font-size:13px;color:var(--ink-soft);font-weight:600}
   .sctl{align-items:center}
   .xbtn{font-size:13px;padding:4px 10px;border-width:2px;box-shadow:0 2px 0 var(--ink);border-radius:10px}
@@ -259,7 +275,9 @@
   .quest .qi svg{width:44px;height:44px;display:block}
   .qbtns{display:flex;gap:8px;margin-left:auto}
   .qbtns button{margin-left:0}
-  .pup{position:absolute;bottom:62px;width:112px;animation:pupRun 3.2s ease-in-out infinite}
+  .mumdog{position:absolute;bottom:60px;left:18%;width:calc(var(--sh) * .64)}
+  .mumdog svg{width:100%;height:auto;overflow:visible}
+  .pup{position:absolute;bottom:62px;width:calc(var(--sh) * .34);animation:pupRun 3.2s ease-in-out infinite}
   .pup svg{width:100%;height:auto;overflow:visible}
   @keyframes pupRun{0%,100%{transform:translateX(0)}50%{transform:translateX(var(--dx,120px))}}
   .pup.flip svg{transform:scaleX(-1)}
@@ -341,11 +359,18 @@
   .breed-beagle    #dogShape{transform:scale(1.02,.95)}
 
   @media(max-width:640px){
-    .stats{grid-template-columns:repeat(2,1fr)}
+    .stats{grid-template-columns:repeat(3,1fr)}
     .quests{grid-template-columns:1fr}
-    .scene{height:270px}
-    #dog{width:190px}
-    .bubble{bottom:200px;font-size:14px;max-width:88%}
+    .scene{--sh:clamp(190px, 30vh, 240px)}
+    .pinned{gap:7px}
+    .topbar{padding:6px 10px;gap:8px}
+    .clock{font-size:20px;min-width:0}
+    .stats{gap:6px}
+    .stat{padding:5px 8px;border-radius:12px}
+    .stat .k{font-size:10px}
+    .bar{height:9px;margin-top:3px}
+
+    .bubble{font-size:14px;max-width:88%}
     .storytext{font-size:25px}
   }
 </style>
@@ -354,13 +379,14 @@
 
 <div class="wrap">
 
+  <div class="pinned">
   <div class="topbar">
     <div>
       <div class="clock" id="clock">7:00 am</div>
       <div class="phase" id="phase">Early morning</div>
     </div>
     <div class="daybar"><i id="daybar"></i></div>
-    <div class="wxb"><div id="wxNow">☀️ Sunny</div><div class="wxnext" id="wxNext"></div></div>
+    <div class="wxb" id="wxBadge" role="button" title="Tap to read about the weather"><div id="wxNow">☀️ Sunny</div><div class="wxnext" id="wxNext"></div></div>
     <div class="where" id="where">🏠 Home</div>
   </div>
 
@@ -369,6 +395,7 @@
     <div class="stat s-happy"  id="st-happy"><div class="k"><span>Happy</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-full"   id="st-full"><div class="k"><span>Full</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-clean"  id="st-clean"><div class="k"><span>Clean</span><b>—</b></div><div class="bar"><i></i></div></div>
+    <div class="stat s-potty"  id="st-potty" title="Fills up over time — take him out to the bathroom when it's high"><div class="k"><span>Potty 🚽</span><b>—</b></div><div class="bar"><i></i></div></div>
   </div>
 
   <div class="scene home" id="scene">
@@ -458,6 +485,8 @@
     <div class="bubble" id="bubble"></div>
   </div>
 
+  </div>
+
   <div class="panel quests" id="quests">
     <div class="quest" id="qStory"></div>
     <div class="quest" id="qHunt"></div>
@@ -500,17 +529,20 @@
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
           <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
           <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. You only get 5 listens!</li>
-          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You get 3 listens for the whole hunt.</li>
+          <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. You get 4 listens for the whole hunt.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
+          <li><span>🚽</span>Dogs need to go to the bathroom outside. Watch the Potty bar!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
-          <li><span>🐾</span>Have a great day, and you will see the puppies at night!</li>
+          <li><span>🌦️</span>Tap the weather to read about it. Answer the questions for points!</li>
+          <li><span>🐾</span>At night your dog goes home to his family. More points = more puppies (up to 5)!</li>
         </ul>
       </div>
       <div class="hcol hparents">
         <h2>👩👨 For parents</h2>
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, but only 5 times per story, so they try to sound words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
-        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word or the whole riddle, but only 3 times in the whole hunt. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
+        <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, but only 4 times in the whole hunt. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
+        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. Right answers earn points, once per weather type each day.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -539,6 +571,23 @@
   </div>
 </div>
 
+<!-- ---------- treasure-hunt window ---------- -->
+<div class="overlay hide" id="huntOverlay">
+  <div class="modal story hunt">
+    <div class="shead"><span class="sbadge">🧰 Treasure hunt</span><span id="huntProg"></span><button class="xbtn" id="huntExit" title="Close the riddle for now">✕ Exit</button></div>
+    <div class="art hchest" id="huntArt"></div>
+    <div class="storytext q" id="huntText"></div>
+    <div class="opts hopts" id="huntOpts"></div>
+    <div class="shint" id="huntHint"></div>
+    <div class="sctl">
+      <span class="listen" id="huntListen"></span>
+      <button id="huntRead">🔊 Read riddle<span class="t">uses 1 listen</span></button>
+      <button class="go" id="huntGo">Go find it →</button>
+    </div>
+    <p class="tip" id="huntTip">Hard word? Tap it to hear it, have the whole riddle read, or press 🔊 next to an answer. You get 4 listens for the whole hunt.</p>
+  </div>
+</div>
+
 <!-- ---------- score card ---------- -->
 <div class="overlay hide" id="endOverlay">
   <div class="modal">
@@ -560,8 +609,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v8";
-const RELEASED = "2026-09-27 09:27";
+const VERSION  = "v9";
+const RELEASED = "2026-09-27 09:40";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -577,9 +626,9 @@ const BREEDS = {
     joy:{fetch:1.35, walk:1.1, swim:1.5, puddles:1.3}
   },
   husky:{
-    name:"Yuki", label:"Husky", pro:["she","her","her"],
+    name:"Yuki", label:"Husky", pro:["he","him","his"],
     coat:"#9aa6b4", dark:"#6f7c8c", belly:"#f2f4f7",
-    desc:"A tank of energy that turns sour fast if you under-walk her. Lives for snow and mountains.",
+    desc:"A tank of energy that turns sour fast if you under-walk him. Lives for snow and mountains.",
     energyDrain:0.75, dirtRate:0.9, exerciseNeed:1.9, snow:1.3,
     joy:{walk:1.3, carride:1.2, nap:.6, hike:1.5, snowplay:1.6}
   },
@@ -598,7 +647,7 @@ const BREEDS = {
     joy:{dig:1.6, treat:1.2, hike:.7}
   },
   poodle:{
-    name:"Coco", label:"Poodle", pro:["she","her","her"],
+    name:"Coco", label:"Poodle", pro:["he","him","his"],
     coat:"#f3eee6", dark:"#dcd3c5", belly:"#ffffff",
     desc:"Clever, cultured and white — so every speck of mud shows. Adores tricks and the museum.",
     energyDrain:0.9, dirtRate:1.25, exerciseNeed:0.9, snow:1,
@@ -612,9 +661,9 @@ const BREEDS = {
     joy:{walk:1.2, animals:1.5, fetch:1.2, sealions:1.3}
   },
   beagle:{
-    name:"Scout", label:"Beagle", pro:["she","her","her"],
+    name:"Scout", label:"Beagle", pro:["he","him","his"],
     coat:"#c98a45", dark:"#5a4034", belly:"#ffffff",
-    desc:"A nose with a dog attached. The best treasure hunter there is — sniffing makes her happiest.",
+    desc:"A nose with a dog attached. The best treasure hunter there is — sniffing makes him happiest.",
     energyDrain:1.0, dirtRate:1.1, exerciseNeed:1.2, snow:1,
     joy:{sniff:1.8, dig:1.3, walk:1.2, clue:1.5}
   },
@@ -632,12 +681,12 @@ const BREEDS = {
    props: big emoji [emoji, left%, class]. Keep them out of ~40–62%, that's where he stands.
    ground: small things scattered on the ground once per day. */
 const PLACES = {
-  house:{name:"Inside", icon:"🛋️", to:"inside", pos:[0,0], indoor:true, hint:"🍖 food · 🛁 bath · 💤 nap",
-        props:[["🪴",15,""],["🧸",31,"small"],["🥣",67,"small"]],
+  house:{name:"Inside", icon:"🛋️", to:"inside", pos:[0,0], indoor:true, hint:"🍖 food · 💧 water · 🛁 bath · 💤 nap",
+        props:[["🪴",15,""],["🧸",31,"small"]],
         ground:["🧦","🧸","🦴","🎾","🧦"],
         arrive:"Inside. He does one lap of the living room to check nothing's changed."},
-  home:{name:"Yard", icon:"🏡", to:"the yard", pos:[0,0], hint:"🎾 fetch · 🚗 car ride",
-        props:[["🌳",86,"sway"],["🦴",27,"small"]],
+  home:{name:"Yard", icon:"🏡", to:"the yard", pos:[0,0], hint:"🚽 bathroom · 🍖 food · 💧 water · 🚗 car",
+        props:[["🌳",86,"sway"],["🦴",72,"small"]],
         ground:["🌷","🌼","🥎","🍂","🌱","🧸","🌷"],
         arrive:"The yard. He does a quick patrol of the fence."},
   park:{name:"Park", icon:"🌳", to:"the park", pos:[1,0], hint:"🥏 catch · 🕳️ dig",
@@ -734,7 +783,14 @@ const BACKDROPS = {
     <g fill="#b98553"><rect x="18" y="66" width="60" height="4"/><rect x="18" y="104" width="60" height="4"/><rect x="18" y="142" width="60" height="4"/></g>
     <g><rect x="20" y="74" width="9" height="30" fill="#e8743c"/><rect x="31" y="78" width="8" height="26" fill="#57a9d6"/><rect x="41" y="72" width="10" height="32" fill="#f0b429"/><rect x="53" y="80" width="8" height="24" fill="#4fa86b"/>
     <rect x="22" y="114" width="10" height="28" fill="#6b4a8f"/><rect x="34" y="118" width="9" height="24" fill="#d9534f"/><rect x="46" y="112" width="11" height="30" fill="#57a9d6"/></g>
-    <text x="22" y="190" font-size="36">📚</text>`,
+    <text x="22" y="190" font-size="36">📚</text>
+    <ellipse cx="440" cy="224" rx="88" ry="14" fill="#6b4a8f"/><ellipse cx="440" cy="220" rx="70" ry="8" fill="#9a7cc0"/>
+    <g class="bowls"><ellipse cx="210" cy="231" rx="22" ry="4" fill="rgba(0,0,0,.15)"/>
+      <path d="M190 216 h40 l-6 15 h-28 z" fill="#e8743c"/><ellipse cx="210" cy="216" rx="20" ry="4.5" fill="#8a5a3c"/>
+      <circle cx="204" cy="214" r="3" fill="#a8703f"/><circle cx="213" cy="213" r="3" fill="#a8703f"/><circle cx="219" cy="215" r="2.6" fill="#a8703f"/>
+      <ellipse cx="262" cy="231" rx="22" ry="4" fill="rgba(0,0,0,.15)"/>
+      <path d="M242 216 h40 l-6 15 h-28 z" fill="#57a9d6"/><ellipse cx="262" cy="216" rx="20" ry="4.5" fill="#bfe6f5"/>
+      <path d="M254 216 q6 -2 12 0" stroke="#fff" stroke-width="2" fill="none"/></g>`,
   home:`<path d="M0 150 Q160 110 330 145 T650 135 T880 128 V234 H0Z" fill="#a8cf8c"/>
     <path d="M0 192 Q200 165 420 188 T880 180 V234 H0Z" fill="#98c47e"/>
     <g transform="translate(24 0)">
@@ -747,7 +803,13 @@ const BACKDROPS = {
       <rect class="win" x="130" y="140" width="38" height="30" rx="3"/>
       <path d="M45 140 v30 M26 155 h38 M149 140 v30 M130 155 h38" stroke="#f4dcb4" stroke-width="3"/>
     </g>
-    ${fence(590,880,26,"#fff6e6",188)}`,
+    ${fence(590,880,26,"#fff6e6",188)}
+    <g class="bowls"><ellipse cx="232" cy="231" rx="22" ry="4" fill="rgba(0,0,0,.15)"/>
+      <path d="M212 216 h40 l-6 15 h-28 z" fill="#e8743c"/><ellipse cx="232" cy="216" rx="20" ry="4.5" fill="#8a5a3c"/>
+      <circle cx="226" cy="214" r="3" fill="#a8703f"/><circle cx="235" cy="213" r="3" fill="#a8703f"/><circle cx="241" cy="215" r="2.6" fill="#a8703f"/>
+      <ellipse cx="284" cy="231" rx="22" ry="4" fill="rgba(0,0,0,.15)"/>
+      <path d="M264 216 h40 l-6 15 h-28 z" fill="#57a9d6"/><ellipse cx="284" cy="216" rx="20" ry="4.5" fill="#bfe6f5"/>
+      <path d="M276 216 q6 -2 12 0" stroke="#fff" stroke-width="2" fill="none"/></g>`,
   park:`<path d="M0 140 Q220 90 440 135 T880 120 V234 H0Z" fill="#9fcb86"/>
     <path d="M0 186 Q260 150 520 180 T880 170 V234 H0Z" fill="#8cbf73"/>
     <circle class="glow" cx="262" cy="112" r="34"/>
@@ -946,10 +1008,22 @@ const ACTIONS = [
     say:"Head out the window the entire way. Ears like flags.",
     gate:s => s.full < 18 ? "Too hungry to care about the car. He's staring at the bowl." : null, stat:"full" },
 
-  { id:"feed", label:"Fill the bowl", icon:"🍖", mins:20, locs:["house"],
+  { id:"feed", label:"Fill the food bowl", icon:"🍖", mins:20, locs:["house","home"],
     eff:{energy:10,happy:9,clean:-5,full:58}, exercise:0, pose:"eat", fx:"🍖",
     say:"Inhaled in nineteen seconds, then checked the bowl four more times.",
     gate:s => s.full > 72 ? "He sniffs it, then walks away. Still full from last time." : null, stat:"full" },
+
+  { id:"drink", label:"Fill the water bowl", icon:"💧", mins:5, locs:["house","home"],
+    eff:{energy:4,happy:3,clean:-1}, exercise:0, pose:"eat", fx:"💧",
+    say:"Lap, lap, lap, lap. Half of it ended up on the floor, and on your socks.",
+    gate:s => s.t - s.lastDrink < 45 ? "He sniffs the water and walks off. Not thirsty yet." : null, stat:"energy" },
+
+  { id:"potty", label:"Go to the bathroom", icon:"🚽", mins:5, locs:["home","park","beach","mountains","lake","zoo"],
+    eff:{happy:6}, exercise:0, pose:"idle", fx:"🌿",
+    say:()=>pick(["Sniffed nine spots, picked the tenth. Ahh. Much better.",
+                  "Found the perfect bush. Very private. Very relieved.",
+                  "Did his business, then kicked grass at it like a tiny bull."]),
+    gate:s => s.potty < 20 ? "He sniffs around, lifts a leg… nothing. False alarm." : null, stat:"potty" },
 
   { id:"treat", label:"Give a treat", icon:"🦴", mins:5, locs:Object.keys(PLACES),
     eff:{energy:3,happy:9,clean:-1,full:11}, exercise:0, pose:"eat", fx:"🦴",
@@ -967,7 +1041,7 @@ const ACTIONS = [
     gate:s => s.energy > 68 ? "Not remotely sleepy. He's doing laps of the kitchen." : null },
 
   { id:"cuddle", label:"Cuddle on the couch", icon:"🛋️", mins:20, locs:["house"],
-    eff:{energy:6,happy:12}, exercise:0, pose:"idle", fx:"💛",
+    eff:{energy:6,happy:12}, exercise:0, pose:"sleep", fx:"💛",
     say:"He's decided he's a lap dog. You've lost feeling in one leg.",
     gate:s => s.happy > 90 ? "Far too wound-up to sit still. Maybe after something fun." : null, stat:"happy" },
 
@@ -1041,11 +1115,86 @@ const ACTIONS = [
     gate:s => s.energy < 22 ? "A leaf lands on his head. He leaves it there." : null }
 ];
 
+/* ---------- where each activity happens in the scene ----------
+   spot: {place:{x, y}} in backdrop coordinates (y = surface to stand on, omit for the floor),
+         {pct} = percent across the scene, nose:true = put his nose there (bowls).
+   show: an emoji prop that appears with him. across: he walks across the scene and back. */
+const STAGING = {
+  feed:    {spot:{house:{x:210, nose:true}, home:{x:232, nose:true}}},
+  drink:   {spot:{house:{x:262, nose:true}, home:{x:284, nose:true}}},
+  nap:     {spot:{house:{x:440}}},
+  cuddle:  {spot:{house:{x:736, y:150}}},
+  wash:    {show:["🛁", 150, 0, 40]},
+  carride: {spot:{home:{pct:76}}, show:["🚙", 150, 0, 44]},
+  tug:     {show:["🪢", 56, .5, 110]},
+  treat:   {show:["🦴", 40, .48, 130]},
+  potty:   {spot:{home:{pct:80}, park:{pct:84}, beach:{pct:14}, mountains:{pct:84}, lake:{pct:12}, zoo:{pct:22}}, show:["🌿", 50, -.1, 70]},
+  dig:     {show:["🕳️", 64, .25, 40]},
+  tour:    {spot:{museum:{x:690}}},
+  portrait:{spot:{museum:{x:190}}, show:["🎨", 60, .55, 90]},
+  animals: {across:true},
+  sealions:{show:["🦭", 70, .6, 60]},
+  walk:    {across:true},
+  hike:    {across:true},
+  slide:   {spot:{pool:{x:650}}},
+  swim:    {spot:{lake:{pct:62}}},
+  snowplay:{across:true},
+  leaves:  {across:true}
+};
+function spotToStage(sp){
+  const sc = $("scene").getBoundingClientRect(), W = $("dog").getBoundingClientRect().width || 250;
+  if(sp.pct != null) return {left:sp.pct};
+  const r = $("backdrop").getBoundingClientRect();
+  const k = Math.max(r.width/880, r.height/234), ox = (r.width - 880*k)/2, oy = r.height - 234*k;
+  let x = r.left - sc.left + ox + sp.x*k;
+  if(sp.nose) x -= 0.45*W;
+  x = Math.max(W*.35, Math.min(sc.width - W*.35, x));   // narrow screens crop the room: keep him mostly in view
+  const out = {left: x / sc.width * 100};
+  if(sp.y != null) out.bottom = (r.height - (oy + sp.y*k)) + 96 - 18*W/250;
+  return out;
+}
+function moveDog(left, bottom){
+  const st = $("stage"), cur = parseFloat(st.style.left) || 50;
+  st.classList.toggle("flip", left < cur - 1);
+  st.style.left = left + "%";
+  st.style.bottom = bottom != null ? bottom + "px" : "";
+}
+function homeDog(){ const st = $("stage"); st.classList.remove("flip"); st.style.left = "50%"; st.style.bottom = ""; }
+function showActProp([emoji, size, dx, bottom], left){
+  const W = $("dog").getBoundingClientRect().width || 250, sc = $("scene").getBoundingClientRect();
+  const el = document.createElement("div");
+  el.className = "actprop"; el.textContent = emoji;
+  el.style.fontSize = (size * W/250) + "px";
+  el.style.left = `calc(${left}% + ${dx*W}px)`;
+  el.style.bottom = (bottom * W/250) + "px";
+  $("scene").insertBefore(el, $("wx"));
+  return el;
+}
+/* returns how long the action should play, so there's time to watch it */
+function stageAction(a){
+  const g = STAGING[a.id];
+  if(!g) return 0;
+  const sp = g.spot && g.spot[S.loc];
+  let left = 50;
+  if(sp){ const p = spotToStage(sp); left = p.left; moveDog(p.left, p.bottom); }
+  if(g.across){
+    moveDog(82);
+    setTimeout(()=>moveDog(18), 1000);
+    setTimeout(()=>{ homeDog(); }, 2000);
+    return 2700;
+  }
+  if(g.show){
+    const el = showActProp(g.show, left);
+    setTimeout(()=>el.remove(), sp ? 2500 : 2000);
+  }
+  return sp ? 2600 : 2000;
+}
+
 /* ---------- treasure hunt ---------- */
 /* Each step is a riddle with 4 answers (RIGHT answer first — shuffled on screen).
    The answer tells you where to go; there you sniff for the next note. */
 const HUNT_STEPS = 5;
-const HUNT_LISTENS = 3;   // read-alouds for the whole hunt (its own pool, separate from the story's)
+const HUNT_LISTENS = 4;   // read-alouds for the whole hunt (its own pool, separate from the story's)
 const CLUES = {
   park:{spot:"under the park bench", riddles:[
     {q:"I am brown and fluffy. I have a big bushy tail. I hide nuts in trees. What am I?", a:["a squirrel","a fish","a cow","a frog"], icon:"🐿️", where:"Squirrels live in the park."},
@@ -1482,14 +1631,14 @@ function startGame(breedKey, seed){
   S = {
     breedKey, breed:b, name:b.name,
     t:DAY_START, loc:"house", busy:false, over:false,
-    energy:78, happy:62, full:46, clean:72,
+    energy:78, happy:62, full:46, clean:72, potty:62, potties:0, lastDrink:-999,
     sinceExercise:0, actions:0, exerciseMins:0, treats:0, washes:0, peakHappy:62,
     log:[],
     weather:makeWeather(r),
     ground:scatterGround(r),
     story:{s:pick(STORIES, r), done:false, stars:0, listens:LISTENS},
     hunt:makeHunt(r),
-    finds:[], visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
+    finds:[], wxRead:{}, visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
   };
   document.documentElement.style.setProperty("--coat", b.coat);
@@ -1572,7 +1721,7 @@ function render(){
   $("phase").textContent = phaseName(S.t);
   $("daybar").style.width = (p*100).toFixed(1)+"%";
   $("where").textContent = `${place.icon} ${place.name}`;
-  $("wxNow").textContent = `${W.icon} ${W.name}`;
+  $("wxNow").innerHTML = `${W.icon} ${W.name}` + ((S.wxRead[wxKey] || {}).done ? ` <span class="rd">✔ read</span>` : ` <span class="rd">📖 read me</span>`);
   const seg = weatherSeg(S.t), next = S.weather[S.weather.indexOf(seg)+1];
   $("wxNext").textContent = next && next.wx !== wxKey ? `then ${WX[next.wx].icon} at ${fmtTime(next.from)}` : "for the rest of the day";
 
@@ -1609,11 +1758,11 @@ function render(){
   scene.style.setProperty("--glow", place.indoor ? .8 : (p > .82 ? .9 : W.mix >= .5 ? .55 : 0));
 
   // stat bars
-  ["energy","happy","full","clean"].forEach(k=>{
+  ["energy","happy","full","clean","potty"].forEach(k=>{
     const el = $("st-"+k);
     el.querySelector("i").style.width = S[k]+"%";
     el.querySelector("b").textContent = Math.round(S[k]);
-    el.classList.toggle("low", S[k] < 30);
+    el.classList.toggle("low", k === "potty" ? S[k] > 70 : S[k] < 30);
   });
 
   drawButtons();
@@ -1669,6 +1818,9 @@ function currentCue(){
                    cues.push(["⛈️", "He's pressed against your legs, trembling. He wants to be indoors."]);
   if(wx === "storm" && S.loc === "house" && !stormCalm())
                    cues.push(["⛈️", "He's under the table, flinching at every rumble. A cuddle would help."]);
+  if(S.potty > 70) cues.push(S.loc === "house"
+      ? ["🚽", "He's doing the potty dance by the front door. Take him outside!"]
+      : ["🚽", "He's sniffing every bush with great urgency. Bathroom time!"]);
   if(S.full  < 30) cues.push(S.loc === "house"
       ? ["🍖", "He is sitting by the bowl, staring into it with intent."]
       : ["🍖", "He keeps checking your pockets. There is nothing in your pockets."]);
@@ -1762,7 +1914,7 @@ function drawButtons(){
   Object.keys(PLACES).filter(k => k !== S.loc).map(route).sort((a,b)=>a.mins-b.mins).forEach(r=>{
     const P = PLACES[r.to];
     const btn = document.createElement("button");
-    btn.className = "go";
+    btn.className = "trip";
     const label = r.door ? `🚪 Go ${r.to === "house" ? "inside" : "outside"}` : `${P.icon} ${P.name}`;
     btn.innerHTML = `${label}<span class="t">${r.mins} min ${r.door ? "" : r.walk ? "walk" : "drive"} · ${P.hint}</span>`;
     btn.disabled = S.busy || S.over || r.mins > timeLeft();
@@ -1800,62 +1952,82 @@ function drawQuests(){
     qh.innerHTML = `<div class="qi">${chestSVG(true, h.prize[0])}</div><div class="qt"><b>Treasure hunt · found it!</b>He dug up ${esc(h.prize[1])}.</div>`;
     return;
   }
-  const dots = h.steps.map((_,k)=> k < h.i ? "●" : k === h.i ? "◉" : "○").join("");
-  const addBtns = (...btns) => { const w = document.createElement("div"); w.className = "qbtns"; btns.forEach(b=>w.appendChild(b)); qh.appendChild(w); };
-  const mk = (html, fn, cls) => { const b = document.createElement("button"); b.innerHTML = html; b.onclick = fn; if(cls) b.className = cls; return b; };
-  if(h.paused){
-    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt"><b>Treasure hunt · paused <span class="hdots">${dots}</span></b>Riddle ${h.i+1} of ${h.steps.length} is waiting for you.</div>`;
-    addBtns(mk(`▶ Resume hunt`, ()=>{ h.paused = false; drawQuests(); }));
-    return;
-  }
   const rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
-  const head = `<b>Treasure hunt · riddle ${h.i+1} of ${h.steps.length} <span class="hdots">${dots}</span></b>`;
-  const pause = mk("✕ Exit", ()=>{ h.paused = true; drawQuests(); }, "xbtn");
-  pause.title = "Pause the treasure hunt";
+  const mk = (html, fn) => { const b = document.createElement("button"); b.innerHTML = html; b.onclick = fn; b.disabled = S.over; return b; };
+  const head = `<b>Treasure hunt · riddle ${h.i+1} of ${h.steps.length} <span class="hdots">${huntDots()}</span></b>`;
+  const w = document.createElement("div"); w.className = "qbtns";
   if(!h.solved){
-    if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
-    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${wordSpans(rd.q)}</span></div>`;
-    addBtns(...huntReadBits(), pause);
-    const box = document.createElement("div");
-    box.className = "ropts";
-    h.opts.forEach(([txt, right])=>{
-      const b = document.createElement("button");
-      b.textContent = txt;
-      if(h.wrong.includes(txt)){ b.className = "wrong"; b.disabled = true; }
-      b.onclick = ()=> solveRiddle(txt, right);
-      box.appendChild(b);
-    });
-    qh.appendChild(box);
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}Solve the riddle to find out where to go next.</div>`;
+    w.appendChild(mk(`🗺️ Open riddle`, openHunt));
   } else {
-    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${wordSpans(rd.q)}</span>` +
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}` +
       `<span class="solved">✔ ${rd.icon} It's ${esc(rd.a[0])}! ${esc(rd.where)} ${last ? "The treasure is buried there!" : "The next note is hidden there."}</span></div>`;
     const sniff = mk(`🐽 Sniff here<span class="t">15 min</span>`, doSniff);
     sniff.disabled = S.busy || S.over || 15 > timeLeft();
-    addBtns(sniff, ...huntReadBits(), pause);
+    w.appendChild(sniff);
+    w.appendChild(mk(`🗺️ See riddle`, openHunt));
   }
+  qh.appendChild(w);
 }
-/* hunt read-aloud: tap a word or read the whole riddle, from the hunt's own pool */
-function huntReadBits(){
-  const h = S.hunt;
-  if(!canSpeak) return [];
-  const c = document.createElement("span");
-  c.className = "listen" + (h.listens ? "" : " out");
-  c.textContent = h.listens ? `🔊 ${"●".repeat(h.listens)}${"○".repeat(HUNT_LISTENS - h.listens)}` : "🔇";
-  c.title = `${h.listens} riddle listen${h.listens === 1 ? "" : "s"} left for the whole hunt`;
-  const b = document.createElement("button");
-  b.innerHTML = `🔊 Read riddle<span class="t">${h.listens} listen${h.listens === 1 ? "" : "s"} left</span>`;
-  b.disabled = !h.listens;
-  b.onclick = ()=> huntSpeak(null);
-  return [c, b];
+function huntDots(){ const h = S.hunt; return h.steps.map((_,k)=> k < h.i ? "●" : k === h.i ? "◉" : "○").join(""); }
+
+/* ---------- treasure-hunt window (same shape as the story book) ---------- */
+function openHunt(){
+  if(!S || S.over || S.hunt.done) return;
+  $("huntOverlay").classList.remove("hide");
+  $("huntListen").style.display = $("huntRead").style.display = $("huntTip").style.display = canSpeak ? "" : "none";
+  drawHunt();
+}
+function closeHunt(){
+  stopSpeech();
+  $("huntOverlay").classList.add("hide");
+  drawQuests();
+}
+function drawHunt(){
+  const h = S.hunt, rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
+  $("huntProg").textContent = `Riddle ${h.i+1} of ${h.steps.length}  ${huntDots()}`;
+  $("huntArt").innerHTML = chestSVG(false);
+  $("huntText").innerHTML = wordSpans(rd.q);
+  if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
+  const box = $("huntOpts");
+  box.innerHTML = "";
+  h.opts.forEach(([txt, right])=>{
+    const row = document.createElement("div");
+    row.className = "optrow";
+    const b = document.createElement("button");
+    b.textContent = txt;
+    if(h.wrong.includes(txt)){ b.className = "wrong"; b.disabled = true; }
+    if(h.solved){ b.disabled = true; if(right) b.className = "right"; }
+    b.onclick = ()=> solveRiddle(txt, right);
+    const ear = document.createElement("button");
+    ear.className = "ear"; ear.textContent = "🔊"; ear.title = "Hear this answer (uses 1 listen)";
+    ear.style.display = canSpeak ? "" : "none";
+    ear.onclick = ()=> huntSpeakAnswer(txt, b);
+    row.append(b, ear);
+    box.appendChild(row);
+  });
+  $("huntHint").textContent = h.solved
+    ? `✔ ${rd.icon} It's ${rd.a[0]}! ${rd.where} ${last ? "The treasure is buried there!" : "The next note is hidden there."}`
+    : (h.wrong.length ? `Hmm, not ${h.wrong[h.wrong.length-1]}. Read the riddle again!` : "");
+  $("huntHint").className = "shint" + (h.solved ? " ok" : "");
+  $("huntGo").style.display = h.solved ? "" : "none";
+  drawHuntListen();
+}
+function drawHuntListen(){
+  const h = S.hunt, el = $("huntListen");
+  el.className = "listen" + (h.listens ? "" : " out");
+  el.textContent = h.listens ? `🔊 ${"●".repeat(h.listens)}${"○".repeat(HUNT_LISTENS - h.listens)}  ${h.listens} listen${h.listens === 1 ? "" : "s"} left`
+                             : "🔇 No listens left — sound it out!";
+  $("huntRead").disabled = !h.listens;
 }
 function huntSpeak(span){
-  const h = S.hunt, el = $("qHunt").querySelector(".clue");
-  if(!canSpeak || !el) return;
+  const h = S.hunt, el = $("huntText");
+  if(!canSpeak) return;
   if(span){
     const word = span.textContent.replace(/[^A-Za-z']/g, ""), key = word.toLowerCase();
     if(!word) return;
     if(!h.heard.includes(key)){
-      if(h.listens <= 0) return speak("🔇  No riddle listens left. Sound it out — you can do it!", true);
+      if(h.listens <= 0){ $("huntHint").textContent = "No more listens. Say each sound slowly — you can do it!"; return; }
       h.listens--; h.heard.push(key);
     }
     speakOut(word, [span]);
@@ -1864,27 +2036,36 @@ function huntSpeak(span){
     h.listens--;
     speakOut(el.textContent, [...el.querySelectorAll(".w")]);
   }
-  drawQuests();
+  drawHuntListen();
 }
-/* speak text, highlighting word spans as they're read (spans must carry data-c offsets unless single) */
+function huntSpeakAnswer(txt, btn){
+  const h = S.hunt, key = "answer:" + txt;
+  if(!canSpeak) return;
+  if(!h.heard.includes(key)){
+    if(h.listens <= 0){ $("huntHint").textContent = "No more listens. Say each sound slowly — you can do it!"; return; }
+    h.listens--; h.heard.push(key);
+  }
+  speakOut(txt, [btn]);
+  drawHuntListen();
+}
+/* speak text, highlighting the word spans as they're read */
 function speakOut(text, spans){
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.rate = .75; u.lang = "en-US";
-  const live = () => spans.map(sp => sp.isConnected ? sp : document.querySelector(`#qHunt .clue .w[data-c="${sp.dataset.c}"]`)).filter(Boolean);
-  if(spans.length === 1){ live().forEach(sp=>sp.classList.add("hl")); setTimeout(()=>live().forEach(sp=>sp.classList.remove("hl")), 1500); }
+  if(spans.length === 1){ spans[0].classList.add("hl"); setTimeout(()=>spans[0].classList.remove("hl"), 1500); }
   else u.onboundary = e => {
-    const cur = live(); let hit = null;
-    for(const sp of cur) if(+sp.dataset.c <= e.charIndex) hit = sp;
-    cur.forEach(sp => sp.classList.toggle("hl", sp === hit));
+    let hit = null;
+    for(const sp of spans) if(+sp.dataset.c <= e.charIndex) hit = sp;
+    spans.forEach(sp => sp.classList.toggle("hl", sp === hit));
   };
-  u.onend = () => live().forEach(sp => sp.classList.remove("hl"));
+  u.onend = () => spans.forEach(sp => sp.classList.remove("hl"));
   speechSynthesis.speak(u);
 }
-$("qHunt").addEventListener("click", e=>{
-  const w = e.target.closest(".clue .w");
-  if(w) huntSpeak(w);
-});
+$("huntText").addEventListener("click", e=>{ const w = e.target.closest(".w"); if(w) huntSpeak(w); });
+$("huntRead").onclick = ()=> huntSpeak(null);
+$("huntExit").onclick = closeHunt;
+$("huntGo").onclick = closeHunt;
 /* the treasure-hunt icon: a little chest; open (with the prize) once found */
 function chestSVG(open, prize){
   const lid = open
@@ -1899,16 +2080,18 @@ function chestSVG(open, prize){
   </svg>`;
 }
 function solveRiddle(txt, right){
-  if(S.busy || S.over) return;
+  if(S.over) return;
   const h = S.hunt;
+  if(h.solved) return;
+  h.wrong = h.wrong || [];
   if(right){
     h.solved = true;
     floatFx(h.riddles[h.i].icon, 2);
     say(`<b>Riddle solved!</b> It's ${h.riddles[h.i].a[0]}. ${h.riddles[h.i].where}`);
   } else {
     h.wrong.push(txt);
-    speak(`🤔  Hmm, not ${txt}. Read the riddle again!`, true);
   }
+  drawHunt();
   drawQuests();
 }
 
@@ -1929,6 +2112,8 @@ function passTime(mins, wx){
   // being hungry or filthy erodes mood on its own
   if(S.full  < 25) S.happy = clamp(S.happy - mins*0.03);
   if(S.clean < 25) S.happy = clamp(S.happy - mins*0.015);
+  S.potty = Math.min(100, S.potty + mins*0.3);
+  if(S.potty > 85) S.happy = clamp(S.happy - mins*0.04);
 
   // weather: rain muddies an exposed dog; a storm frays his nerves — badly outside,
   // a little in the house unless cuddled, not at all in the museum
@@ -1984,13 +2169,19 @@ function doAction(a){
   if(a.anim) a.anim(ctx);
   speak(`${a.icon}  ${line}`);
 
-  const dur = a.id === "nap" ? 2200 : 1500;
+  const staged = stageAction(a);
+  const dur = Math.max(a.id === "nap" ? 2200 : 1500, staged);
   setTimeout(()=>{
+    if(staged) homeDog();
     passTime(a.mins, wx);
     applyEffects(Object.assign({}, a.eff, (a.effAt && a.effAt[S.loc]) || {}), a.id, a.outside, wx);
     if(a.exercise){ S.exerciseMins += a.exercise; S.sinceExercise = 0; }
     if(a.id === "treat"){ S.treats++; if(S.treats > 3) S.happy = clamp(S.happy - (S.treats-3)*2); }
     if(a.id === "wash")  S.washes++;
+    if(a.id === "feed")  S.potty = Math.min(100, S.potty + 15);
+    if(a.id === "drink"){ S.potty = Math.min(100, S.potty + 22); S.lastDrink = S.t; }
+    if(a.id === "swim")  S.potty = Math.min(100, S.potty + 5);
+    if(a.id === "potty"){ S.potty = 0; S.potties++; }
     if(a.done) a.done(ctx);
     S.busy = false;
     say(`<b>${a.label}.</b> ${line}`);
@@ -2028,7 +2219,7 @@ function doTravel(r){
 
 /* the treasure hunt: he sniffs, you read the clue and pick the place */
 function doSniff(){
-  if(S.busy || S.over || S.hunt.done || !S.hunt.solved || S.hunt.paused) return;
+  if(S.busy || S.over || S.hunt.done || !S.hunt.solved) return;
   const wx = weatherAt(S.t), h = S.hunt;
   if(wx === "storm" && exposedHere())
     return refuse("He won't put his nose to the ground in this. He wants to be indoors.", "happy");
@@ -2065,6 +2256,7 @@ function doSniff(){
     S.busy = false;
     render();
     if(S.t >= DAY_END) endDay(false);
+    else if(!h.done && h.i > 0 && !h.solved && S.loc === target) setTimeout(openHunt, 1400);
   }, 1500);
 }
 
@@ -2090,14 +2282,14 @@ function wordSpans(text){
    the same word again is free, so the counter never punishes a re-check. */
 const LISTENS = 5;
 function drawListens(){
-  const st = S.story, left = st.listens, el = $("storyListen");
+  const st = ST.pool, left = st.listens, el = $("storyListen");
   el.className = "listen" + (left ? "" : " out");
-  el.textContent = left ? `🔊 ${"●".repeat(left)}${"○".repeat(LISTENS-left)}  ${left} listen${left === 1 ? "" : "s"} left`
+  el.textContent = left ? `🔊 ${"●".repeat(left)}${"○".repeat(ST.max-left)}  ${left} listen${left === 1 ? "" : "s"} left`
                         : "🔇 No listens left — sound it out!";
   $("storyRead").disabled = !left;
 }
 function readPage(){
-  const st = S.story, el = $("storyText");
+  const st = ST.pool, el = $("storyText");
   if(!canSpeak || !el.querySelector(".w")) return;
   if(st.listens <= 0){ $("storyHint").textContent = "No more listens. Say each sound slowly — you can do it!"; return; }
   st.listens--;
@@ -2117,17 +2309,18 @@ function readPage(){
 /* leave the story half-way: nothing is lost except the page you were on; listens stay spent */
 function exitStory(){
   if(!ST || ST.bedtime) return;
+  const kind = ST.kind;
   stopSpeech();
   $("storyOverlay").classList.add("hide");
   ST = null;
   S.busy = false;
-  say(`<b>Story paused.</b> You can finish “${fill(S.story.s.title)}” any time before bedtime.`);
+  if(kind === "story") say(`<b>Story paused.</b> You can finish “${fill(S.story.s.title)}” any time before bedtime.`);
   render();
 }
 function tapWord(span){
   const word = span.textContent.replace(/[^A-Za-z']/g, "");
   if(!word || !canSpeak) return;
-  const st = S.story, key = word.toLowerCase();
+  const st = ST.pool, key = word.toLowerCase();
   st.heard = st.heard || [];
   if(!st.heard.includes(key)){
     if(st.listens <= 0){ $("storyHint").textContent = "No more listens. Say each sound slowly — you can do it!"; return; }
@@ -2144,19 +2337,23 @@ function tapWord(span){
 }
 function stopSpeech(){ if(canSpeak) speechSynthesis.cancel(); }
 
-function openStory(bedtime, done){
+/* opt lets the same book show other readings (the weather): its own text, listen pool and badge */
+function openStory(bedtime, done, opt){
+  opt = opt || {s:S.story.s, pool:S.story, max:LISTENS, kind:"story",
+                badge: bedtime ? "🌙 Bedtime story" : "📖 Today's story"};
   S.busy = true;
   drawButtons();
-  const s = S.story.s, lines = s.text.map(fill), pages = [];
+  const s = opt.s, lines = s.text.map(fill), pages = [];
   for(let i=0;i<lines.length;i+=2) pages.push(lines.slice(i,i+2).join(" "));
-  ST = {s, pages, page:0, q:-1, stars:0, tried:false, bedtime, done};
-  $("storyBadge").textContent = bedtime ? "🌙 Bedtime story" : "📖 Today's story";
+  ST = {s, pages, page:0, q:-1, stars:0, tried:false, bedtime, done, pool:opt.pool, max:opt.max, kind:opt.kind};
+  $("storyBadge").textContent = opt.badge;
   $("storyTitle").textContent = fill(s.title);
   $("storyPeekText").textContent = lines.join(" ");
   $("storyListen").style.display = canSpeak ? "" : "none";
   $("storyRead").style.display = canSpeak ? "" : "none";
   $("storyExit").style.display = bedtime ? "none" : "";
   $("storyTip").style.display = canSpeak ? "" : "none";
+  $("storyTip").textContent = `Stuck? Tap a word to hear it, or have the whole page read — each one uses 1 of your ${opt.max} listens. Save them for the hard parts!`;
   drawListens();
   $("storyOverlay").classList.remove("hide");
   showStoryPage();
@@ -2241,6 +2438,51 @@ $("storyText").addEventListener("click", e=>{
   if(w) tapWord(w);
 });
 
+/* ---------- weather reading: tap the weather badge ---------- */
+const WX_LISTENS = 2;
+const WX_READ = {
+  sunny: {title:"The Sun", art:"☀️😎",
+    text:["The sun is out today.","It is hot and bright.","The sun gives us light.","Plants need the sun to grow.","Dogs like to nap in a warm, sunny spot.","Drink lots of water on a hot day!"],
+    qs:[["What do plants need to grow?",["the sun","the moon","snow"]],
+        ["What should you drink on a hot day?",["water","mud","soup"]]]},
+  cloudy:{title:"Clouds", art:"☁️🌥️",
+    text:["Clouds are made of tiny drops of water.","They float high in the sky.","Some clouds are white and fluffy.","Gray clouds can bring rain.","When clouds cover the sun, the day gets dim.","Look up! Can you see a cloud shaped like a dog?"],
+    qs:[["What are clouds made of?",["tiny drops of water","cotton","smoke"]],
+        ["What can gray clouds bring?",["rain","sun","cake"]]]},
+  rain:  {title:"Rain", art:"🌧️☔",
+    text:["Rain falls from gray clouds.","Drip, drop, drip!","Rain gives water to plants and trees.","It makes puddles on the ground.","Dogs get muddy in the rain.","Wear boots and a coat to stay dry."],
+    qs:[["Where does rain fall from?",["gray clouds","the sun","a tree"]],
+        ["What does rain make on the ground?",["puddles","sand","snow"]]]},
+  storm: {title:"Thunderstorms", art:"⛈️⚡",
+    text:["A storm has rain, wind, thunder and lightning.","Lightning is a big flash of light in the sky.","Thunder is the loud boom it makes.","Many dogs are scared of thunder.","Stay inside when there is a storm.","A hug helps a scared dog feel safe."],
+    qs:[["What is the loud boom called?",["thunder","lightning","rain"]],
+        ["Where should you stay in a storm?",["inside","up a tree","in the pool"]]]},
+  snow:  {title:"Snow", art:"❄️⛄",
+    text:["Snow falls when it is very cold.","Snow is made of tiny bits of ice.","Each snowflake has six sides.","Snow is white and soft.","You can make a snowman with it.","Dogs love to run and roll in the snow!"],
+    qs:[["When does snow fall?",["when it is very cold","when it is hot","at the beach"]],
+        ["How many sides does a snowflake have?",["six","two","ten"]]]},
+  wind:  {title:"Wind", art:"🌬️🪁",
+    text:["Wind is air that moves.","You can not see the wind.","But you can see what it does!","It makes leaves fly and trees sway.","Wind helps a kite go up high.","On a windy day, hold on to your hat!"],
+    qs:[["What is wind?",["air that moves","water","a bird"]],
+        ["What does wind help go up high?",["a kite","a rock","a car"]]]}
+};
+function openWeather(){
+  if(!S || S.busy || S.over) return;
+  const wx = weatherAt(S.t), W = WX[wx];
+  const entry = S.wxRead[wx] = S.wxRead[wx] || {listens:WX_LISTENS, heard:[], done:false, stars:0};
+  openStory(false, stars=>{
+    if(!entry.done){
+      entry.done = true; entry.stars = stars;
+      floatFx(W.icon, 2);
+      say(`<b>${W.icon} You read about ${WX_READ[wx].title.toLowerCase()}!</b> ${stars ? `+${stars*2} points.` : "Good try!"}`);
+    }
+    S.busy = false;
+    render();
+  }, {s:WX_READ[wx], pool:entry, max:WX_LISTENS, kind:"weather",
+      badge: entry.done ? `${W.icon} About the weather · already read` : `${W.icon} About the weather · +2 points a question`});
+}
+$("wxBadge").onclick = openWeather;
+
 function doStory(){
   if(S.busy || S.over || S.story.done) return;
   openStory(false, stars=>{
@@ -2273,45 +2515,73 @@ function endDay(early){
   goToSleep(early);
 }
 
-/* a perfect day (story read + treasure found + high score) earns the puppy scene */
-const PUPPY_SCORE = 80;
+/* the better the day, the more puppies are waiting inside with their mum (0–5) */
+const PUP_TIERS = [[100,5],[88,4],[75,3],[60,2],[45,1]];
+const MUM_NAMES = {retriever:"Honey", husky:"Luna", bulldog:"Rosie", dachshund:"Pickle", poodle:"Bella", dalmatian:"Dotty", beagle:"Daisy", corgi:"Maple"};
+function pupCount(score){ const t = PUP_TIERS.find(([min])=>score >= min); return t ? t[1] : 0; }
+function nextPupTier(n){ const t = PUP_TIERS.slice().reverse().find(([,c])=>c === n+1); return t ? t[0] : null; }
 function dayScore(){
   return Math.round(S.happy*0.40 + S.energy*0.18 + S.full*0.21 + S.clean*0.21)
-       + Math.min(10, Math.floor(S.exerciseMins/30)*2) + S.story.stars*2 + (S.hunt.done ? 8 : 0);
+       + Math.min(10, Math.floor(S.exerciseMins/30)*2) + S.story.stars*2 + (S.hunt.done ? 8 : 0)
+       - (S.potty > 80 ? 5 : 0)
+       + Object.values(S.wxRead).reduce((n,e)=>n + (e.done ? e.stars*2 : 0), 0);
 }
 function goToSleep(early){
   const score = dayScore();
-  S.puppies = S.story.done && S.hunt.done && score >= PUPPY_SCORE;
-  if(S.puppies) return puppyScene(()=>sleepAndCard(early, score));
+  S.pups = pupCount(score);
+  if(S.pups) return puppyScene(S.pups, ()=>sleepAndCard(early, score));
   sleepAndCard(early, score);
 }
-function puppyScene(then){
+function lighten(hex, k){
+  const n = parseInt(hex.slice(1), 16), c = [n>>16, (n>>8)&255, n&255].map(v=>Math.round(v + (255-v)*k));
+  return "#" + c.map(v=>v.toString(16).padStart(2,"0")).join("");
+}
+function cloneDog(pose, extraClass){
+  const svg = dog.cloneNode(true);
+  svg.removeAttribute("id");
+  svg.setAttribute("class", `breed-${S.breedKey} pose-${pose}${extraClass ? " " + extraClass : ""}`);
+  return svg;
+}
+function puppyScene(n, then){
   S.loc = "house"; S.shownLoc = null;
   render();
   drawButtons();
-  $("stage").style.left = "46%";
-  setPose("jump");
-  const scene = $("scene"), extras = [];
-  [[8,150,"run"],[66,-150,"jump"],[26,110,"run"]].forEach(([x,dx,pose],i)=>{
+  const scene = $("scene"), extras = [], b = S.breed, mum = MUM_NAMES[S.breedKey] || "Daisy";
+  $("stage").style.left = "58%";
+  setPose("walk");
+  // mum: same breed, a shade lighter, pink collar and a bow
+  const m = document.createElement("div");
+  m.className = "mumdog";
+  const ms = cloneDog("idle");
+  ms.style.setProperty("--coat", lighten(b.coat, .22));
+  ms.style.setProperty("--coat-dark", lighten(b.dark, .22));
+  ms.style.setProperty("--accent", "#e86aa6");
+  ms.style.setProperty("--accent-2", "#ffd1e6");
+  ms.querySelector("#head").insertAdjacentHTML("beforeend",
+    `<g class="bow"><path d="M186 22 l-16 -10 v20 z M186 22 l16 -10 v20 z" fill="#e86aa6"/><circle cx="186" cy="22" r="5" fill="#c94f8a"/></g>`);
+  m.appendChild(ms);
+  scene.insertBefore(m, $("wx")); extras.push(m);
+  const spots = [[6,150,"run"],[70,-150,"jump"],[30,110,"run"],[78,-110,"run"],[14,90,"jump"]];
+  spots.slice(0, n).forEach(([x,dx,pose],i)=>{
     const d = document.createElement("div");
     d.className = "pup" + (dx < 0 ? " flip" : "");
     d.style.left = x + "%";
     d.style.setProperty("--dx", dx + "px");
     d.style.animationDelay = (-i*0.9) + "s";
-    const svg = dog.cloneNode(true);
-    svg.removeAttribute("id");
-    svg.setAttribute("class", `breed-${S.breedKey} pose-${pose}`);
-    d.appendChild(svg);
+    const ps = cloneDog(pose);
+    if(i % 2) ps.style.setProperty("--coat", lighten(b.coat, .22));   // some take after mum
+    d.appendChild(ps);
     scene.insertBefore(d, $("wx"));
     extras.push(d);
   });
   const hearts = document.createElement("div");
-  hearts.className = "hearts"; hearts.textContent = "💛 🐶 💛";
+  hearts.className = "hearts"; hearts.textContent = "💛 " + "🐶".repeat(n) + " 💛";
   scene.appendChild(hearts); extras.push(hearts);
-  speak(`🐶  Puppy time! ${S.name}'s puppies tumble into the living room to play.`);
-  say(`<b>Puppy time!</b> A perfect day — ${S.name} plays with ${S.breed.pro[2]} puppies until the stars come out.`);
-  setTimeout(()=>{ setPose("idle"); speak("🐾  Tag, tumble, tail-chase… then one by one the puppies curl up in a heap."); }, 3800);
-  setTimeout(()=>{ extras.forEach(e=>e.remove()); $("stage").style.left = "50%"; then(); }, 7000);
+  const word = n === 1 ? "puppy" : `${n} puppies`;
+  speak(`🏠  ${S.name} comes inside — and ${mum} is waiting with their ${word}!`);
+  say(`<b>Puppy time!</b> ${S.name} comes home to ${mum} and their ${word}. They play until the stars come out.`);
+  setTimeout(()=>{ setPose("jump"); speak("🐾  Tag, tumble, tail-chase… then one by one the puppies curl up in a heap."); }, 3500);
+  setTimeout(()=>{ extras.forEach(e=>e.remove()); $("stage").style.left = "50%"; then(); }, 7500);
 }
 function sleepAndCard(early, score){
   setPose("sleep");
@@ -2333,12 +2603,15 @@ function sleepAndCard(early, score){
       clean:  "He's asleep and he smells. A bath — or the pool slide — would have fixed that."
     };
     let verdict = notes[worst[0]];
+    const pottyNote = S.potty > 80 ? " Also: he went to bed REALLY needing the bathroom (−5)." : "";
     if(score >= 85) verdict = "Near-perfect day. He's asleep on his side with his paws twitching. " + (worst[1] < 60 ? notes[worst[0]] : "Nothing to fix.");
     else if(score >= 70) verdict = "A good day by any dog's reckoning. " + notes[worst[0]];
     else if(score < 45) verdict = "A thin day. " + notes[worst[0]];
+    verdict += pottyNote;
     if(S.hunt.done) verdict += ` And he found the treasure: ${S.hunt.prize[1]}.`;
-    verdict += S.puppies ? " 🐶 You earned puppy play time!"
-                         : ` (Read the story, find the treasure and score ${PUPPY_SCORE}+ to see ${S.name} play with ${S.breed.pro[2]} puppies.)`;
+    const nt = nextPupTier(S.pups);
+    verdict += S.pups ? ` 🐶 ${S.pups} ${S.pups === 1 ? "puppy" : "puppies"} came out to play!` : "";
+    if(nt) verdict += ` (Score ${nt}+ to see ${S.pups + 1} ${S.pups + 1 === 1 ? "puppy" : "puppies"}.)`;
 
     $("endTitle").textContent = early ? `${S.name} turns in early` : `${S.name} is asleep`;
     $("endSub").textContent = `${S.breed.label} · ${fmtTime(S.t)} · ${S.actions} things done · ${S.exerciseMins} min of exercise`;
@@ -2354,7 +2627,9 @@ function sleepAndCard(early, score){
       ["Places visited", `${S.visited.size} of ${Object.keys(PLACES).length}`],
       ["Weather", [...S.wxSeen].map(w=>WX[w].icon).join(" ")],
       ["Dug up", S.finds.length ? S.finds.join(" ") : "—"],
-      ["Evening", S.puppies ? "🐶 puppy play time" : "—"]
+      ["Weather reading", Object.entries(S.wxRead).filter(([,e])=>e.done).map(([k,e])=>WX[k].icon+"⭐".repeat(e.stars)).join(" ") || "—"],
+      ["Bathroom trips", S.potties + (S.potty > 80 ? " · needs to go!" : "")],
+      ["Puppies", S.pups ? "🐶".repeat(S.pups) : "—"]
     ].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
     $("endOverlay").classList.remove("hide");
   }, 1800);
@@ -2398,7 +2673,7 @@ $("verPick").textContent = VERSION;
 $("verFoot").innerHTML = `Dog Day ${VERSION} · released ${RELEASED} <button onclick="showHelp()">❓ How to play</button>`;
 function showHelp(){ $("helpOverlay").classList.remove("hide"); }
 function hideHelp(){ $("helpOverlay").classList.add("hide"); }
-document.addEventListener("keydown", e=>{ if(e.key === "Escape") hideHelp(); });
+document.addEventListener("keydown", e=>{ if(e.key === "Escape"){ hideHelp(); if(!$("huntOverlay").classList.contains("hide")) closeHunt(); } });
 $("picks").innerHTML = Object.entries(BREEDS).map(([k,b])=>`
   <div class="pick" onclick="startGame('${k}')">
     ${miniDog(b,k)}
