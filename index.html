@@ -203,6 +203,10 @@
   button.bed{background:var(--ink);color:#fff}
   button.bed .t{color:rgba(255,255,255,.8)}
   button.wxact{background:#eef6ff}
+  .btns button{position:relative}
+  .chk{position:absolute;top:-9px;right:-9px;background:var(--good);color:#fff;font-size:12px;font-weight:900;
+    line-height:1;padding:3px 6px;border:2px solid var(--ink);border-radius:99px;pointer-events:none}
+  button.did{background:#f3fbf5}
 
   .log{font-size:14px;font-weight:600;color:var(--ink-soft);line-height:1.6;min-height:52px}
   .log b{color:var(--ink)}
@@ -613,8 +617,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v13";
-const RELEASED = "2026-09-27 10:17";
+const VERSION  = "v14";
+const RELEASED = "2026-09-27 10:19";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1644,7 +1648,7 @@ function startGame(breedKey, seed){
     ground:scatterGround(r),
     story:{s:pick(STORIES, r), done:false, stars:0, listens:0},
     hunt:makeHunt(r),
-    finds:[], wxRead:{}, visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
+    finds:[], wxRead:{}, didActs:{}, visited:new Set(["house"]), wxSeen:new Set(), cuddledAt:-999,
     shownLoc:null, shownWx:null
   };
   document.documentElement.style.setProperty("--coat", b.coat);
@@ -1909,7 +1913,9 @@ function drawButtons(){
     let tag = `${a.mins} min${a.weather ? " · " + WX[wx].icon + " only today" : ""}`;
     if(noTime) tag = "not enough daylight";
     else if(scared) tag += " · ⛈️ he's scared";
-    btn.innerHTML = `${a.icon} ${a.label}<span class="t">${tag}</span>`;
+    const n = S.didActs[a.id] || 0;
+    btn.innerHTML = `${a.icon} ${a.label}<span class="t">${tag}</span>` + (n ? `<span class="chk" title="Done ${n}× today">✓${n > 1 ? "×" + n : ""}</span>` : "");
+    if(n) btn.classList.add("did");
     btn.disabled = S.busy || S.over || noTime;
     btn.onclick = ()=>doAction(a);
     wrap.appendChild(btn);
@@ -1922,7 +1928,8 @@ function drawButtons(){
     const btn = document.createElement("button");
     btn.className = "trip";
     const label = r.door ? `🚪 Go ${r.to === "house" ? "inside" : "outside"}` : `${P.icon} ${P.name}`;
-    btn.innerHTML = `${label}<span class="t">${r.mins} min ${r.door ? "" : r.walk ? "walk" : "drive"} · ${P.hint}</span>`;
+    btn.innerHTML = `${label}<span class="t">${r.mins} min ${r.door ? "" : r.walk ? "walk" : "drive"} · ${P.hint}</span>` +
+      (!r.door && S.visited.has(r.to) ? `<span class="chk" title="Visited today">✓</span>` : "");
     btn.disabled = S.busy || S.over || r.mins > timeLeft();
     btn.onclick = ()=>doTravel(r);
     tw.appendChild(btn);
@@ -2190,6 +2197,7 @@ function doAction(a){
     if(a.id === "swim")  S.potty = Math.min(100, S.potty + 5);
     if(a.id === "potty"){ S.potty = 0; S.potties++; }
     if(a.done) a.done(ctx);
+    S.didActs[a.id] = (S.didActs[a.id] || 0) + 1;
     S.busy = false;
     say(`<b>${a.label}.</b> ${line}`);
     render();
