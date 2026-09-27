@@ -233,6 +233,18 @@
   .peek summary{cursor:pointer;font-weight:800;color:var(--ink)}
   .sctl{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
   .tip{margin:12px 0 0;font-size:13px;color:var(--ink-soft);font-weight:600}
+  .sctl{align-items:center}
+  .xbtn{font-size:13px;padding:4px 10px;border-width:2px;box-shadow:0 2px 0 var(--ink);border-radius:10px}
+  .ver{font-size:13px;font-weight:800;color:var(--ink-soft);background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:2px 9px;vertical-align:middle}
+  .footer{text-align:center;font-size:12px;color:var(--ink-soft);font-weight:700;letter-spacing:.4px}
+  .quest .qi svg{width:44px;height:44px;display:block}
+  .qbtns{display:flex;gap:8px;margin-left:auto}
+  .qbtns button{margin-left:0}
+  .pup{position:absolute;bottom:62px;width:112px;animation:pupRun 3.2s ease-in-out infinite}
+  .pup svg{width:100%;height:auto;overflow:visible}
+  @keyframes pupRun{0%,100%{transform:translateX(0)}50%{transform:translateX(var(--dx,120px))}}
+  .pup.flip svg{transform:scaleX(-1)}
+  .hearts{position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:34px;animation:floatup 2.4s ease-out infinite}
 
   /* ---------- dog animation ---------- */
   #dogShape{transform-origin:125px 150px}
@@ -436,13 +448,14 @@
   </div>
 
   <div class="panel"><div class="log" id="log"></div></div>
+  <div class="footer" id="verFoot"></div>
 
 </div>
 
 <!-- ---------- breed picker ---------- -->
 <div class="overlay" id="pickOverlay">
   <div class="modal">
-    <h1>Dog Day</h1>
+    <h1>Dog Day <span class="ver" id="verPick"></span></h1>
     <p class="sub">One day, sunrise to dusk. Read the day's story, follow the treasure map, and get your dog to bed happy.</p>
     <div class="picks" id="picks"></div>
   </div>
@@ -451,7 +464,7 @@
 <!-- ---------- story book ---------- -->
 <div class="overlay hide" id="storyOverlay">
   <div class="modal story">
-    <div class="shead"><span class="sbadge" id="storyBadge">📖 Today's story</span><span id="storyProg"></span></div>
+    <div class="shead"><span class="sbadge" id="storyBadge">📖 Today's story</span><span id="storyProg"></span><button class="xbtn" id="storyExit" title="Stop reading for now">✕ Exit</button></div>
     <h2 id="storyTitle"></h2>
     <div class="art" id="storyArt"></div>
     <div class="storytext" id="storyText"></div>
@@ -460,9 +473,10 @@
     <details class="peek" id="storyPeek"><summary>📖 Peek at the story</summary><div id="storyPeekText"></div></details>
     <div class="sctl">
       <span class="listen" id="storyListen"></span>
+      <button id="storyRead">🔊 Read this page<span class="t">uses 1 listen</span></button>
       <button class="go" id="storyNext">Next →</button>
     </div>
-    <p class="tip" id="storyTip">Stuck on a word? Tap it to hear it — but you only get 3 listens, so save them for the hard ones!</p>
+    <p class="tip" id="storyTip">Stuck? Tap a word to hear it, or have the whole page read — each one uses 1 of your 3 listens. Save them for the hard parts!</p>
   </div>
 </div>
 
@@ -480,11 +494,15 @@
 
 <script>
 /* ============================================================
-   DOG DAY  —  v2
+   DOG DAY  —  see VERSION below
    7 breeds, 8 places, weather, a daily story (reading practice)
    and a treasure hunt. One day, 7:00am → dusk. No failure
    states: the score is the whole feedback loop.
    ============================================================ */
+
+/* bump both on every release pushed to GitHub */
+const VERSION  = "v3";
+const RELEASED = "2026-09-26 18:38";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1711,34 +1729,55 @@ function drawQuests(){
   const h = S.hunt, qh = $("qHunt");
   qh.className = "quest" + (h.done ? " done" : "");
   if(h.done){
-    qh.innerHTML = `<div class="qi">${h.prize[0]}</div><div class="qt"><b>Treasure hunt · found it!</b>He dug up ${esc(h.prize[1])}.</div>`;
-  } else {
-    const rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
-    const dots = h.steps.map((_,k)=> k < h.i ? "●" : k === h.i ? "◉" : "○").join("");
-    const head = `<b>Treasure hunt · riddle ${h.i+1} of ${h.steps.length} <span class="hdots">${dots}</span></b>`;
-    if(!h.solved){
-      if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
-      qh.innerHTML = `<div class="qi">🗺️</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span></div>`;
-      const box = document.createElement("div");
-      box.className = "ropts";
-      h.opts.forEach(([txt, right])=>{
-        const b = document.createElement("button");
-        b.textContent = txt;
-        if(h.wrong.includes(txt)){ b.className = "wrong"; b.disabled = true; }
-        b.onclick = ()=> solveRiddle(txt, right);
-        box.appendChild(b);
-      });
-      qh.appendChild(box);
-    } else {
-      qh.innerHTML = `<div class="qi">${rd.icon}</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span>` +
-        `<span class="solved">✔ It's ${esc(rd.a[0])}! ${esc(rd.where)} ${last ? "The treasure is buried there!" : "The next note is hidden there."}</span></div>`;
-      const b = document.createElement("button");
-      b.innerHTML = `🐽 Sniff here<span class="t">15 min</span>`;
-      b.disabled = S.busy || S.over || 15 > timeLeft();
-      b.onclick = doSniff;
-      qh.appendChild(b);
-    }
+    qh.innerHTML = `<div class="qi">${chestSVG(true, h.prize[0])}</div><div class="qt"><b>Treasure hunt · found it!</b>He dug up ${esc(h.prize[1])}.</div>`;
+    return;
   }
+  const dots = h.steps.map((_,k)=> k < h.i ? "●" : k === h.i ? "◉" : "○").join("");
+  const addBtns = (...btns) => { const w = document.createElement("div"); w.className = "qbtns"; btns.forEach(b=>w.appendChild(b)); qh.appendChild(w); };
+  const mk = (html, fn, cls) => { const b = document.createElement("button"); b.innerHTML = html; b.onclick = fn; if(cls) b.className = cls; return b; };
+  if(h.paused){
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt"><b>Treasure hunt · paused <span class="hdots">${dots}</span></b>Riddle ${h.i+1} of ${h.steps.length} is waiting for you.</div>`;
+    addBtns(mk(`▶ Resume hunt`, ()=>{ h.paused = false; drawQuests(); }));
+    return;
+  }
+  const rd = h.riddles[h.i], last = h.i === h.steps.length - 1;
+  const head = `<b>Treasure hunt · riddle ${h.i+1} of ${h.steps.length} <span class="hdots">${dots}</span></b>`;
+  const pause = mk("✕ Exit", ()=>{ h.paused = true; drawQuests(); }, "xbtn");
+  pause.title = "Pause the treasure hunt";
+  if(!h.solved){
+    if(!h.opts){ h.opts = shuffle(rd.a.map((t,k)=>[t, k === 0])); h.wrong = []; }
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span></div>`;
+    addBtns(pause);
+    const box = document.createElement("div");
+    box.className = "ropts";
+    h.opts.forEach(([txt, right])=>{
+      const b = document.createElement("button");
+      b.textContent = txt;
+      if(h.wrong.includes(txt)){ b.className = "wrong"; b.disabled = true; }
+      b.onclick = ()=> solveRiddle(txt, right);
+      box.appendChild(b);
+    });
+    qh.appendChild(box);
+  } else {
+    qh.innerHTML = `<div class="qi">${chestSVG(false)}</div><div class="qt">${head}<span class="clue">${esc(rd.q)}</span>` +
+      `<span class="solved">✔ ${rd.icon} It's ${esc(rd.a[0])}! ${esc(rd.where)} ${last ? "The treasure is buried there!" : "The next note is hidden there."}</span></div>`;
+    const sniff = mk(`🐽 Sniff here<span class="t">15 min</span>`, doSniff);
+    sniff.disabled = S.busy || S.over || 15 > timeLeft();
+    addBtns(sniff, pause);
+  }
+}
+/* the treasure-hunt icon: a little chest; open (with the prize) once found */
+function chestSVG(open, prize){
+  const lid = open
+    ? `<path d="M8 22 L14 6 H50 L56 22 Z" fill="#b8742f"/><path d="M14 6 H50" stroke="#8a5220" stroke-width="3"/><text x="32" y="30" text-anchor="middle" font-size="18">${prize || "✨"}</text>`
+    : `<path d="M8 26 Q8 10 32 10 Q56 10 56 26 Z" fill="#b8742f"/><path d="M8 26 Q8 10 32 10 Q56 10 56 26" fill="none" stroke="#8a5220" stroke-width="3"/><rect x="28" y="10" width="8" height="16" fill="#f0b429"/>`;
+  return `<svg viewBox="0 0 64 60">${lid}
+    <rect x="8" y="26" width="48" height="28" rx="3" fill="#9a5b24"/>
+    <rect x="8" y="26" width="48" height="6" fill="#f0b429"/>
+    <rect x="28" y="26" width="8" height="28" fill="#f0b429"/>
+    <rect x="27" y="32" width="10" height="10" rx="2" fill="#fff3c4" stroke="#8a5220" stroke-width="2"/>
+    ${open ? "" : '<text x="54" y="14" font-size="12">✨</text>'}
+  </svg>`;
 }
 function solveRiddle(txt, right){
   if(S.busy || S.over) return;
@@ -1870,7 +1909,7 @@ function doTravel(r){
 
 /* the treasure hunt: he sniffs, you read the clue and pick the place */
 function doSniff(){
-  if(S.busy || S.over || S.hunt.done || !S.hunt.solved) return;
+  if(S.busy || S.over || S.hunt.done || !S.hunt.solved || S.hunt.paused) return;
   const wx = weatherAt(S.t), h = S.hunt;
   if(wx === "storm" && exposedHere())
     return refuse("He won't put his nose to the ground in this. He wants to be indoors.", "happy");
@@ -1936,6 +1975,35 @@ function drawListens(){
   el.className = "listen" + (left ? "" : " out");
   el.textContent = left ? `🔊 ${"●".repeat(left)}${"○".repeat(LISTENS-left)}  ${left} listen${left === 1 ? "" : "s"} left`
                         : "🔇 No listens left — sound it out!";
+  $("storyRead").disabled = !left;
+}
+function readPage(){
+  const st = S.story, el = $("storyText");
+  if(!canSpeak || !el.querySelector(".w")) return;
+  if(st.listens <= 0){ $("storyHint").textContent = "No more listens. Say each sound slowly — you can do it!"; return; }
+  st.listens--;
+  drawListens();
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(el.textContent);
+  u.rate = .75; u.lang = "en-US";
+  const spans = [...el.querySelectorAll(".w")];
+  u.onboundary = e => {
+    let cur = null;
+    for(const sp of spans) if(+sp.dataset.c <= e.charIndex) cur = sp;
+    spans.forEach(sp => sp.classList.toggle("hl", sp === cur));
+  };
+  u.onend = () => spans.forEach(sp => sp.classList.remove("hl"));
+  speechSynthesis.speak(u);
+}
+/* leave the story half-way: nothing is lost except the page you were on; listens stay spent */
+function exitStory(){
+  if(!ST || ST.bedtime) return;
+  stopSpeech();
+  $("storyOverlay").classList.add("hide");
+  ST = null;
+  S.busy = false;
+  say(`<b>Story paused.</b> You can finish “${fill(S.story.s.title)}” any time before bedtime.`);
+  render();
 }
 function tapWord(span){
   const word = span.textContent.replace(/[^A-Za-z']/g, "");
@@ -1967,6 +2035,8 @@ function openStory(bedtime, done){
   $("storyTitle").textContent = fill(s.title);
   $("storyPeekText").textContent = lines.join(" ");
   $("storyListen").style.display = canSpeak ? "" : "none";
+  $("storyRead").style.display = canSpeak ? "" : "none";
+  $("storyExit").style.display = bedtime ? "none" : "";
   $("storyTip").style.display = canSpeak ? "" : "none";
   drawListens();
   $("storyOverlay").classList.remove("hide");
@@ -2045,6 +2115,8 @@ $("storyNext").onclick = ()=>{
     else { ST.q = 0; showQuestion(); }
   } else if(ST.q >= ST.s.qs.length) finishStory();
 };
+$("storyRead").onclick = readPage;
+$("storyExit").onclick = exitStory;
 $("storyText").addEventListener("click", e=>{
   const w = e.target.closest(".w");
   if(w) tapWord(w);
@@ -2082,18 +2154,53 @@ function endDay(early){
   goToSleep(early);
 }
 
+/* a perfect day (story read + treasure found + high score) earns the puppy scene */
+const PUPPY_SCORE = 80;
+function dayScore(){
+  return Math.round(S.happy*0.40 + S.energy*0.18 + S.full*0.21 + S.clean*0.21)
+       + Math.min(10, Math.floor(S.exerciseMins/30)*2) + S.story.stars*2 + (S.hunt.done ? 8 : 0);
+}
 function goToSleep(early){
+  const score = dayScore();
+  S.puppies = S.story.done && S.hunt.done && score >= PUPPY_SCORE;
+  if(S.puppies) return puppyScene(()=>sleepAndCard(early, score));
+  sleepAndCard(early, score);
+}
+function puppyScene(then){
+  S.loc = "house"; S.shownLoc = null;
+  render();
+  drawButtons();
+  $("stage").style.left = "46%";
+  setPose("jump");
+  const scene = $("scene"), extras = [];
+  [[8,150,"run"],[66,-150,"jump"],[26,110,"run"]].forEach(([x,dx,pose],i)=>{
+    const d = document.createElement("div");
+    d.className = "pup" + (dx < 0 ? " flip" : "");
+    d.style.left = x + "%";
+    d.style.setProperty("--dx", dx + "px");
+    d.style.animationDelay = (-i*0.9) + "s";
+    const svg = dog.cloneNode(true);
+    svg.removeAttribute("id");
+    svg.setAttribute("class", `breed-${S.breedKey} pose-${pose}`);
+    d.appendChild(svg);
+    scene.insertBefore(d, $("wx"));
+    extras.push(d);
+  });
+  const hearts = document.createElement("div");
+  hearts.className = "hearts"; hearts.textContent = "💛 🐶 💛";
+  scene.appendChild(hearts); extras.push(hearts);
+  speak(`🐶  Puppy time! ${S.name}'s puppies tumble into the living room to play.`);
+  say(`<b>Puppy time!</b> A perfect day — ${S.name} plays with ${S.breed.pro[2]} puppies until the stars come out.`);
+  setTimeout(()=>{ setPose("idle"); speak("🐾  Tag, tumble, tail-chase… then one by one the puppies curl up in a heap."); }, 3800);
+  setTimeout(()=>{ extras.forEach(e=>e.remove()); $("stage").style.left = "50%"; then(); }, 7000);
+}
+function sleepAndCard(early, score){
   setPose("sleep");
   floatFx("💤", 4);
   speak("💤  Out like a light.");
   drawButtons();
 
   setTimeout(()=>{
-    const storyBonus = S.story.stars * 2;
-    const treasureBonus = S.hunt.done ? 8 : 0;
-    const score = Math.round(
-      S.happy*0.40 + S.energy*0.18 + S.full*0.21 + S.clean*0.21
-    ) + Math.min(10, Math.floor(S.exerciseMins/30)*2) + storyBonus + treasureBonus;
 
     const stats = [["happy",S.happy,"happiness"],["energy",S.energy,"rest"],
                    ["full",S.full,"food"],["clean",S.clean,"grooming"]];
@@ -2111,6 +2218,8 @@ function goToSleep(early){
     else if(score >= 70) verdict = "A good day by any dog's reckoning. " + notes[worst[0]];
     else if(score < 45) verdict = "A thin day. " + notes[worst[0]];
     if(S.hunt.done) verdict += ` And he found the treasure: ${S.hunt.prize[1]}.`;
+    verdict += S.puppies ? " 🐶 You earned puppy play time!"
+                         : ` (Read the story, find the treasure and score ${PUPPY_SCORE}+ to see ${S.name} play with ${S.breed.pro[2]} puppies.)`;
 
     $("endTitle").textContent = early ? `${S.name} turns in early` : `${S.name} is asleep`;
     $("endSub").textContent = `${S.breed.label} · ${fmtTime(S.t)} · ${S.actions} things done · ${S.exerciseMins} min of exercise`;
@@ -2125,7 +2234,8 @@ function goToSleep(early){
       ["Treasure", S.hunt.done ? S.hunt.prize[0] + " found" : `${S.hunt.i} of ${S.hunt.steps.length} riddles`],
       ["Places visited", `${S.visited.size} of ${Object.keys(PLACES).length}`],
       ["Weather", [...S.wxSeen].map(w=>WX[w].icon).join(" ")],
-      ["Dug up", S.finds.length ? S.finds.join(" ") : "—"]
+      ["Dug up", S.finds.length ? S.finds.join(" ") : "—"],
+      ["Evening", S.puppies ? "🐶 puppy play time" : "—"]
     ].map(([k,v])=>`<div><span>${k}</span><b>${v}</b></div>`).join("");
     $("endOverlay").classList.remove("hide");
   }, 1800);
@@ -2163,6 +2273,8 @@ function miniDog(b, key){
     <path d="${EARS[key]}" fill="${earFill}"/>
   </g></svg>`;
 }
+$("verPick").textContent = VERSION;
+$("verFoot").textContent = `Dog Day ${VERSION} · released ${RELEASED}`;
 $("picks").innerHTML = Object.entries(BREEDS).map(([k,b])=>`
   <div class="pick" onclick="startGame('${k}')">
     ${miniDog(b,k)}
