@@ -62,9 +62,6 @@
   .garland.g-usa{display:block;background-image:radial-gradient(circle at 8px 16px,#d9534f 5px,transparent 6px),radial-gradient(circle at 22px 16px,#fff 5px,transparent 6px),radial-gradient(circle at 36px 16px,#2d5fb3 5px,transparent 6px),linear-gradient(#2b2b33,#2b2b33);background-size:44px 26px,44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 0,0 9px}
   .garland.g-party{display:block;background-image:radial-gradient(circle at 11px 16px,#f0b429 5px,transparent 6px),radial-gradient(circle at 33px 16px,#57a9d6 5px,transparent 6px),linear-gradient(#6b4a8f,#6b4a8f);background-size:44px 26px,44px 26px,100% 2px;background-position:0 0,0 0,0 9px}
   @keyframes twinkle{50%{filter:brightness(1.35)}}
-  .counters{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-bottom:-4px}
-  .cnt{font-size:13px;font-weight:800;background:var(--card);border:2px solid var(--ink);border-radius:99px;padding:3px 10px}
-  .cnt.ok{background:#e6f5ea;border-color:var(--good)}
   .pickopts{display:grid;gap:10px;margin:0 0 14px}
   .pickopts > div{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
   .pickopts b{font-size:13px;letter-spacing:.6px;text-transform:uppercase;color:var(--ink-soft);margin-right:4px}
@@ -78,7 +75,8 @@
   .wxb .wxnext{font-size:11px;color:var(--ink-soft);font-weight:800}
 
   /* ---------- stats ---------- */
-  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+  .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .s-water i{background:#3fb6e0}
   .s-potty i{background:#a37ad1}
   .stat{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:9px 11px;box-shadow:var(--shadow)}
   .stat .k{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--ink-soft)}
@@ -428,11 +426,11 @@
     <div class="where" id="where">🏠 Home</div>
   </div>
 
-  <div class="counters" id="counters"></div>
   <div class="stats">
     <div class="stat s-energy" id="st-energy"><div class="k"><span>Energy</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-happy"  id="st-happy"><div class="k"><span>Happy</span><b>—</b></div><div class="bar"><i></i></div></div>
-    <div class="stat s-full"   id="st-full"><div class="k"><span>Full</span><b>—</b></div><div class="bar"><i></i></div></div>
+    <div class="stat s-full"   id="st-full"><div class="k"><span>Food 🍖</span><b>—</b></div><div class="bar"><i></i></div></div>
+    <div class="stat s-water"  id="st-water" title="Goes down over time, faster after exercise and in the sun"><div class="k"><span>Water 💧</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-clean"  id="st-clean"><div class="k"><span>Clean</span><b>—</b></div><div class="bar"><i></i></div></div>
     <div class="stat s-potty"  id="st-potty" title="Goes down over time — take him out to the bathroom when it's low"><div class="k"><span>Potty 🚽</span><b>—</b></div><div class="bar"><i></i></div></div>
   </div>
@@ -583,7 +581,7 @@
           <li><span>🐶</span>Pick your grade, a theme and your dog.</li>
           <li><span>☀️</span>You have one day, from morning until night.</li>
           <li><span>🎾</span>Tap the buttons to play, eat, nap and go places.</li>
-          <li><span>📊</span>Watch the bars: Energy, Happy, Full, Clean. Keep them up!</li>
+          <li><span>📊</span>Watch the bars: Energy, Happy, Food, Water, Clean, Potty. Keep them all up!</li>
           <li><span>📖</span>Read today's story all by yourself. Hard word? Tap it to hear it. Each page gives you 1 listen — save them up if you don't need them!</li>
           <li><span>🔊</span>Riddles too: tap a word or read the riddle. You can hear the answers too. Each riddle gives you 1 listen, and you can save them.</li>
           <li><span>🧰</span>Solve the riddles. They tell you where the treasure is. Go there and sniff!</li>
@@ -673,8 +671,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v18";
-const RELEASED = "2026-09-27 11:22";
+const VERSION  = "v19";
+const RELEASED = "2026-09-27 17:11";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -1078,9 +1076,14 @@ const ACTIONS = [
     gate:s => s.full > 72 ? "He sniffs it, then walks away. Still full from last time." : null, stat:"full" },
 
   { id:"drink", label:"Fill the water bowl", icon:"💧", mins:5, locs:["house","home"],
-    eff:{energy:4,happy:3,clean:-1}, exercise:0, pose:"eat", fx:"💧",
+    eff:{energy:4,happy:3,clean:-1,water:45}, exercise:0, pose:"eat", fx:"💧",
     say:"Lap, lap, lap, lap. Half of it ended up on the floor, and on your socks.",
-    gate:s => s.t - s.lastDrink < 45 ? "He sniffs the water and walks off. Not thirsty yet." : null, stat:"energy" },
+    gate:s => s.water > 85 ? "He sniffs the water and walks off. Not thirsty yet." : null, stat:"water" },
+
+  { id:"drinkout", label:"Give water from the bottle", icon:"💧", mins:5, locs:["park","beach","mountains","lake","pool","museum","zoo"],
+    eff:{energy:4,happy:3,water:40}, exercise:0, pose:"eat", fx:"💧",
+    say:"You pour, he laps. Most of it goes in. Some goes on your shoes.",
+    gate:s => s.water > 85 ? "He turns his nose up at the bottle. Not thirsty yet." : null, stat:"water" },
 
   { id:"potty", label:"Go to the bathroom", icon:"🚽", mins:5, locs:["home","park","beach","mountains","lake","zoo"],
     eff:{happy:6}, exercise:0, pose:"idle", fx:"🌿",
@@ -1186,6 +1189,7 @@ const ACTIONS = [
 const STAGING = {
   feed:    {spot:{house:{x:210, nose:true}, home:{x:232, nose:true}}},
   drink:   {spot:{house:{x:262, nose:true}, home:{x:284, nose:true}}},
+  drinkout:{show:["🥣", 50, .42, 62]},
   nap:     {spot:{house:{x:440}}},
   cuddle:  {spot:{house:{x:736, y:150}}},
   wash:    {show:["🛁", 150, 0, 40]},
@@ -2362,7 +2366,7 @@ function startGame(breedKey, seed){
   S = {
     breedKey, breed:b, name:b.name, level:LEVEL, theme,
     t:DAY_START, loc:"house", busy:false, over:false,
-    energy:78, happy:62, full:46, clean:72, potty:38, potties:0, lastDrink:-999,
+    energy:78, happy:62, full:46, clean:72, water:62, potty:38, potties:0,
     sinceExercise:0, actions:0, exerciseMins:0, treats:0, washes:0, peakHappy:62,
     log:[],
     weather:seasonWeather(makeWeather(r), TH.season, r),
@@ -2490,11 +2494,7 @@ function render(){
   scene.style.setProperty("--glow", place.indoor ? .8 : (p > .82 ? .9 : W.mix >= .5 ? .55 : 0));
 
   // stat bars
-  const meals = S.didActs.feed || 0, drinks = S.didActs.drink || 0;
-  $("counters").innerHTML =
-    `<span class="cnt${meals >= 2 ? " ok" : ""}">🍖 Meals <b>${meals}</b> / 2${meals >= 2 ? " ✓" : ""}</span>` +
-    `<span class="cnt${drinks >= 4 ? " ok" : ""}">💧 Water <b>${drinks}</b> / 4${drinks >= 4 ? " ✓" : ""}</span>`;
-  ["energy","happy","full","clean","potty"].forEach(k=>{
+  ["energy","happy","full","water","clean","potty"].forEach(k=>{
     const el = $("st-"+k);
     el.querySelector("i").style.width = S[k]+"%";
     el.querySelector("b").textContent = Math.round(S[k]);
@@ -2561,6 +2561,7 @@ function currentCue(){
   if(S.potty < 30) cues.push(S.loc === "house"
       ? ["🚽", "He's doing the potty dance by the front door. Take him outside!"]
       : ["🚽", "He's sniffing every bush with great urgency. Bathroom time!"]);
+  if(S.water < 30) cues.push(["💧", homeish(S.loc) ? "Tongue out, panting, staring at the water bowl." : "Panting hard. He keeps looking at your water bottle."]);
   if(S.full  < 30) cues.push(S.loc === "house"
       ? ["🍖", "He is sitting by the bowl, staring into it with intent."]
       : ["🍖", "He keeps checking your pockets. There is nothing in your pockets."]);
@@ -2845,6 +2846,7 @@ function passTime(mins, wx){
   const calm = stormCalm();
   S.t += mins;
   S.full  = clamp(S.full  - mins*0.055);
+  S.water = clamp(S.water - mins*0.08*(wx === "sunny" && exposedHere() ? 1.4 : 1));
   S.clean = clamp(S.clean - mins*0.012*S.breed.dirtRate);
   S.sinceExercise += mins;
 
@@ -2855,6 +2857,7 @@ function passTime(mins, wx){
   }
   // being hungry or filthy erodes mood on its own
   if(S.full  < 25) S.happy = clamp(S.happy - mins*0.03);
+  if(S.water < 25) S.happy = clamp(S.happy - mins*0.03);
   if(S.clean < 25) S.happy = clamp(S.happy - mins*0.015);
   S.potty = clamp(S.potty - mins*0.3);            // like the other bars: 100 = fine, 0 = has to go NOW
   if(S.potty < 15) S.happy = clamp(S.happy - mins*0.04);
@@ -2878,6 +2881,7 @@ function applyEffects(eff, id, outside, wx){
   if(eff.energy) S.energy = clamp(S.energy + (eff.energy < 0 ? eff.energy*eMul : eff.energy));
   if(eff.happy)  S.happy  = clamp(S.happy  + (eff.happy  > 0 ? eff.happy*joy : eff.happy));
   if(eff.full)   S.full   = clamp(S.full   + eff.full);
+  if(eff.water)  S.water  = clamp(S.water  + eff.water);
   if(eff.clean)  S.clean  = clamp(S.clean  + (eff.clean < 0 ? eff.clean*dMul : eff.clean));
   S.peakHappy = Math.max(S.peakHappy, S.happy);
 }
@@ -2923,8 +2927,9 @@ function doAction(a){
     if(a.id === "treat"){ S.treats++; if(S.treats > 3) S.happy = clamp(S.happy - (S.treats-3)*2); }
     if(a.id === "wash")  S.washes++;
     if(a.id === "feed")  S.potty = clamp(S.potty - 15);
-    if(a.id === "drink"){ S.potty = clamp(S.potty - 22); S.lastDrink = S.t; }
-    if(a.id === "swim")  S.potty = clamp(S.potty - 5);
+    if(a.id === "drink" || a.id === "drinkout") S.potty = clamp(S.potty - 22);
+    if(a.id === "swim"){ S.potty = clamp(S.potty - 5); S.water = clamp(S.water + 10); }
+    if(a.exercise) S.water = clamp(S.water - a.exercise*.2*(weatherAt(S.t) === "sunny" ? 1.4 : 1));
     if(a.id === "potty"){ S.potty = 100; S.potties++; }
     if(a.done) a.done(ctx);
     S.didActs[a.id] = (S.didActs[a.id] || 0) + 1;
@@ -3308,7 +3313,7 @@ const MUM_NAMES = {retriever:"Honey", husky:"Luna", bulldog:"Rosie", dachshund:"
 function pupCount(score){ const t = PUP_TIERS.find(([min])=>score >= min); return t ? t[1] : 0; }
 function nextPupTier(n){ const t = PUP_TIERS.slice().reverse().find(([,c])=>c === n+1); return t ? t[0] : null; }
 function dayScore(){
-  return Math.round(S.happy*0.40 + S.energy*0.18 + S.full*0.21 + S.clean*0.21)
+  return Math.round(S.happy*0.36 + S.energy*0.16 + S.full*0.16 + S.water*0.16 + S.clean*0.16)
        + Math.min(10, Math.floor(S.exerciseMins/30)*2) + S.story.stars*2 + (S.hunt.done ? 8 : 0)
        - (S.potty < 20 ? 5 : 0)
        + Object.values(S.wxRead).reduce((n,e)=>n + (e.done ? e.stars*2 : 0), 0);
@@ -3385,13 +3390,14 @@ function sleepAndCard(early, score){
   setTimeout(()=>{
 
     const stats = [["happy",S.happy,"happiness"],["energy",S.energy,"rest"],
-                   ["full",S.full,"food"],["clean",S.clean,"grooming"]];
+                   ["full",S.full,"food"],["water",S.water,"water"],["clean",S.clean,"grooming"]];
     stats.sort((a,b)=>a[1]-b[1]);
     const worst = stats[0];
 
     const notes = {
       happy:  "He had a flat day. More walking, more fetch, fewer baths.",
       energy: "You ran him into the ground. A nap earlier would have bought you a better evening.",
+      water:  "He went to bed thirsty. Water only takes five minutes — the bottle works anywhere.",
       full:   "He went to bed hungry. Feeding is cheap — twenty minutes and it lifts three stats.",
       clean:  "He's asleep and he smells. A bath — or the pool slide — would have fixed that."
     };
@@ -3413,7 +3419,7 @@ function sleepAndCard(early, score){
     const n = S.story.s.qs.length;
     $("endTally").innerHTML = [
       ["Happiness", Math.round(S.happy)], ["Energy left", Math.round(S.energy)],
-      ["Fullness", Math.round(S.full)],   ["Cleanliness", Math.round(S.clean)],
+      ["Food", Math.round(S.full)], ["Water", Math.round(S.water)],   ["Cleanliness", Math.round(S.clean)],
       ["Exercise", S.exerciseMins+" min"],["Treats", S.treats],
       ["Story", "⭐".repeat(S.story.stars) + "☆".repeat(n - S.story.stars)],
       ["Treasure", S.hunt.done ? S.hunt.prize[0] + " found" : `${S.hunt.i} of ${S.hunt.steps.length} riddles`],
