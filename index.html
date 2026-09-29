@@ -385,13 +385,18 @@
   .breed-dachshund #dogShape{transform:scale(1.18,.8)}
   .breed-corgi     #dogShape{transform:scale(1.06,.84)}
   .breed-poodle    #dogShape{transform:scale(.97,1.04)}
-  .ear-husky,.ear-bulldog,.ear-retriever,.ear-dachshund,.ear-poodle,.ear-dalmatian,.ear-corgi,.ear-beagle{display:none}
+  .ear-husky,.ear-bulldog,.ear-retriever,.ear-dachshund,.ear-poodle,.ear-dalmatian,.ear-corgi,.ear-beagle,.ear-shepherd,.ear-pug,.ear-collie,.ear-stbernard{display:none}
   .breed-husky .ear-husky,.breed-bulldog .ear-bulldog,.breed-retriever .ear-retriever,
   .breed-dachshund .ear-dachshund,.breed-poodle .ear-poodle,.breed-dalmatian .ear-dalmatian,
-  .breed-corgi .ear-corgi,.breed-beagle .ear-beagle{display:block}
+  .breed-corgi .ear-corgi,.breed-beagle .ear-beagle,.breed-shepherd .ear-shepherd,.breed-pug .ear-pug,
+  .breed-collie .ear-collie,.breed-stbernard .ear-stbernard{display:block}
   .ear-dalmatian{fill:#34343d}
-  .deco-poodle,.deco-dalmatian,.deco-beagle{display:none}
-  .breed-poodle .deco-poodle,.breed-dalmatian .deco-dalmatian,.breed-beagle .deco-beagle{display:block}
+  .deco-poodle,.deco-dalmatian,.deco-beagle,.deco-shepherd,.deco-pug,.deco-collie,.deco-stbernard{display:none}
+  .breed-poodle .deco-poodle,.breed-dalmatian .deco-dalmatian,.breed-beagle .deco-beagle,.breed-shepherd .deco-shepherd,
+  .breed-pug .deco-pug,.breed-collie .deco-collie,.breed-stbernard .deco-stbernard{display:block}
+  .breed-shepherd  #dogShape{transform:scale(1.08,.98)}
+  .breed-pug       #dogShape{transform:scale(1.02,.86)}
+  .breed-stbernard #dogShape{transform:scale(1.12,1.06)}
   .breed-beagle    #dogShape{transform:scale(1.02,.95)}
 
   @media(max-width:640px){
@@ -455,6 +460,7 @@
             <path d="M64 80 q-30 -4 -36 -34 q18 18 36 20 z" fill="var(--coat-dark)"/>
             <circle class="deco-poodle" cx="30" cy="45" r="11" fill="var(--belly)"/>
             <circle class="deco-beagle" cx="31" cy="47" r="6.5" fill="#fff"/>
+            <circle class="deco-collie" cx="31" cy="47" r="6.5" fill="#fff"/>
           </g>
           <!-- back legs -->
           <g class="leg b" style="transform-origin:82px 106px">
@@ -468,6 +474,8 @@
           <!-- body -->
           <ellipse cx="112" cy="92" rx="58" ry="33" fill="var(--coat)"/>
           <path class="deco-beagle" d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="#3a2f2a"/>
+          <path class="deco-shepherd" d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="#2b2420"/>
+          <path class="deco-stbernard" d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="#b5602f"/>
           <ellipse cx="118" cy="104" rx="45" ry="19" fill="var(--belly)"/>
           <g class="deco-dalmatian" fill="#34343d">
             <circle cx="90" cy="78" r="6"/><circle cx="118" cy="70" r="5"/><circle cx="142" cy="86" r="4.5"/>
@@ -489,6 +497,9 @@
             <ellipse cx="190" cy="56" rx="31" ry="27" fill="var(--coat)"/>
             <ellipse cx="216" cy="66" rx="21" ry="14" fill="var(--belly)"/>
             <g class="deco-dalmatian" fill="#34343d"><circle cx="192" cy="40" r="4"/><circle cx="178" cy="62" r="3.2"/></g>
+            <g class="deco-stbernard"><ellipse cx="194" cy="46" rx="17" ry="13" fill="#b5602f"/></g>
+            <g class="deco-collie" fill="#fff"><path d="M188 28 q10 16 14 38 l-12 0 q-2 -22 -8 -38 z"/><ellipse cx="166" cy="86" rx="15" ry="16"/><circle cx="203" cy="52" r="8.5"/></g>
+            <ellipse class="deco-pug" cx="218" cy="64" rx="20" ry="13" fill="#3a3236"/>
             <path d="M200 72 q10 8 22 2" stroke="var(--coat-dark)" stroke-width="3" fill="none" stroke-linecap="round"/>
             <ellipse cx="234" cy="60" rx="8" ry="6.5" fill="#2b2b33"/>
             <!-- ears -->
@@ -501,6 +512,10 @@
               <path class="ear-dalmatian" d="M168 34 q-16 8 -12 36 q16 6 24 -12 z"/>
               <path class="ear-corgi"     d="M166 42 l2 -44 l32 30 z" fill="var(--coat-dark)"/>
               <path class="ear-beagle"    d="M168 34 q-19 6 -15 46 q17 6 23 -20 z" fill="var(--coat-dark)"/>
+              <path class="ear-shepherd" d="M166 44 l4 -48 l30 30 z" fill="var(--coat-dark)"/>
+              <path class="ear-pug" d="M168 36 q-12 0 -12 16 q12 4 18 -8 z" fill="var(--coat-dark)"/>
+              <path class="ear-collie" d="M168 42 l4 -36 l24 22 q-10 6 -28 14 z" fill="var(--coat-dark)"/>
+              <path class="ear-stbernard" d="M168 34 q-18 8 -14 42 q16 6 24 -16 z" fill="var(--coat-dark)"/>
             </g>
             <circle class="eye-open" cx="203" cy="52" r="5.5" fill="#2b2b33"/>
             <circle class="eye-open" cx="205" cy="50" r="1.8" fill="#fff"/>
@@ -561,7 +576,7 @@
     <p class="sub">One day, sunrise to dusk. Read the day's story, follow the treasure map, and get your dog to bed happy.</p>
     <div class="pickopts">
       <div><b>📚 Grade</b><span id="levelChoices"><button class="seg" data-lv="K" onclick="LEVEL='K';drawPickerOptions()">K</button><button class="seg" data-lv="1" onclick="LEVEL='1';drawPickerOptions()">1st</button><button class="seg" data-lv="2" onclick="LEVEL='2';drawPickerOptions()">2nd</button><button class="seg" data-lv="3" onclick="LEVEL='3';drawPickerOptions()">3rd</button><button class="seg" data-lv="4" onclick="LEVEL='4';drawPickerOptions()">4th</button><button class="seg" data-lv="5" onclick="LEVEL='5';drawPickerOptions()">5th</button></span></div>
-      <div><b>🎨 Theme</b> <span class="devtag" id="devTag">🛠 developer mode: all themes</span><span id="themeChoices"></span></div>
+      <div><b>🎨 Theme</b> <span class="devtag" id="devTag">🛠 developer mode</span><span id="themeChoices"></span></div>
     </div>
     <div class="picks" id="picks"></div>
     <button class="helpbtn" onclick="showHelp()">❓ How to play</button>
@@ -597,7 +612,7 @@
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, earning 1 listen per page; unused listens carry over to later pages and the questions, so there's a reason to try sounding words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
         <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, earning 1 listen per riddle, saved up if unused. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
         <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It earns 1 listen per page (3 in all), saved up if unused. Right answers earn points, once per weather type each day.</p>
-        <p><b>Reading level & theme.</b> On the first screen pick a grade from <b>K to 5th</b>. Each grade has its own stories, and pages get longer as the grade goes up (from 2 tiny sentences in K to a full paragraph in 5th). Grades 3–5 get 4 questions (main idea, vocabulary, inference) and harder riddles and science-based weather articles. Pick a theme too: the current season is always there, and each holiday (Halloween, Thanksgiving, Christmas, Valentine's, St. Patrick's, Easter, 4th of July, New Year) unlocks 3 weeks before its date, with decorations, dog outfits and a matching story.</p>
+        <p><b>Reading level & theme.</b> On the first screen pick a grade from <b>K to 5th</b>. Each grade has its own stories, and pages get longer as the grade goes up (from 2 tiny sentences in K to a full paragraph in 5th). Grades 3–5 get 4 questions (main idea, vocabulary, inference) and harder riddles and science-based weather articles. Pick a theme too: any of the 4 seasons or any holiday (Halloween, Thanksgiving, Christmas, Valentine's, St. Patrick's, Easter, 4th of July, New Year), each with its own decorations, dog outfit, weather and matching stories. The current season or an upcoming holiday is picked for you.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -671,8 +686,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v19";
-const RELEASED = "2026-09-27 17:11";
+const VERSION  = "v20";
+const RELEASED = "2026-09-29 15:21";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -735,6 +750,34 @@ const BREEDS = {
     desc:"Short legs, huge opinions. Goes wild for the water slide and anything he can catch.",
     energyDrain:1.1, dirtRate:1.0, exerciseNeed:1.1, snow:1,
     joy:{slide:1.5, catch:1.4, treat:1.3}
+  },
+  shepherd:{
+    name:"Ranger", label:"German Shepherd", pro:["he","him","his"],
+    coat:"#c68a4a", dark:"#2b2420", belly:"#e6bd85",
+    desc:"Brave, smart and always on duty. Loves long hikes, learning tricks and a good treasure hunt.",
+    energyDrain:0.9, dirtRate:1.1, exerciseNeed:1.5, snow:1.1,
+    joy:{hike:1.4, walk:1.3, trick:1.4, clue:1.4}
+  },
+  pug:{
+    name:"Nugget", label:"Pug", pro:["he","him","his"],
+    coat:"#e6c79a", dark:"#3a3236", belly:"#f3dfbd",
+    desc:"A small snorty clown. Naps like a champion, hates long walks, and will do anything for a cuddle.",
+    energyDrain:1.45, dirtRate:0.8, exerciseNeed:0.55, snow:.8,
+    joy:{cuddle:1.6, nap:1.4, treat:1.4, hike:.6, swim:.6}
+  },
+  collie:{
+    name:"Flash", label:"Border Collie", pro:["he","him","his"],
+    coat:"#34303a", dark:"#1f1d22", belly:"#ffffff",
+    desc:"The fastest brain in the dog park. Needs lots of running, and fetch or catch make his whole day.",
+    energyDrain:0.8, dirtRate:1.0, exerciseNeed:1.8, snow:1,
+    joy:{fetch:1.5, catch:1.5, trick:1.4, nap:.6}
+  },
+  stbernard:{
+    name:"Bruno", label:"Saint Bernard", pro:["he","him","his"],
+    coat:"#fbf6ee", dark:"#a4532a", belly:"#ffffff",
+    desc:"A gentle giant built for snow. Happiest in the mountains, or snoozing on the couch.",
+    energyDrain:1.2, dirtRate:1.2, exerciseNeed:0.9, snow:1.4,
+    joy:{snowplay:1.6, hike:1.3, nap:1.3, cuddle:1.3, slide:.7}
   }
 };
 
@@ -1735,20 +1778,24 @@ function daysUntil(key, now){
 let DEV = /[?&]dev=1/.test(location.search);
 let LEVEL = "1";
 let THEME = null;
+/* every season and holiday is always selectable; holidays are listed soonest first */
+function nextIn(k, now){ const d = daysUntil(k, now); return d === null ? 0 : d < -2 ? d + 365 : d; }
 function themeChoices(){
-  const now = new Date(), out = [seasonOf(now)];
-  for(const k of Object.keys(THEMES)){
-    const d = daysUntil(k, now);
-    if(d !== null && d <= 21 && d >= -2) out.push(k);
-  }
-  return DEV ? Object.keys(THEMES) : out;
+  const now = new Date(), keys = Object.keys(THEMES);
+  const seasons = keys.filter(k=>!THEMES[k].date), hols = keys.filter(k=>THEMES[k].date);
+  return seasons.concat(hols.sort((a,b)=>nextIn(a, now) - nextIn(b, now)));
+}
+/* default: a holiday within 3 weeks, else the current season */
+function defaultTheme(){
+  const now = new Date();
+  return Object.keys(THEMES).find(k=>{ const d = daysUntil(k, now); return d !== null && d <= 21 && d >= -2; }) || seasonOf(now);
 }
 function drawPickerOptions(){
   const ch = themeChoices();
-  if(!THEME || !ch.includes(THEME)) THEME = ch.find(k=>THEMES[k].date) || ch[0];
+  if(!THEME || !ch.includes(THEME)) THEME = defaultTheme();
   $("themeChoices").innerHTML = ch.map(k=>{
     const d = daysUntil(k, new Date());
-    const when = d === null ? "" : d > 0 ? ` · in ${d} day${d === 1 ? "" : "s"}` : d === 0 ? " · today!" : "";
+    const when = d === null ? (k === seasonOf(new Date()) ? " · now" : "") : d > 0 && d <= 45 ? ` · in ${d} day${d === 1 ? "" : "s"}` : d === 0 ? " · today!" : "";
     return `<button class="seg${k === THEME ? " on" : ""}" onclick="THEME='${k}';drawPickerOptions()">${THEMES[k].icon} ${THEMES[k].name}<span class="t">${when}</span></button>`;
   }).join("");
   document.querySelectorAll("#levelChoices .seg").forEach(b=>b.classList.toggle("on", b.dataset.lv === LEVEL));
@@ -3309,7 +3356,8 @@ function endDay(early){
 
 /* the better the day, the more puppies are waiting inside with their mum (0–5) */
 const PUP_TIERS = [[100,5],[88,4],[75,3],[60,2],[45,1]];
-const MUM_NAMES = {retriever:"Honey", husky:"Luna", bulldog:"Rosie", dachshund:"Pickle", poodle:"Bella", dalmatian:"Dotty", beagle:"Daisy", corgi:"Maple"};
+const MUM_NAMES = {retriever:"Honey", husky:"Luna", bulldog:"Rosie", dachshund:"Pickle", poodle:"Bella", dalmatian:"Dotty", beagle:"Daisy", corgi:"Maple",
+                   shepherd:"Willow", pug:"Muffin", collie:"Misty", stbernard:"Heidi"};
 function pupCount(score){ const t = PUP_TIERS.find(([min])=>score >= min); return t ? t[1] : 0; }
 function nextPupTier(n){ const t = PUP_TIERS.slice().reverse().find(([,c])=>c === n+1); return t ? t[0] : null; }
 function dayScore(){
@@ -3443,9 +3491,15 @@ const EARS = {
   poodle:    'M166 34 q-22 10 -16 46 q6 8 16 2 q10 -6 12 -34 z',
   dalmatian: 'M168 34 q-16 8 -12 36 q16 6 24 -12 z',
   corgi:     'M166 42 l2 -44 l32 30 z',
-  beagle:    'M168 34 q-19 6 -15 46 q17 6 23 -20 z'
+  beagle:    'M168 34 q-19 6 -15 46 q17 6 23 -20 z',
+  shepherd:  'M166 44 l4 -48 l30 30 z',
+  pug:       'M168 36 q-12 0 -12 16 q12 4 18 -8 z',
+  collie:    'M168 42 l4 -36 l24 22 q-10 6 -28 14 z',
+  stbernard: 'M168 34 q-18 8 -14 42 q16 6 24 -16 z'
 };
-const SHAPES = {bulldog:[1.06,.9], dachshund:[1.18,.8], corgi:[1.06,.84], poodle:[.97,1.04], beagle:[1.02,.95]};
+const SHAPES = {bulldog:[1.06,.9], dachshund:[1.18,.8], corgi:[1.06,.84], poodle:[.97,1.04], beagle:[1.02,.95],
+                shepherd:[1.08,.98], pug:[1.02,.86], stbernard:[1.12,1.06]};
+const SADDLE = {beagle:"#3a2f2a", shepherd:"#2b2420", stbernard:"#b5602f"};
 function miniDog(b, key){
   const [sx,sy] = SHAPES[key] || [1,1];
   const spots = key === "dalmatian" ? `<g fill="#34343d"><circle cx="90" cy="78" r="6"/><circle cx="118" cy="70" r="5"/><circle cx="142" cy="86" r="4.5"/><circle cx="100" cy="98" r="4"/><circle cx="192" cy="40" r="4"/></g>` : "";
@@ -3453,7 +3507,7 @@ function miniDog(b, key){
   const earFill = key === "dalmatian" ? "#34343d" : b.dark;
   return `<svg viewBox="0 0 250 170"><g transform="translate(125 150) scale(${sx} ${sy}) translate(-125 -150)">
     <ellipse cx="112" cy="92" rx="58" ry="33" fill="${b.coat}"/>
-    ${key === "beagle" ? '<path d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="#3a2f2a"/>' : ""}
+    ${SADDLE[key] ? `<path d="M66 84 Q80 58 118 60 Q150 62 160 80 Q120 92 66 84 Z" fill="${SADDLE[key]}"/>` : ""}
     <ellipse cx="118" cy="104" rx="45" ry="19" fill="${b.belly}"/>
     <rect x="75" y="100" width="17" height="46" rx="8" fill="${b.dark}"/>
     <rect x="143" y="98" width="17" height="48" rx="8" fill="${b.dark}"/>
@@ -3462,6 +3516,9 @@ function miniDog(b, key){
     ${poms}
     <ellipse cx="190" cy="56" rx="31" ry="27" fill="${b.coat}"/>
     <ellipse cx="216" cy="66" rx="21" ry="14" fill="${b.belly}"/>
+    ${key === "stbernard" ? '<ellipse cx="194" cy="46" rx="17" ry="13" fill="#b5602f"/>' : ""}
+    ${key === "collie" ? '<g fill="#fff"><path d="M188 28 q10 16 14 38 l-12 0 q-2 -22 -8 -38 z"/><ellipse cx="166" cy="86" rx="15" ry="16"/><circle cx="203" cy="52" r="8.5"/></g>' : ""}
+    ${key === "pug" ? '<ellipse cx="218" cy="64" rx="20" ry="13" fill="#3a3236"/>' : ""}
     <ellipse cx="234" cy="60" rx="8" ry="6.5" fill="#2b2b33"/>
     <circle cx="203" cy="52" r="5.5" fill="#2b2b33"/>
     ${spots}
