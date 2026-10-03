@@ -1,8 +1,15 @@
 <!DOCTYPE html>
+<!--
+  Dog Day
+  Copyright (c) 2026 m1keLima. All rights reserved.
+  No part of this game (code, stories, riddles, art) may be copied, modified,
+  redistributed or republished without written permission.
+-->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="copyright" content="© 2026 m1keLima. All rights reserved.">
 <title>Dog Day</title><link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiNlODZhMTAiLz48ZyBmaWxsPSIjZmZmIj48ZWxsaXBzZSBjeD0iMzIiIGN5PSI0MiIgcng9IjEzIiByeT0iMTEiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjI4IiByPSI2Ii8+PGNpcmNsZSBjeD0iMjYiIGN5PSIxNyIgcj0iNiIvPjxjaXJjbGUgY3g9IjM4IiBjeT0iMTciIHI9IjYiLz48Y2lyY2xlIGN4PSI0OCIgY3k9IjI4IiByPSI2Ii8+PC9nPjwvc3ZnPg==">
 <style>
   :root{
@@ -686,8 +693,9 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v21";
-const RELEASED = "2026-10-02 16:52";
+const VERSION  = "v22";
+const RELEASED = "2026-10-03 09:19";
+const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 
 const DAY_START = 7*60;      // 7:00 am
 const DAY_END   = 19*60+30;  // 7:30 pm — dusk, he sleeps
@@ -3530,7 +3538,7 @@ $("verPick").textContent = VERSION;
   $("verPick").onclick = ()=>{ taps++; clearTimeout(tm); tm = setTimeout(()=>taps = 0, 1500);
     if(taps >= 5){ taps = 0; DEV = !DEV; drawPickerOptions(); } }; }
 drawPickerOptions();
-$("verFoot").innerHTML = `Dog Day ${VERSION} · released ${RELEASED} <button onclick="showHelp()">❓ How to play</button>`;
+$("verFoot").innerHTML = `Dog Day ${VERSION} · released ${RELEASED} · ${COPYRIGHT} <button onclick="showHelp()">❓ How to play</button>`;
 function showHelp(){ $("helpOverlay").classList.remove("hide"); }
 function hideHelp(){ $("helpOverlay").classList.add("hide"); }
 document.addEventListener("keydown", e=>{ if(e.key === "Escape"){ hideHelp(); if(!$("huntOverlay").classList.contains("hide")) closeHunt(); } });
