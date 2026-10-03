@@ -255,6 +255,8 @@
   .pick .br{font-size:12px;color:var(--ink-soft);letter-spacing:1px;text-transform:uppercase}
   .pick .ds{font-size:12.5px;font-weight:600;color:var(--ink-soft);margin-top:6px;line-height:1.45}
   .score{font-size:60px;line-height:1;margin:6px 0 2px}
+  .endhead{font-size:18px;font-weight:800;line-height:1.45;margin:10px 0 4px;padding:10px 14px;border-radius:14px;border:3px solid var(--ink)}
+  .endhead.good{background:#e3f6d8}.endhead.ok{background:#fff3c4}.endhead.bad{background:#ffe1dc}
   .verdict{font-size:16px;font-weight:600;line-height:1.6;margin:10px 0 16px}
   .tally{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px;font-size:14px;font-weight:600;margin-bottom:16px}
   .tally div{display:flex;justify-content:space-between;gap:8px;border-bottom:2px dotted var(--line);padding:4px 0}
@@ -610,7 +612,7 @@
           <li><span>🚽</span>Dogs go to the bathroom outside. When the Potty bar gets low, take him out!</li>
           <li><span>⛈️</span>Look at the weather. Dogs do not like storms!</li>
           <li><span>🌦️</span>Tap the weather to read about it. Answer the questions for points!</li>
-          <li><span>🐾</span>At night your dog goes home to his family. More points = more puppies (up to 5)!</li>
+          <li><span>🐾</span>At night your dog goes home to his family. More points = more puppies (up to 5)! But no reading stars (story and weather) = no puppies.</li>
         </ul>
       </div>
       <div class="hcol hparents">
@@ -618,7 +620,7 @@
         <p><b>What it is.</b> A gentle dog-care game with reading practice at a 1st-grade level. One day in the game takes about 15–25 minutes. You can't lose: the day always ends with a score.</p>
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, earning 1 listen per page; unused listens carry over to later pages and the questions, so there's a reason to try sounding words out first. Skipping the story doesn't work: it comes back as the bedtime story. Stars are for answers right on the first try.</p>
         <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, earning 1 listen per riddle, saved up if unused. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
-        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It earns 1 listen per page (3 in all), saved up if unused. Right answers earn points, once per weather type each day.</p>
+        <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It earns 1 listen per page (3 in all), saved up if unused. Right answers earn points, once per weather type each day. <b>Puppies need reading:</b> at night the puppies only come out if your child earned at least one star on the story and one on a weather article.</p>
         <p><b>Reading level & theme.</b> On the first screen pick a grade from <b>K to 5th</b>. Each grade has its own stories, and pages get longer as the grade goes up (from 2 tiny sentences in K to a full paragraph in 5th). Grades 3–5 get 4 questions (main idea, vocabulary, inference) and harder riddles and science-based weather articles. Pick a theme too: any of the 4 seasons or any holiday (Halloween, Thanksgiving, Christmas, Valentine's, St. Patrick's, Easter, 4th of July, New Year), each with its own decorations, dog outfit, weather and matching stories. The current season or an upcoming holiday is picked for you.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
@@ -673,6 +675,7 @@
     <button class="xclose" onclick="closeEnd()" title="Close to watch the family" aria-label="Close">✕</button>
     <h1 id="endTitle">Good night</h1>
     <p class="sub" id="endSub"></p>
+    <div class="endhead" id="endHead"></div>
     <div class="score" id="endScore">0</div>
     <div class="verdict" id="endVerdict"></div>
     <div class="tally" id="endTally"></div>
@@ -693,8 +696,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v22";
-const RELEASED = "2026-10-03 09:19";
+const VERSION  = "v23";
+const RELEASED = "2026-10-03 10:44";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 
 const DAY_START = 7*60;      // 7:00 am
@@ -3366,6 +3369,11 @@ function endDay(early){
 const PUP_TIERS = [[100,5],[88,4],[75,3],[60,2],[45,1]];
 const MUM_NAMES = {retriever:"Honey", husky:"Luna", bulldog:"Rosie", dachshund:"Pickle", poodle:"Bella", dalmatian:"Dotty", beagle:"Daisy", corgi:"Maple",
                    shepherd:"Willow", pug:"Muffin", collie:"Misty", stbernard:"Heidi"};
+/* puppies only come out if he also earned reading stars: at least 1 from the story AND 1 from a weather page */
+function readingStars(){
+  return {story:S.story.stars, weather:Object.values(S.wxRead).reduce((n,e)=>n + (e.done ? e.stars : 0), 0)};
+}
+function readingOK(){ const r = readingStars(); return r.story > 0 && r.weather > 0; }
 function pupCount(score){ const t = PUP_TIERS.find(([min])=>score >= min); return t ? t[1] : 0; }
 function nextPupTier(n){ const t = PUP_TIERS.slice().reverse().find(([,c])=>c === n+1); return t ? t[0] : null; }
 function dayScore(){
@@ -3376,7 +3384,8 @@ function dayScore(){
 }
 function goToSleep(early){
   const score = dayScore();
-  S.pups = pupCount(score);
+  S.pupsEarned = pupCount(score);
+  S.pups = readingOK() ? S.pupsEarned : 0;
   if(S.pups) return puppyScene(S.pups, ()=>sleepAndCard(early, score));
   sleepAndCard(early, score);
 }
@@ -3464,9 +3473,18 @@ function sleepAndCard(early, score){
     else if(score < 45) verdict = "A thin day. " + notes[worst[0]];
     verdict += pottyNote;
     if(S.hunt.done) verdict += ` And he found the treasure: ${S.hunt.prize[1]}.`;
-    const nt = nextPupTier(S.pups);
+    const nt = nextPupTier(S.pups), rd = readingStars(), readOK = readingOK();
     verdict += S.pups ? ` 🐶 ${S.pups} ${S.pups === 1 ? "puppy" : "puppies"} came out to play!` : "";
-    if(nt) verdict += ` (Score ${nt}+ to see ${S.pups + 1} ${S.pups + 1 === 1 ? "puppy" : "puppies"}.)`;
+    if(readOK && nt) verdict += ` (Score ${nt}+ to see ${S.pups + 1} ${S.pups + 1 === 1 ? "puppy" : "puppies"}.)`;
+    // the headline comment: well done, or not — and why
+    const missed = [rd.story ? "" : "the story", rd.weather ? "" : "the weather"].filter(Boolean).join(" or ");
+    let head;
+    if(readOK && score >= 60) head = "🌟 Well done! You took great care of him and you read well.";
+    else if(readOK) head = "👍 Good try! Your reading was great, but he needed more care today.";
+    else if(S.pupsEarned) head = `😕 Not well done yet. He had a good day, but you got no reading stars from ${missed}, so the puppies stayed hidden. Read and answer the questions tomorrow to meet them!`;
+    else head = `😕 Not well done yet. He needed more care, and you got no reading stars from ${missed}. Read the weather and the story, and answer the questions, to meet the puppies!`;
+    $("endHead").textContent = head;
+    $("endHead").className = "endhead " + (readOK && score >= 60 ? "good" : readOK ? "ok" : "bad");
 
     $("endTitle").textContent = early ? `${S.name} turns in early` : `${S.name} is asleep`;
     $("endSub").textContent = `${S.breed.label} · ${fmtTime(S.t)} · ${S.actions} things done · ${S.exerciseMins} min of exercise`;
