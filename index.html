@@ -637,7 +637,7 @@
         <p><b>Reading.</b> Each day has one story (10 short sentences over 5 pages) and 3 questions about it. Your child can hear a word by tapping it, or hear the whole page, earning 1 listen per page; unused listens carry over to later pages and the questions, so there's a reason to try sounding words out first. Skipping the story doesn't work: it comes back as the bedtime story. Every page read earns a ⭐ and every question answered earns a ⭐. Stopping part-way keeps the stars already earned, and reopening carries on from where your child stopped.</p>
         <p><b>Treasure hunt.</b> 5 riddles, each with 4 answers. Your child can hear a word, the whole riddle or an answer, earning 1 listen per riddle, saved up if unused. The answer is a clue to a place in the game, so your child has to read and think before travelling there.</p>
         <p><b>Weather reading.</b> Tapping the weather opens a short article about it with 2 questions. It earns 1 listen per page (3 in all), saved up if unused. Right answers earn points, once per weather type each day. <b>Puppies need reading:</b> at night the puppies only come out if your child earned at least one star on the story and one on a weather article.</p>
-        <p><b>Reading level & theme.</b> On the first screen pick a grade from <b>K to 5th</b>. Each grade has its own stories, and pages get longer as the grade goes up (from 2 tiny sentences in K to a full paragraph in 5th). Grades 3–5 get 4 questions (main idea, vocabulary, inference) and harder riddles and science-based weather articles. Pick a theme too: any of the 4 seasons or any holiday (Halloween, Thanksgiving, Christmas, New Year, Valentine's, Mardi Gras, St. Patrick's, Easter, Earth Day, Cinco de Mayo, Memorial Day, 4th of July, Ferragosto), each with its own decorations, dog outfit, weather and matching stories. While a holiday is on (for example 18 Oct – 1 Nov for Halloween) it's picked for you; otherwise the current season is. Each holiday has a treat: the dog-safe ones (🥚 🍎 🍓 🍉) go to the dog, and for the others (like 🍫 or 🍬) the game explains why they're not for dogs and gives him a 🦴.</p>
+        <p><b>Reading level & theme.</b> On the first screen pick a grade from <b>K to 5th</b>. Each grade has its own stories, and pages get longer as the grade goes up (from 2 tiny sentences in K to a full paragraph in 5th). Grades 3–5 get 4 questions (main idea, vocabulary, inference) and harder riddles and science-based weather articles. Pick a theme too: any of the 4 seasons or any holiday (Halloween, Thanksgiving, Christmas, New Year, Valentine's, Mardi Gras, St. Patrick's, Easter, Earth Day, Cinco de Mayo, Memorial Day, 4th of July, Ferragosto), each with its own decorations, dog outfit, weather and matching stories. While a holiday is on (for example 10 Oct – 2 Nov for Halloween) it's picked for you; otherwise the current season is. Each holiday has a treat: the dog-safe ones (🥚 🍎 🍓 🍉) go to the dog, and for the others (like 🍫 or 🍬) the game explains why they're not for dogs and gives him a 🦴.</p>
         <p><b>Planning.</b> Every action takes time and changes the dog's needs. A good day balances playing and resting, and plans around the weather forecast.</p>
         <p><b>Tips.</b> Let your child read the story out loud to you. Ask "what does your dog need now?" Turn the sound up: the device's voice reads the words.</p>
         <p><b>Privacy.</b> No account, no ads and no internet needed after loading. Nothing is saved: every reload is a new day.</p>
@@ -713,8 +713,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v26";
-const RELEASED = "2026-10-04 09:41";
+const VERSION  = "v27";
+const RELEASED = "2026-10-04 19:56";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 
 const DAY_START = 7*60;      // 7:00 am
@@ -1756,8 +1756,8 @@ const STORIES = [
    season: which weather tweaks apply. decor: props [emoji, left%, class] out = outdoor
    places, house = inside. ground: extra ground clutter. sky: emoji that drift across the
    sky. hat: dog outfit (SVG in #head). garland: string of lights in the house & yard.
-   date(y): the holiday's date that year. win(y): [first day, last day] the holiday is "on" (same windows as
-   Haunted House) — while it's on, it's picked by default. treat: the holiday treat; safe = OK for a dog,
+   date(y): the holiday's date that year. win(y): [first day, last day] the holiday is "on" (v27: about twice
+   Haunted House's windows, mostly starting earlier) — while it's on, it's picked by default. treat: the holiday treat; safe = OK for a dog,
    otherwise he gets a bone and the game says why. */
 const THEMES = {
   spring:     {name:"Spring", icon:"🌷", season:"spring", hat:"flower", collar:"#f5a3c7",
@@ -1772,41 +1772,41 @@ const THEMES = {
   winter:     {name:"Winter", icon:"❄️", season:"winter", hat:"scarf", collar:"#57a9d6",
                decor:{out:[["⛄",66,""],["🌲",36,"small"]], house:[["☕",66,"small"]]}, ground:["❄️","⛄"],
                stories:["Snow Day","The Silly Snowman","Snowman Nose","The Red Sled"]},
-  newyear:    {name:"New Year", icon:"🎉", treat:"🍭", win:y=>[D(y-1,11,27), D(y,0,5)], season:"winter", hat:"party", collar:"#6b4a8f", date:y=>new Date(y,0,1),
+  newyear:    {name:"New Year", icon:"🎉", treat:"🍭", win:y=>[D(y-1,11,27), D(y,0,7)], season:"winter", hat:"party", collar:"#6b4a8f", date:y=>new Date(y,0,1),
                decor:{out:[["🎉",36,"small"],["🎈",66,"small"]], house:[["🎈",66,"small"],["🥳",36,"small"]]}, ground:["🎊"], sky:["🎊","🎉"], garland:"party"},
-  valentine:  {name:"Valentine's Day", icon:"💘", treat:"🍫", win:y=>[D(y,1,7), D(y,1,15)], season:"winter", hat:"heart", collar:"#e86aa6", date:y=>new Date(y,1,14),
+  valentine:  {name:"Valentine's Day", icon:"💘", treat:"🍫", win:y=>[D(y,1,1), D(y,1,15)], season:"winter", hat:"heart", collar:"#e86aa6", date:y=>new Date(y,1,14),
                decor:{out:[["💝",36,"small"],["🌹",66,"small"]], house:[["💐",66,"small"],["💌",36,"small"]]}, ground:["❤️","💕"], sky:["💕","❤️"], garland:"hearts",
                stories:["A Card for Grandpa","A Gift for Mom"]},
-  stpatrick:  {name:"St. Patrick's Day", icon:"☘️", treat:"🍀", win:y=>[D(y,2,12), D(y,2,18)], season:"spring", hat:"leprechaun", collar:"#3aa655", date:y=>new Date(y,2,17),
+  stpatrick:  {name:"St. Patrick's Day", icon:"☘️", treat:"🍀", win:y=>[D(y,2,7), D(y,2,18)], season:"spring", hat:"leprechaun", collar:"#3aa655", date:y=>new Date(y,2,17),
                decor:{out:[["🌈",66,""],["🪙",36,"small"]], house:[["☘️",66,"small"],["🪙",36,"small"]]}, ground:["🍀","☘️","🪙"], sky:["☘️"], garland:"green"},
-  easter:     {name:"Easter", icon:"🐣", treat:"🥚", safe:true, win:y=>{ const e = easterDate(y); return [plus(e,-7), plus(e,1)]; }, season:"spring", hat:"bunny", collar:"#b9a3e3", date:y=>easterDate(y),
+  easter:     {name:"Easter", icon:"🐣", treat:"🥚", safe:true, win:y=>{ const e = easterDate(y); return [plus(e,-14), plus(e,1)]; }, season:"spring", hat:"bunny", collar:"#b9a3e3", date:y=>easterDate(y),
                decor:{out:[["🐣",36,"small"],["🐰",66,"small"]], house:[["🧺",66,"small"],["🥚",36,"small"]]}, ground:["🥚","🥚","🌷"], sky:["🦋"],
                stories:["The Bunny Hop"]},
-  mardigras:  {name:"Mardi Gras", icon:"🎭", treat:"🍩", win:y=>{ const t = THEMES.mardigras.date(y); return [plus(t,-6), t]; }, season:"winter", hat:"jester", collar:"#6b4a8f", date:y=>{ const e = easterDate(y); return new Date(e.getFullYear(), e.getMonth(), e.getDate() - 47); },
+  mardigras:  {name:"Mardi Gras", icon:"🎭", treat:"🍩", win:y=>{ const t = THEMES.mardigras.date(y); return [plus(t,-13), t]; }, season:"winter", hat:"jester", collar:"#6b4a8f", date:y=>{ const e = easterDate(y); return new Date(e.getFullYear(), e.getMonth(), e.getDate() - 47); },
                decor:{out:[["🎭",36,"small"],["🎺",66,"small"]], house:[["🎭",66,"small"],["👑",36,"small"]]}, ground:["📿","🪙","🎭"], sky:["🎊","🎉"], garland:"mardigras",
                stories:["Pancake Morning","The Costume Party","The Duck Parade","The Picnic Ant Parade","Party Time"]},
-  earthday:   {name:"Earth Day", icon:"🌍", treat:"🍎", safe:true, win:y=>[D(y,3,18), D(y,3,23)], season:"spring", hat:"leaf", collar:"#3aa655", date:y=>new Date(y,3,22),
+  earthday:   {name:"Earth Day", icon:"🌍", treat:"🍎", safe:true, win:y=>[D(y,3,15), D(y,3,25)], season:"spring", hat:"leaf", collar:"#3aa655", date:y=>new Date(y,3,22),
                decor:{out:[["🌱",36,"small"],["♻️",66,"small"]], house:[["🪴",66,"small"],["♻️",36,"small"]]}, ground:["🌱","🍃","♻️","🌼"], sky:["🦋","🍃"], garland:"earth",
                stories:["A Tree for Earth Day","The Recycling Champion","The Recycling Challenge","Seeds in the Garden","Planting Sunflower Seeds","Tomato Garden","Mr. Lee's Garden","Seeds of the Neighborhood"]},
-  cincodemayo:{name:"Cinco de Mayo", icon:"🪅", treat:"🌮", win:y=>[D(y,4,1), D(y,4,6)], season:"spring", hat:"fiesta", collar:"#3aa655", date:y=>new Date(y,4,5),
+  cincodemayo:{name:"Cinco de Mayo", icon:"🪅", treat:"🌮", win:y=>[D(y,3,28), D(y,4,7)], season:"spring", hat:"fiesta", collar:"#3aa655", date:y=>new Date(y,4,5),
                decor:{out:[["🪅",36,"small"],["🌵",66,"small"]], house:[["🪅",66,"small"],["🌺",36,"small"]]}, ground:["🌺","🎊","🌼"], sky:["🎊"], garland:"fiesta",
                stories:["Party Time","The Surprise Party","The Duck Parade"]},
-  memorialday:{name:"Memorial Day", icon:"🇺🇸", treat:"🍓", safe:true, win:y=>{ const m = lastWeekday(y,4,1); return [plus(m,-2), m]; }, season:"spring", hat:"poppy", collar:"#2d5fb3", date:y=>lastWeekday(y,4,1),
+  memorialday:{name:"Memorial Day", icon:"🇺🇸", treat:"🍓", safe:true, win:y=>{ const m = lastWeekday(y,4,1); return [plus(m,-7), m]; }, season:"spring", hat:"poppy", collar:"#2d5fb3", date:y=>lastWeekday(y,4,1),
                decor:{out:[["🇺🇸",36,"small"],["🌭",66,"small"]], house:[["🇺🇸",66,"small"],["🌹",36,"small"]]}, ground:["⭐","🌼","🌹"], garland:"usa",
                stories:["The Duck Parade","Picnic in the Park","Picnic at the Park","Picnic in the Yard","The Fire Station","The Fire Station Visit"]},
-  ferragosto: {name:"Ferragosto", icon:"🇮🇹", treat:"🍦", win:y=>[D(y,7,10), D(y,7,16)], season:"summer", hat:"boater", collar:"#d9534f", date:y=>new Date(y,7,15),
+  ferragosto: {name:"Ferragosto", icon:"🇮🇹", treat:"🍦", win:y=>[D(y,7,5), D(y,7,20)], season:"summer", hat:"boater", collar:"#d9534f", date:y=>new Date(y,7,15),
                decor:{out:[["🍉",36,"small"],["🇮🇹",66,"small"]], house:[["🍉",66,"small"],["🍝",36,"small"]]}, ground:["🐚","🍉","🍋"], sky:["🎆"], garland:"italy",
                stories:["Beach Day","The Beach Day","The Beach","Sandcastle Fun","Saving the Sandcastle","The Ice Cream Truck","A Boat on the Sea"]},
-  july4:      {name:"4th of July", icon:"🎆", treat:"🍉", safe:true, win:y=>[D(y,5,28), D(y,6,5)], season:"summer", hat:"stars", collar:"#2d5fb3", date:y=>new Date(y,6,4),
+  july4:      {name:"4th of July", icon:"🎆", treat:"🍉", safe:true, win:y=>[D(y,5,24), D(y,6,7)], season:"summer", hat:"stars", collar:"#2d5fb3", date:y=>new Date(y,6,4),
                decor:{out:[["🇺🇸",36,"small"],["🌭",66,"small"]], house:[["🇺🇸",66,"small"]]}, ground:["⭐","🎆"], sky:["🎆","🎇"], garland:"usa",
                stories:["The Duck Parade"]},
-  halloween:  {name:"Halloween", icon:"🎃", treat:"🍬", win:y=>[D(y,9,18), D(y,10,1)], season:"fall", hat:"witch", collar:"#f28b2c", date:y=>new Date(y,9,31),
+  halloween:  {name:"Halloween", icon:"🎃", treat:"🍬", win:y=>[D(y,9,10), D(y,10,2)], season:"fall", hat:"witch", collar:"#f28b2c", date:y=>new Date(y,9,31),
                decor:{out:[["🎃",36,"small"],["🎃",66,""],["👻",97,"small"]], house:[["🎃",66,"small"],["🕯️",36,"small"]]}, ground:["🎃","🍬","🕸️"], sky:["🦇","👻"], garland:"spooky",
                stories:["The Costume Party","The Pumpkin Patch","Pumpkin Picking"]},
-  thanksgiving:{name:"Thanksgiving", icon:"🦃", treat:"🥧", win:y=>{ const t = nthWeekday(y,10,4,4); return [plus(t,-4), plus(t,3)]; }, season:"fall", hat:"pilgrim", collar:"#8a5a3c", date:y=>nthWeekday(y,10,4,4),
+  thanksgiving:{name:"Thanksgiving", icon:"🦃", treat:"🥧", win:y=>{ const t = nthWeekday(y,10,4,4); return [plus(t,-10), plus(t,3)]; }, season:"fall", hat:"pilgrim", collar:"#8a5a3c", date:y=>nthWeekday(y,10,4,4),
                decor:{out:[["🦃",66,"small"],["🌽",36,"small"]], house:[["🥧",36,"small"],["🦃",66,"small"]]}, ground:["🍂","🌽","🍁"], sky:["🍂"],
                stories:["Soup for Grandpa","Setting the Table","Pancake Morning"]},
-  christmas:  {name:"Christmas", icon:"🎄", treat:"🎁", win:y=>[D(y,11,1), D(y,11,26)], season:"winter", hat:"santa", collar:"#d9534f", date:y=>new Date(y,11,25),
+  christmas:  {name:"Christmas", icon:"🎄", treat:"🎁", win:y=>[D(y,10,26), D(y,11,26)], season:"winter", hat:"santa", collar:"#d9534f", date:y=>new Date(y,11,25),
                decor:{out:[["⛄",66,""],["🎁",36,"small"]], house:[["🎄",66,""],["🎁",36,"small"]]}, ground:["🎁","❄️"], sky:["❄️"], garland:"xmas",
                stories:["Holiday Lights","The Red Sled","The Silly Snowman"]}
 };
