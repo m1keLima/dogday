@@ -715,8 +715,8 @@
    ============================================================ */
 
 /* bump both on every release pushed to GitHub */
-const VERSION  = "v29";
-const RELEASED = "2026-10-18 18:00";
+const VERSION  = "v30";
+const RELEASED = "2026-10-25 13:30";
 const COPYRIGHT = "© 2026 m1keLima. All rights reserved.";
 
 const DAY_START = 7*60;      // 7:00 am
@@ -1139,7 +1139,7 @@ const ACTIONS = [
       `Caught the ${c.item[1]} mid-air, then looked around to check you saw.`]),
     gate:s => s.energy < 26 ? "He watches it sail past his nose. Didn't even blink." : null },
 
-  { id:"trick", label:"Practise a trick", icon:"⭐️", mins:15, locs:Object.keys(PLACES),
+  { id:"trick", label:"Practice a trick", icon:"⭐️", mins:15, locs:Object.keys(PLACES),
     eff:{energy:-12,happy:11,clean:-1,full:-3}, exercise:10, pose:"jump", fx:"⭐️",
     say:"Sit, jump, spin — nailed it, then did it twice more unprompted.",
     gate:s => s.energy < 38 ? "He offers you a slow blink instead. That's the trick now." : null },
